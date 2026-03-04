@@ -4,26 +4,19 @@
 
 	let { open = false, onclose }: { open: boolean; onclose: () => void } = $props();
 
-	function handleEditShortcut(event: SubmitEvent) {
+	async function handleEditShortcut(event: SubmitEvent) {
 		event.preventDefault();
 		const formData = new FormData(event.target as HTMLFormElement);
 		const data = Object.fromEntries(formData);
+		const id = shortcutsStore.editShortcutInfo.id;
 
-		const idx = shortcutsStore.shortcuts.findIndex(
-			(s) => s.name === shortcutsStore.editShortcutInfo.name
-		);
-
-		if (idx !== -1) {
-			const updated = [...shortcutsStore.shortcuts];
-			updated[idx] = {
-				name: data.name.toString(),
-				link: data.url.toString()
-			};
-			shortcutsStore.shortcuts = updated;
-			shortcutsStore.editShortcutInfo = updated[idx];
+		try {
+			await shortcutsStore.update(id, data.name.toString(), data.url.toString());
+			shortcutsStore.editShortcutInfo = { id, name: data.name.toString(), link: data.url.toString() };
+			onclose();
+		} catch {
+			// TODO: show error
 		}
-
-		onclose();
 	}
 </script>
 
