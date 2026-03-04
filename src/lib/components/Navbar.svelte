@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { themeStore } from '$lib/stores/theme.svelte';
+	import { userStore } from '$lib/stores/user.svelte';
 	import SwitchButtonTheme from './SwitchButtonTheme.svelte';
-	import ColorIcon from '$lib/assets/icons/ColorIcon.svelte';
 	import { cianoPalette, pinkPalette, orangePalette, bluePalette } from '$lib/styles/colors';
 
 	const palettes = [cianoPalette, pinkPalette, orangePalette, bluePalette];
@@ -30,6 +30,15 @@
 		<div class="w-px h-5 bg-white/10"></div>
 
 		<SwitchButtonTheme />
+
+		<div class="w-px h-5 bg-white/10"></div>
+
+		<button
+			class="text-[var(--color-text)] opacity-50 hover:opacity-100 text-xs transition-opacity"
+			onclick={() => userStore.logout()}
+		>
+			Sign out
+		</button>
 	</div>
 </nav>
 

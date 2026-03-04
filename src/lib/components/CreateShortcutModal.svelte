@@ -4,21 +4,18 @@
 
 	let { open = false, onclose }: { open: boolean; onclose: () => void } = $props();
 
-	function handleCreateShortcut(event: SubmitEvent) {
+	async function handleCreateShortcut(event: SubmitEvent) {
 		event.preventDefault();
 		const formData = new FormData(event.target as HTMLFormElement);
 		const data = Object.fromEntries(formData);
 
-		shortcutsStore.shortcuts = [
-			...shortcutsStore.shortcuts,
-			{
-				name: data.name.toString(),
-				link: data.url.toString()
-			}
-		];
-
-		(event.target as HTMLFormElement).reset();
-		onclose();
+		try {
+			await shortcutsStore.create(data.name.toString(), data.url.toString());
+			(event.target as HTMLFormElement).reset();
+			onclose();
+		} catch {
+			// TODO: show error
+		}
 	}
 </script>
 

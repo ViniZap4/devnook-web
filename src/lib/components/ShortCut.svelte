@@ -2,14 +2,14 @@
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { shortcutsStore } from '$lib/stores/shortcuts.svelte';
 
-	let { name, link }: { name: string; link: string } = $props();
+	let { id, name, link }: { id: number; name: string; link: string } = $props();
 
 	const url = new URL(link);
 	const urlIcon = `https://${url.hostname}/favicon.ico`;
 
 	function handleContextMenu(e: MouseEvent) {
 		e.preventDefault();
-		shortcutsStore.contextMenu = { x: e.x, y: e.y, name, link };
+		shortcutsStore.contextMenu = { x: e.x, y: e.y, id, name, link };
 	}
 </script>
 

@@ -13,8 +13,8 @@
 <section class="card p-6 animate-fade-in">
 	<h2 class="text-[var(--color-text)] mb-4">Shortcuts</h2>
 	<div class="grid grid-cols-[repeat(auto-fill,5.5rem)] gap-1">
-		{#each shortcutsStore.shortcuts as shortcut (shortcut.name + shortcut.link)}
-			<ShortCut link={shortcut.link} name={shortcut.name} />
+		{#each shortcutsStore.shortcuts as shortcut (shortcut.id)}
+			<ShortCut id={shortcut.id} link={shortcut.link} name={shortcut.name} />
 		{/each}
 		<NewShortCut oncreate={() => { createModalOpen = true; }} />
 	</div>

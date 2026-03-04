@@ -18,17 +18,19 @@
 		close();
 	}
 
-	function handleDelete() {
+	async function handleDelete() {
 		if (confirm(`Delete "${ctx.name}" shortcut?`)) {
-			shortcutsStore.shortcuts = shortcutsStore.shortcuts.filter(
-				(s) => !(s.name === ctx.name && s.link === ctx.link)
-			);
+			try {
+				await shortcutsStore.remove(ctx.id);
+			} catch {
+				// TODO: show error
+			}
 			close();
 		}
 	}
 
 	function openEditShortcut() {
-		shortcutsStore.editShortcutInfo = { name: ctx.name, link: ctx.link };
+		shortcutsStore.editShortcutInfo = { id: ctx.id, name: ctx.name, link: ctx.link };
 		close();
 		onedit();
 	}
