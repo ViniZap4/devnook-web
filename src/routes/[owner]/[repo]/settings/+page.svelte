@@ -4,6 +4,7 @@
 	import { repos, webhooks } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
 	import type { Webhook } from '$lib/types/webhook';
+	import type { Collaborator } from '$lib/services/api';
 	import { onMount } from 'svelte';
 
 	const owner = $derived($page.params.owner!);
@@ -26,6 +27,17 @@
 	let hookEvents = $state('push');
 	let hookSubmitting = $state(false);
 
+	// Collaborators
+	let collaborators = $state<Collaborator[]>([]);
+	let showCollabForm = $state(false);
+	let collabUsername = $state('');
+	let collabPermission = $state('write');
+	let collabSubmitting = $state(false);
+
+	// Transfer
+	let transferOwner = $state('');
+	let transferring = $state(false);
+
 	// Delete
 	let deleting = $state(false);
 	let confirmName = $state('');
@@ -40,7 +52,12 @@
 				defaultBranch = repo.default_branch;
 				topicsInput = (repo.topics || []).join(', ');
 			}
-			hooks = await webhooks.list(owner, repoName);
+			const [h, c] = await Promise.all([
+				webhooks.list(owner, repoName),
+				repos.listCollaborators(owner, repoName)
+			]);
+			hooks = h;
+			collaborators = c;
 		} catch {
 			// ignore
 		}
@@ -97,6 +114,44 @@
 			// ignore
 		}
 	}
+
+	async function addCollaborator(e: Event) {
+		e.preventDefault();
+		if (!collabUsername) return;
+		collabSubmitting = true;
+		try {
+			await repos.addCollaborator(owner, repoName, { username: collabUsername, permission: collabPermission });
+			collabUsername = '';
+			collabPermission = 'write';
+			showCollabForm = false;
+			collaborators = await repos.listCollaborators(owner, repoName);
+		} catch {
+			// ignore
+		} finally {
+			collabSubmitting = false;
+		}
+	}
+
+	async function removeCollaborator(username: string) {
+		if (!confirm(`Remove ${username} as collaborator?`)) return;
+		try {
+			await repos.removeCollaborator(owner, repoName, username);
+			collaborators = collaborators.filter(c => c.username !== username);
+		} catch {
+			// ignore
+		}
+	}
+
+	async function handleTransfer() {
+		if (!transferOwner || !confirm(`Transfer this repository to "${transferOwner}"? This action cannot be undone.`)) return;
+		transferring = true;
+		try {
+			await repos.transfer(owner, repoName, transferOwner);
+			goto(`/${transferOwner}/${repoName}`);
+		} catch {
+			transferring = false;
+		}
+	}
 </script>
 
 <div class="flex flex-col gap-8">
@@ -133,6 +188,58 @@
 				{/if}
 			</div>
 		</form>
+	</section>
+
+	<!-- Collaborators -->
+	<section class="card p-6">
+		<div class="flex items-center justify-between mb-4">
+			<h3 class="font-semibold text-sm" style="color: var(--color-text);">Collaborators</h3>
+			<button class="text-xs px-3 py-1.5 rounded-lg text-white" style="background-color: var(--color-primary);" onclick={() => { showCollabForm = !showCollabForm; }}>{showCollabForm ? 'Cancel' : 'Add Collaborator'}</button>
+		</div>
+
+		{#if showCollabForm}
+			<form onsubmit={addCollaborator} class="flex items-end gap-3 mb-4 max-w-lg">
+				<div class="flex-1">
+					<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Username</label>
+					<input type="text" bind:value={collabUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]" />
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Permission</label>
+					<select bind:value={collabPermission} class="px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]">
+						<option value="read">Read</option>
+						<option value="write">Write</option>
+						<option value="admin">Admin</option>
+					</select>
+				</div>
+				<button type="submit" disabled={collabSubmitting || !collabUsername} class="px-4 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40" style="background-color: var(--color-primary);">{collabSubmitting ? 'Adding...' : 'Add'}</button>
+			</form>
+		{/if}
+
+		{#if collaborators.length === 0}
+			<p class="text-sm" style="color: var(--color-text-dim);">No collaborators</p>
+		{:else}
+			<div class="flex flex-col gap-2">
+				{#each collaborators as collab}
+					<div class="flex items-center justify-between p-3 rounded-lg border" style="border-color: var(--color-border);">
+						<div class="flex items-center gap-3">
+							<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-medium" style="background-color: var(--color-surface-hover); color: var(--color-text-dim);">
+								{collab.username.charAt(0).toUpperCase()}
+							</div>
+							<div>
+								<a href="/{collab.username}" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">{collab.username}</a>
+								{#if collab.full_name}
+									<span class="text-xs ml-1" style="color: var(--color-text-dim);">{collab.full_name}</span>
+								{/if}
+							</div>
+						</div>
+						<div class="flex items-center gap-3">
+							<span class="text-xs px-2 py-0.5 rounded-full" style="background-color: var(--color-surface); color: var(--color-text-dim);">{collab.permission}</span>
+							<button class="text-xs opacity-40 hover:opacity-100" style="color: var(--color-error);" onclick={() => removeCollaborator(collab.username)}>Remove</button>
+						</div>
+					</div>
+				{/each}
+			</div>
+		{/if}
 	</section>
 
 	<!-- Webhooks -->
@@ -172,24 +279,49 @@
 
 	<!-- Danger zone -->
 	<section class="rounded-lg border border-red-500/20 p-6">
-		<h3 class="text-red-400 font-semibold mb-2">Danger Zone</h3>
-		<p class="text-sm text-[var(--color-text)] opacity-60 mb-4">
-			Once you delete a repository, there is no going back.
-		</p>
-		<div class="flex flex-col gap-3 max-w-sm">
-			<input
-				type="text"
-				bind:value={confirmName}
-				placeholder="Type repository name to confirm"
-				class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30"
-			/>
-			<button
-				onclick={handleDelete}
-				disabled={confirmName !== repoName || deleting}
-				class="px-4 py-2 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
-			>
-				{deleting ? 'Deleting...' : 'Delete this repository'}
-			</button>
+		<h3 class="text-red-400 font-semibold mb-4">Danger Zone</h3>
+
+		<!-- Transfer -->
+		<div class="flex items-center justify-between p-4 rounded-lg border mb-4" style="border-color: var(--color-border);">
+			<div>
+				<p class="text-sm font-medium" style="color: var(--color-text);">Transfer ownership</p>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Transfer this repository to another user.</p>
+			</div>
+			<div class="flex items-center gap-2 shrink-0">
+				<input
+					type="text"
+					bind:value={transferOwner}
+					placeholder="New owner"
+					class="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] w-32"
+				/>
+				<button
+					onclick={handleTransfer}
+					disabled={!transferOwner || transferring}
+					class="px-3 py-1.5 text-sm font-medium rounded-lg border transition-colors hover:bg-red-500/10 disabled:opacity-30"
+					style="border-color: var(--color-border); color: var(--color-error);"
+				>{transferring ? 'Transferring...' : 'Transfer'}</button>
+			</div>
+		</div>
+
+		<!-- Delete -->
+		<div class="flex items-center justify-between p-4 rounded-lg border" style="border-color: var(--color-border);">
+			<div>
+				<p class="text-sm font-medium" style="color: var(--color-text);">Delete this repository</p>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Once deleted, there is no going back.</p>
+			</div>
+			<div class="flex items-center gap-2 shrink-0">
+				<input
+					type="text"
+					bind:value={confirmName}
+					placeholder="Type name to confirm"
+					class="px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] w-40"
+				/>
+				<button
+					onclick={handleDelete}
+					disabled={confirmName !== repoName || deleting}
+					class="px-3 py-1.5 text-sm font-medium rounded-lg bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-30 disabled:cursor-not-allowed"
+				>{deleting ? 'Deleting...' : 'Delete'}</button>
+			</div>
 		</div>
 	</section>
 </div>
