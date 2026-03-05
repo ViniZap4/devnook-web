@@ -1,0 +1,142 @@
+<script lang="ts">
+	import { page } from '$app/stores';
+	import { pulls } from '$lib/services/api';
+	import type { PullRequest, PRComment } from '$lib/types/pull_request';
+	import { onMount } from 'svelte';
+	import RelativeTime from '$lib/components/RelativeTime.svelte';
+	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
+
+	const owner = $derived($page.params.owner!);
+	const repo = $derived($page.params.repo!);
+	const number = $derived(parseInt($page.params.number!));
+
+	let pr = $state<PullRequest | null>(null);
+	let comments = $state<PRComment[]>([]);
+	let loading = $state(true);
+	let commentBody = $state('');
+	let submittingComment = $state(false);
+	let merging = $state(false);
+
+	onMount(async () => {
+		try {
+			[pr, comments] = await Promise.all([
+				pulls.get(owner, repo, number),
+				pulls.comments(owner, repo, number)
+			]);
+		} catch {
+			// ignore
+		} finally {
+			loading = false;
+		}
+	});
+
+	async function addComment(e: Event) {
+		e.preventDefault();
+		if (!commentBody.trim()) return;
+		submittingComment = true;
+		try {
+			await pulls.addComment(owner, repo, number, { body: commentBody });
+			comments = await pulls.comments(owner, repo, number);
+			commentBody = '';
+		} catch {
+			// ignore
+		} finally {
+			submittingComment = false;
+		}
+	}
+
+	async function handleMerge() {
+		merging = true;
+		try {
+			await pulls.merge(owner, repo, number);
+			pr = await pulls.get(owner, repo, number);
+		} catch {
+			// ignore
+		} finally {
+			merging = false;
+		}
+	}
+
+	async function closePR() {
+		try {
+			await pulls.update(owner, repo, number, { state: 'closed' });
+			pr = await pulls.get(owner, repo, number);
+		} catch {
+			// ignore
+		}
+	}
+</script>
+
+{#if loading}
+	<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading...</div>
+{:else if pr}
+	<div class="flex flex-col gap-6">
+		<div>
+			<h2 class="text-xl font-bold" style="color: var(--color-text);">{pr.title} <span class="font-normal" style="color: var(--color-text-dim);">#{pr.number}</span></h2>
+			<div class="flex items-center gap-2 mt-2 text-sm">
+				<span class="px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
+					style="background-color: {pr.state === 'merged' ? 'var(--color-secondary)' : pr.state === 'open' ? 'var(--color-success)' : 'var(--color-error)'};"
+				>{pr.state}</span>
+				<span style="color: var(--color-text-dim);">
+					{pr.author} wants to merge <code class="px-1.5 py-0.5 rounded text-xs" style="background: var(--color-surface); color: var(--color-primary);">{pr.head_branch}</code> into <code class="px-1.5 py-0.5 rounded text-xs" style="background: var(--color-surface); color: var(--color-primary);">{pr.base_branch}</code>
+				</span>
+			</div>
+		</div>
+
+		{#if pr.body}
+			<div class="card p-4">
+				<MarkdownRenderer content={pr.body} />
+			</div>
+		{/if}
+
+		{#if pr.state === 'open'}
+			<div class="flex items-center gap-3">
+				<button
+					class="px-4 py-2 text-sm font-medium rounded-lg text-white transition-opacity hover:opacity-90 disabled:opacity-40"
+					style="background-color: var(--color-success);"
+					onclick={handleMerge}
+					disabled={merging}
+				>{merging ? 'Merging...' : 'Merge Pull Request'}</button>
+				<button
+					class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
+					style="border-color: var(--color-border); color: var(--color-error);"
+					onclick={closePR}
+				>Close</button>
+			</div>
+		{/if}
+
+		<!-- Comments -->
+		{#if comments.length > 0}
+			<div class="flex flex-col gap-4">
+				<h3 class="text-sm font-semibold" style="color: var(--color-text-dim);">Comments ({comments.length})</h3>
+				{#each comments as comment}
+					<div class="card p-4">
+						<div class="flex items-center gap-2 mb-2 text-sm">
+							<span class="font-medium" style="color: var(--color-text);">{comment.author}</span>
+							{#if comment.created_at}
+								<span style="color: var(--color-text-dim);">· <RelativeTime date={comment.created_at} /></span>
+							{/if}
+						</div>
+						<MarkdownRenderer content={comment.body} />
+					</div>
+				{/each}
+			</div>
+		{/if}
+
+		<form onsubmit={addComment} class="flex flex-col gap-3">
+			<textarea
+				bind:value={commentBody}
+				placeholder="Leave a comment..."
+				rows={4}
+				class="w-full px-4 py-2.5 text-sm rounded-lg border resize-y"
+				style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			></textarea>
+			<button
+				type="submit"
+				disabled={submittingComment || !commentBody.trim()}
+				class="self-start px-4 py-2 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
+				style="background-color: var(--color-primary);"
+			>{submittingComment ? 'Posting...' : 'Comment'}</button>
+		</form>
+	</div>
+{/if}

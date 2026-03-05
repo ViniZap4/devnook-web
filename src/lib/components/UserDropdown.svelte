@@ -13,17 +13,17 @@
 		danger?: boolean;
 	}
 
-	const mainItems: MenuItem[] = [
-		{ label: 'Your profile', href: '' },
-		{ label: 'Dashboard', href: '/dashboard' },
-		{ label: 'New repository', href: '/new' },
-		{ label: 'Settings', href: '/settings' },
-	];
-
-	$effect(() => {
-		if (userStore.user?.username && mainItems[0]) {
-			mainItems[0].href = `/${userStore.user.username}`;
+	const mainItems: MenuItem[] = $derived.by(() => {
+		const items: MenuItem[] = [
+			{ label: 'Your profile', href: `/${userStore.user?.username ?? ''}` },
+			{ label: 'Dashboard', href: '/dashboard' },
+			{ label: 'New repository', href: '/new' },
+			{ label: 'Settings', href: '/settings' },
+		];
+		if (userStore.user?.is_admin) {
+			items.push({ label: 'Admin Panel', href: '/admin' });
 		}
+		return items;
 	});
 
 	function toggleThemeMode() {

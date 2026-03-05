@@ -26,6 +26,13 @@
 			<span class="text-xs text-[var(--color-text)] opacity-50">
 				{lines.length} lines · {formatSize(blob.size)}
 			</span>
+			{#if !blob.binary}
+				<a
+					href="/{owner}/{repo}/blame/{blob.path}"
+					class="text-xs font-medium hover:underline"
+					style="color: var(--color-primary);"
+				>Blame</a>
+			{/if}
 		</div>
 
 		{#if blob.binary}

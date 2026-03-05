@@ -4,6 +4,7 @@
 	import UserDropdown from './UserDropdown.svelte';
 	import CreateDropdown from './CreateDropdown.svelte';
 	import ThemePicker from './ThemePicker.svelte';
+	import NotificationBell from './NotificationBell.svelte';
 	import { onMount, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
 
@@ -113,6 +114,7 @@
 		<div class="flex items-center gap-3">
 			<ThemePicker />
 			<div class="w-px h-5" style="background: var(--color-border);"></div>
+			<NotificationBell />
 			<CreateDropdown />
 			<UserDropdown />
 		</div>

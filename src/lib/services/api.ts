@@ -52,6 +52,9 @@ export interface User {
 	email: string;
 	full_name: string;
 	avatar_url: string;
+	bio: string;
+	location: string;
+	website: string;
 	is_admin: boolean;
 	created_at: string;
 	updated_at: string;
@@ -83,9 +86,11 @@ export interface DashboardStats {
 
 export const users = {
 	profile: (username: string) => request<UserProfile>('GET', `/api/v1/users/${username}`),
-	updateProfile: (data: { full_name: string; email: string; avatar_url: string }) =>
+	updateProfile: (data: { full_name?: string; email?: string; avatar_url?: string; bio?: string; location?: string; website?: string }) =>
 		request<void>('PUT', '/api/v1/users/me', data),
-	dashboardStats: () => request<DashboardStats>('GET', '/api/v1/dashboard/stats')
+	dashboardStats: () => request<DashboardStats>('GET', '/api/v1/dashboard/stats'),
+	starred: (username: string) =>
+		request<import('$lib/types/repository').Repository[]>('GET', `/api/v1/users/${username}/starred`)
 };
 
 // Explore
@@ -127,7 +132,7 @@ export const shortcuts = {
 };
 
 // Repositories
-import type { Repository, TreeEntry, Commit, Branch, BlobContent, ReadmeContent } from '$lib/types/repository';
+import type { Repository, TreeEntry, Commit, CommitDetail, Branch, Tag, BlobContent, ReadmeContent, BlameLine, CompareResult } from '$lib/types/repository';
 
 export const repos = {
 	list: () => request<Repository[]>('GET', '/api/v1/repos'),
@@ -135,6 +140,8 @@ export const repos = {
 		request<{ id: number; name: string; clone_url: string }>('POST', '/api/v1/repos', data),
 	get: (owner: string, name: string) =>
 		request<Repository>('GET', `/api/v1/repos/${owner}/${name}`),
+	update: (owner: string, name: string, data: { description?: string; website?: string; is_private?: boolean; default_branch?: string; topics?: string[] }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${name}`, data),
 	remove: (owner: string, name: string) =>
 		request<void>('DELETE', `/api/v1/repos/${owner}/${name}`),
 	tree: (owner: string, name: string, ref: string, path: string = '') =>
@@ -148,12 +155,118 @@ export const repos = {
 		const qs = params.toString();
 		return request<Commit[]>('GET', `/api/v1/repos/${owner}/${name}/commits${qs ? '?' + qs : ''}`);
 	},
+	commitDetail: (owner: string, name: string, hash: string) =>
+		request<CommitDetail>('GET', `/api/v1/repos/${owner}/${name}/commits/${hash}`),
 	branches: (owner: string, name: string) =>
 		request<Branch[]>('GET', `/api/v1/repos/${owner}/${name}/branches`),
+	tags: (owner: string, name: string) =>
+		request<Tag[]>('GET', `/api/v1/repos/${owner}/${name}/tags`),
 	readme: (owner: string, name: string, ref?: string) => {
 		const qs = ref ? `?ref=${ref}` : '';
 		return request<ReadmeContent>('GET', `/api/v1/repos/${owner}/${name}/readme${qs}`);
-	}
+	},
+	blame: (owner: string, name: string, ref: string, path: string) =>
+		request<BlameLine[]>('GET', `/api/v1/repos/${owner}/${name}/blame/${ref}/${path}`),
+	compare: (owner: string, name: string, base: string, head: string) =>
+		request<CompareResult>('GET', `/api/v1/repos/${owner}/${name}/compare?base=${base}&head=${head}`),
+
+	// Stars
+	star: (owner: string, name: string) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${name}/star`),
+	unstar: (owner: string, name: string) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${name}/star`),
+	isStarred: (owner: string, name: string) =>
+		request<{ starred: boolean }>('GET', `/api/v1/repos/${owner}/${name}/star`),
+	stargazers: (owner: string, name: string) =>
+		request<User[]>('GET', `/api/v1/repos/${owner}/${name}/stargazers`),
+
+	// Forks
+	fork: (owner: string, name: string) =>
+		request<{ id: number; name: string }>('POST', `/api/v1/repos/${owner}/${name}/forks`),
+	forks: (owner: string, name: string) =>
+		request<Repository[]>('GET', `/api/v1/repos/${owner}/${name}/forks`)
+};
+
+// Labels
+import type { Label, Milestone } from '$lib/types/issue';
+
+export const labels = {
+	list: (owner: string, repo: string) =>
+		request<Label[]>('GET', `/api/v1/repos/${owner}/${repo}/labels`),
+	create: (owner: string, repo: string, data: { name: string; color: string; description?: string }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/labels`, data),
+	update: (owner: string, repo: string, id: number, data: { name?: string; color?: string; description?: string }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/labels/${id}`, data),
+	remove: (owner: string, repo: string, id: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/labels/${id}`),
+	addToIssue: (owner: string, repo: string, issueNumber: number, labelId: number) =>
+		request<void>('POST', `/api/v1/repos/${owner}/${repo}/issues/${issueNumber}/labels`, { label_id: labelId }),
+	removeFromIssue: (owner: string, repo: string, issueNumber: number, labelId: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/issues/${issueNumber}/labels/${labelId}`)
+};
+
+// Milestones
+export const milestones = {
+	list: (owner: string, repo: string) =>
+		request<Milestone[]>('GET', `/api/v1/repos/${owner}/${repo}/milestones`),
+	create: (owner: string, repo: string, data: { title: string; description?: string; due_date?: string }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/milestones`, data),
+	update: (owner: string, repo: string, id: number, data: { title?: string; description?: string; state?: string; due_date?: string }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/milestones/${id}`, data),
+	remove: (owner: string, repo: string, id: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/milestones/${id}`)
+};
+
+// Releases
+import type { Release } from '$lib/types/release';
+
+export const releases = {
+	list: (owner: string, repo: string) =>
+		request<Release[]>('GET', `/api/v1/repos/${owner}/${repo}/releases`),
+	get: (owner: string, repo: string, id: number) =>
+		request<Release>('GET', `/api/v1/repos/${owner}/${repo}/releases/${id}`),
+	create: (owner: string, repo: string, data: { tag_name: string; title: string; body?: string; is_draft?: boolean; is_prerelease?: boolean }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/releases`, data),
+	update: (owner: string, repo: string, id: number, data: { title?: string; body?: string; is_draft?: boolean; is_prerelease?: boolean }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/releases/${id}`, data),
+	remove: (owner: string, repo: string, id: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/releases/${id}`)
+};
+
+// Pull Requests
+import type { PullRequest, PRComment } from '$lib/types/pull_request';
+
+export const pulls = {
+	list: (owner: string, repo: string, state?: string) => {
+		const qs = state ? `?state=${state}` : '';
+		return request<PullRequest[]>('GET', `/api/v1/repos/${owner}/${repo}/pulls${qs}`);
+	},
+	create: (owner: string, repo: string, data: { title: string; body?: string; head_branch: string; base_branch: string }) =>
+		request<{ id: number; number: number }>('POST', `/api/v1/repos/${owner}/${repo}/pulls`, data),
+	get: (owner: string, repo: string, number: number) =>
+		request<PullRequest>('GET', `/api/v1/repos/${owner}/${repo}/pulls/${number}`),
+	update: (owner: string, repo: string, number: number, data: { title?: string; body?: string; state?: string }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/pulls/${number}`, data),
+	merge: (owner: string, repo: string, number: number) =>
+		request<void>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/merge`),
+	comments: (owner: string, repo: string, number: number) =>
+		request<PRComment[]>('GET', `/api/v1/repos/${owner}/${repo}/pulls/${number}/comments`),
+	addComment: (owner: string, repo: string, number: number, data: { body: string }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/comments`, data)
+};
+
+// Webhooks
+import type { Webhook } from '$lib/types/webhook';
+
+export const webhooks = {
+	list: (owner: string, repo: string) =>
+		request<Webhook[]>('GET', `/api/v1/repos/${owner}/${repo}/hooks`),
+	create: (owner: string, repo: string, data: { url: string; secret?: string; events: string[]; active?: boolean }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/hooks`, data),
+	update: (owner: string, repo: string, id: number, data: { url?: string; secret?: string; events?: string[]; active?: boolean }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/hooks/${id}`, data),
+	remove: (owner: string, repo: string, id: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/hooks/${id}`)
 };
 
 // Organizations
@@ -187,11 +300,11 @@ export const issues = {
 		const qs = state ? `?state=${state}` : '';
 		return request<Issue[]>('GET', `/api/v1/repos/${owner}/${repo}/issues${qs}`);
 	},
-	create: (owner: string, repo: string, data: { title: string; body: string }) =>
+	create: (owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[] }) =>
 		request<{ id: number; number: number }>('POST', `/api/v1/repos/${owner}/${repo}/issues`, data),
 	get: (owner: string, repo: string, number: number) =>
 		request<Issue>('GET', `/api/v1/repos/${owner}/${repo}/issues/${number}`),
-	update: (owner: string, repo: string, number: number, data: { title?: string; body?: string; state?: string }) =>
+	update: (owner: string, repo: string, number: number, data: { title?: string; body?: string; state?: string; milestone_id?: number; assignee_id?: number }) =>
 		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/issues/${number}`, data),
 	comments: (owner: string, repo: string, number: number) =>
 		request<IssueComment[]>('GET', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments`),
@@ -201,4 +314,44 @@ export const issues = {
 		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`, data),
 	removeComment: (owner: string, repo: string, number: number, id: number) =>
 		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`)
+};
+
+// SSH Keys
+import type { SSHKey } from '$lib/types/ssh_key';
+
+export const sshKeys = {
+	list: () => request<SSHKey[]>('GET', '/api/v1/users/me/keys'),
+	create: (data: { name: string; public_key: string }) =>
+		request<{ id: number }>('POST', '/api/v1/users/me/keys', data),
+	remove: (id: number) => request<void>('DELETE', `/api/v1/users/me/keys/${id}`)
+};
+
+// Notifications
+import type { Notification, UnreadCount } from '$lib/types/notification';
+
+export const notifications = {
+	list: (unread?: boolean) => {
+		const qs = unread !== undefined ? `?unread=${unread}` : '';
+		return request<Notification[]>('GET', `/api/v1/notifications${qs}`);
+	},
+	unreadCount: () => request<UnreadCount>('GET', '/api/v1/notifications/unread'),
+	markRead: (id: number) => request<void>('PUT', `/api/v1/notifications/${id}/read`),
+	markAllRead: () => request<void>('PUT', '/api/v1/notifications/read-all')
+};
+
+// Admin
+export interface AdminStats {
+	total_users: number;
+	total_repos: number;
+	total_orgs: number;
+	total_issues: number;
+}
+
+export const admin = {
+	stats: () => request<AdminStats>('GET', '/api/v1/admin/stats'),
+	listUsers: () => request<User[]>('GET', '/api/v1/admin/users'),
+	getUser: (username: string) => request<User>('GET', `/api/v1/admin/users/${username}`),
+	updateUser: (username: string, data: { is_admin?: boolean; full_name?: string; email?: string }) =>
+		request<void>('PUT', `/api/v1/admin/users/${username}`, data),
+	removeUser: (username: string) => request<void>('DELETE', `/api/v1/admin/users/${username}`)
 };

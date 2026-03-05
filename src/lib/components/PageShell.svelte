@@ -3,7 +3,7 @@
 	import Footer from './Footer.svelte';
 	import type { Snippet } from 'svelte';
 
-	let { children, maxWidth = 'max-w-5xl' }: { children: Snippet; maxWidth?: string } = $props();
+	let { children, maxWidth = 'max-w-6xl' }: { children: Snippet; maxWidth?: string } = $props();
 </script>
 
 <div class="min-h-screen flex flex-col" style="background-color: var(--color-background);">

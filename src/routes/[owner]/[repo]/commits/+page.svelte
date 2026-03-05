@@ -34,7 +34,7 @@
 	{#if loading}
 		<div class="py-12 text-center text-[var(--color-text)] opacity-50">Loading...</div>
 	{:else}
-		<CommitList {commits} />
+		<CommitList {commits} owner={owner} repo={repoName} />
 		<Pagination page={currentPage} hasMore={commits.length >= 30} onPageChange={loadPage} />
 	{/if}
 </div>
