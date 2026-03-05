@@ -75,6 +75,7 @@ export const auth = {
 export interface UserProfile {
 	user: User;
 	repos: import('$lib/types/repository').Repository[];
+	orgs: import('$lib/types/organization').Organization[];
 }
 
 export interface DashboardStats {

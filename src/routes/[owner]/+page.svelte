@@ -4,6 +4,7 @@
 	import { users } from '$lib/services/api';
 	import type { User } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
+	import type { Organization } from '$lib/types/organization';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
@@ -16,15 +17,17 @@
 	let user = $state<User | null>(null);
 	let repos = $state<Repository[]>([]);
 	let starredRepos = $state<Repository[]>([]);
+	let orgs = $state<Organization[]>([]);
 	let loading = $state(true);
 	let error = $state('');
-	let tab = $state<'repos' | 'starred'>('repos');
+	let tab = $state<'repos' | 'starred' | 'orgs'>('repos');
 
 	onMount(async () => {
 		try {
 			const data = await users.profile(owner);
 			user = data.user;
 			repos = data.repos;
+			orgs = data.orgs || [];
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'User not found';
 		} finally {
@@ -41,7 +44,7 @@
 		}
 	}
 
-	function switchTab(t: 'repos' | 'starred') {
+	function switchTab(t: 'repos' | 'starred' | 'orgs') {
 		tab = t;
 		if (t === 'starred') loadStarred();
 	}
@@ -132,9 +135,44 @@
 						<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
 						Starred
 					</button>
+					{#if orgs.length > 0}
+						<button
+							class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
+							style="{tab === 'orgs' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+							onclick={() => switchTab('orgs')}
+						>
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
+							Organizations
+							<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{orgs.length}</span>
+						</button>
+					{/if}
 				</div>
 
-				{#if displayedRepos.length === 0}
+				{#if tab === 'orgs'}
+				{#if orgs.length === 0}
+					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+						<p class="text-sm" style="color: var(--color-text-dim);">No organizations.</p>
+					</div>
+				{:else}
+					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+						{#each orgs as org}
+							<a href="/orgs/{org.name}" class="card p-4 hover:bg-[var(--color-surface)] transition-colors">
+								<div class="flex items-center gap-3">
+									<div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">
+										{org.name.charAt(0).toUpperCase()}
+									</div>
+									<div class="min-w-0">
+										<p class="text-sm font-semibold truncate" style="color: var(--color-text);">{org.display_name || org.name}</p>
+										{#if org.description}
+											<p class="text-xs truncate mt-0.5" style="color: var(--color-text-dim);">{org.description}</p>
+										{/if}
+									</div>
+								</div>
+							</a>
+						{/each}
+					</div>
+				{/if}
+			{:else if displayedRepos.length === 0}
 					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
 						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
