@@ -1,6 +1,7 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { pulls, repos } from '$lib/services/api';
+	import { userStore } from '$lib/stores/user.svelte';
 	import type { PullRequest, PRComment } from '$lib/types/pull_request';
 	import type { CompareResult } from '$lib/types/repository';
 	import { onMount } from 'svelte';
@@ -10,6 +11,7 @@
 	const owner = $derived($page.params.owner!);
 	const repo = $derived($page.params.repo!);
 	const number = $derived(parseInt($page.params.number!));
+	const isOwner = $derived(userStore.user?.username === owner);
 
 	let pr = $state<PullRequest | null>(null);
 	let comments = $state<PRComment[]>([]);
@@ -19,6 +21,8 @@
 	let submittingComment = $state(false);
 	let merging = $state(false);
 	let activeTab = $state<'conversation' | 'diff'>('conversation');
+	let editingTitle = $state(false);
+	let editTitle = $state('');
 
 	onMount(async () => {
 		try {
@@ -73,6 +77,26 @@
 			// ignore
 		}
 	}
+
+	async function reopenPR() {
+		try {
+			await pulls.update(owner, repo, number, { state: 'open' });
+			pr = await pulls.get(owner, repo, number);
+		} catch {
+			// ignore
+		}
+	}
+
+	async function saveTitle() {
+		if (!editTitle.trim() || !pr) return;
+		try {
+			await pulls.update(owner, repo, number, { title: editTitle.trim() });
+			pr = { ...pr, title: editTitle.trim() };
+			editingTitle = false;
+		} catch {
+			// ignore
+		}
+	}
 </script>
 
 {#if loading}
@@ -80,7 +104,25 @@
 {:else if pr}
 	<div class="flex flex-col gap-6">
 		<div>
-			<h2 class="text-xl font-bold" style="color: var(--color-text);">{pr.title} <span class="font-normal" style="color: var(--color-text-dim);">#{pr.number}</span></h2>
+			{#if editingTitle}
+				<div class="flex items-center gap-2">
+					<input
+						type="text"
+						bind:value={editTitle}
+						class="flex-1 text-xl font-bold px-2 py-1 rounded-lg border"
+						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					/>
+					<button class="px-3 py-1 text-sm rounded-lg text-white" style="background-color: var(--color-primary);" onclick={saveTitle}>Save</button>
+					<button class="px-3 py-1 text-sm rounded-lg border" style="border-color: var(--color-border); color: var(--color-text-dim);" onclick={() => { editingTitle = false; }}>Cancel</button>
+				</div>
+			{:else}
+				<div class="flex items-center gap-2">
+					<h2 class="text-xl font-bold" style="color: var(--color-text);">{pr.title} <span class="font-normal" style="color: var(--color-text-dim);">#{pr.number}</span></h2>
+					{#if isOwner}
+						<button class="text-xs hover:underline" style="color: var(--color-primary);" onclick={() => { editTitle = pr!.title; editingTitle = true; }}>Edit</button>
+					{/if}
+				</div>
+			{/if}
 			<div class="flex items-center gap-2 mt-2 text-sm">
 				<span class="px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
 					style="background-color: {pr.state === 'merged' ? 'var(--color-secondary)' : pr.state === 'open' ? 'var(--color-success)' : 'var(--color-error)'};"
@@ -130,6 +172,14 @@
 						style="border-color: var(--color-border); color: var(--color-error);"
 						onclick={closePR}
 					>Close</button>
+				</div>
+			{:else if pr.state === 'closed'}
+				<div class="flex items-center gap-3">
+					<button
+						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
+						style="border-color: var(--color-success)30; color: var(--color-success);"
+						onclick={reopenPR}
+					>Reopen pull request</button>
 				</div>
 			{/if}
 

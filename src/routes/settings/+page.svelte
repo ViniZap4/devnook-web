@@ -15,6 +15,14 @@
 	let saving = $state(false);
 	let saved = $state(false);
 
+	// Password
+	let oldPassword = $state('');
+	let newPassword = $state('');
+	let confirmPassword = $state('');
+	let changingPassword = $state(false);
+	let passwordChanged = $state(false);
+	let passwordError = $state('');
+
 	onMount(() => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
 		if (userStore.user) {
@@ -39,6 +47,31 @@
 			// ignore
 		} finally {
 			saving = false;
+		}
+	}
+
+	async function handlePasswordChange(e: Event) {
+		e.preventDefault();
+		passwordError = '';
+		if (newPassword !== confirmPassword) {
+			passwordError = 'Passwords do not match';
+			return;
+		}
+		if (newPassword.length < 6) {
+			passwordError = 'Password must be at least 6 characters';
+			return;
+		}
+		changingPassword = true;
+		passwordChanged = false;
+		try {
+			await users.changePassword({ old_password: oldPassword, new_password: newPassword });
+			oldPassword = ''; newPassword = ''; confirmPassword = '';
+			passwordChanged = true;
+			setTimeout(() => { passwordChanged = false; }, 3000);
+		} catch (err) {
+			passwordError = err instanceof Error ? err.message : 'Failed to change password';
+		} finally {
+			changingPassword = false;
 		}
 	}
 </script>
@@ -138,6 +171,39 @@
 						</button>
 						{#if saved}
 							<span class="text-sm font-medium animate-fade-in" style="color: var(--color-success);">Saved!</span>
+						{/if}
+					</div>
+				</form>
+			</div>
+		</section>
+
+		<!-- Password Section -->
+		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
+			<div>
+				<h2 class="text-sm font-semibold" style="color: var(--color-text);">Password</h2>
+				<p class="text-xs mt-1" style="color: var(--color-text-dim);">Update your account password</p>
+			</div>
+			<div class="rounded-xl border p-6" style="border-color: var(--color-border); background-color: var(--color-surface);">
+				<form onsubmit={handlePasswordChange} class="flex flex-col gap-4 max-w-sm">
+					<div>
+						<label for="old-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Current password</label>
+						<input id="old-pass" type="password" bind:value={oldPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+					</div>
+					<div>
+						<label for="new-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">New password</label>
+						<input id="new-pass" type="password" bind:value={newPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+					</div>
+					<div>
+						<label for="confirm-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Confirm new password</label>
+						<input id="confirm-pass" type="password" bind:value={confirmPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+					</div>
+					{#if passwordError}
+						<p class="text-xs" style="color: var(--color-error);">{passwordError}</p>
+					{/if}
+					<div class="flex items-center gap-3">
+						<button type="submit" disabled={changingPassword || !oldPassword || !newPassword || !confirmPassword} class="px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all disabled:opacity-40 hover:brightness-110" style="background-color: var(--color-primary);">{changingPassword ? 'Changing...' : 'Change password'}</button>
+						{#if passwordChanged}
+							<span class="text-sm font-medium animate-fade-in" style="color: var(--color-success);">Password updated!</span>
 						{/if}
 					</div>
 				</form>
