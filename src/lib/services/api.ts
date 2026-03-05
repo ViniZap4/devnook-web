@@ -158,6 +158,16 @@ export interface Contributor {
 	commits: number;
 }
 
+// Collaborators
+export interface Collaborator {
+	id: number;
+	username: string;
+	full_name: string;
+	avatar_url: string;
+	permission: string;
+	created_at: string;
+}
+
 // Repositories
 import type { Repository, TreeEntry, Commit, CommitDetail, Branch, Tag, BlobContent, ReadmeContent, BlameLine, CompareResult } from '$lib/types/repository';
 
@@ -234,6 +244,18 @@ export const repos = {
 	// Contributors
 	contributors: (owner: string, name: string) =>
 		request<Contributor[]>('GET', `/api/v1/repos/${owner}/${name}/contributors`),
+
+	// Collaborators
+	listCollaborators: (owner: string, name: string) =>
+		request<Collaborator[]>('GET', `/api/v1/repos/${owner}/${name}/collaborators`),
+	addCollaborator: (owner: string, name: string, data: { username: string; permission?: string }) =>
+		request<void>('POST', `/api/v1/repos/${owner}/${name}/collaborators`, data),
+	removeCollaborator: (owner: string, name: string, username: string) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${name}/collaborators/${username}`),
+
+	// Transfer
+	transfer: (owner: string, name: string, newOwner: string) =>
+		request<{ new_owner: string }>('POST', `/api/v1/repos/${owner}/${name}/transfer`, { new_owner: newOwner }),
 
 	// Archive URL (not an API call, returns download URL)
 	archiveUrl: (owner: string, name: string, ref: string, format: 'zip' | 'tar.gz' = 'zip') =>
