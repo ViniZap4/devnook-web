@@ -4,8 +4,8 @@
 
 	let { id, name, link }: { id: number; name: string; link: string } = $props();
 
-	const url = new URL(link);
-	const urlIcon = `https://${url.hostname}/favicon.ico`;
+	const url = $derived(new URL(link));
+	const urlIcon = $derived(`https://${url.hostname}/favicon.ico`);
 
 	function handleContextMenu(e: MouseEvent) {
 		e.preventDefault();
