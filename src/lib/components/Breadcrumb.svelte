@@ -10,7 +10,7 @@
 </script>
 
 <nav class="flex items-center gap-1 text-sm text-[var(--color-text)]">
-	<a href="/{owner}/{repo}" class="hover:underline opacity-70 hover:opacity-100 font-semibold" style="color: var(--palette-0);">
+	<a href="/{owner}/{repo}" class="hover:underline opacity-70 hover:opacity-100 font-semibold" style="color: var(--color-primary);">
 		{repo}
 	</a>
 	{#each segments as segment, i}
@@ -19,7 +19,7 @@
 			<a
 				href="/{owner}/{repo}/tree/{ref}/{segments.slice(0, i + 1).join('/')}"
 				class="hover:underline opacity-70 hover:opacity-100"
-				style="color: var(--palette-0);"
+				style="color: var(--color-primary);"
 			>
 				{segment}
 			</a>

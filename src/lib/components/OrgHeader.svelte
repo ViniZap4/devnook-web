@@ -6,7 +6,7 @@
 </script>
 
 <div class="flex items-center gap-4">
-	<div class="w-16 h-16 rounded-xl bg-white/10 flex items-center justify-center">
+	<div class="w-16 h-16 rounded-xl bg-[var(--color-surface)] flex items-center justify-center">
 		<OrgIcon size={28} color="var(--color-text)" />
 	</div>
 	<div>

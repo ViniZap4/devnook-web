@@ -33,7 +33,7 @@
 	</div>
 
 	{#if issue.body}
-		<div class="rounded-lg border border-white/[0.06] p-5 text-[var(--color-text)]">
+		<div class="rounded-lg border border-[var(--color-border)] p-5 text-[var(--color-text)]">
 			<MarkdownRenderer content={issue.body} />
 		</div>
 	{/if}

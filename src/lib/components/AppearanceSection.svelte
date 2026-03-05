@@ -1,65 +1,89 @@
 <script lang="ts">
-	import SwitchButtonTheme from './SwitchButtonTheme.svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
-	import { cianoPalette, pinkPalette, orangePalette, bluePalette } from '$lib/styles/colors';
+	import { themes, darkThemeOrder, lightThemeOrder, type ThemeMode } from '$lib/styles/themes';
 
-	const palettes = [cianoPalette, pinkPalette, orangePalette, bluePalette];
+	const modes: ThemeMode[] = ['auto', 'dark', 'light'];
+	const modeLabels: Record<ThemeMode, string> = { auto: 'Auto', dark: 'Dark', light: 'Light' };
 </script>
 
-<div class="flex flex-col gap-5">
+<div class="flex flex-col gap-6">
+	<!-- Mode selector -->
 	<div class="flex flex-col gap-3">
-		<span class="text-[var(--color-text)] text-xs font-semibold opacity-40 uppercase tracking-wider">Color Palette</span>
-		<div class="flex flex-row gap-3">
-			{#each palettes as palette}
+		<span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Mode</span>
+		<div class="flex gap-2">
+			{#each modes as m}
 				<button
-					class="palette-option"
-					class:active={palette[0] === themeStore.colors[0]}
-					onclick={() => { themeStore.colors = palette; }}
-					style="--c0: #{palette[0]};"
-				aria-label="Select color palette"
+					class="flex-1 px-3 py-2 rounded-xl text-xs font-medium transition-all border"
+					style="
+						color: {themeStore.mode === m ? 'var(--color-primary)' : 'var(--color-text-dim)'};
+						background: {themeStore.mode === m ? 'var(--color-surface)' : 'transparent'};
+						border-color: {themeStore.mode === m ? 'var(--color-primary)30' : 'var(--color-border)'};
+					"
+					onclick={() => { themeStore.mode = m; }}
 				>
-					<div class="palette-preview">
-						<div class="dot" style="background: #{palette[0]};"></div>
-						<div class="dot" style="background: #{palette[2]};"></div>
-						<div class="dot" style="background: #{palette[3]};"></div>
-					</div>
+					{modeLabels[m]}
 				</button>
 			{/each}
 		</div>
 	</div>
 
-	<div class="flex flex-col gap-3">
-		<span class="text-[var(--color-text)] text-xs font-semibold opacity-40 uppercase tracking-wider">Theme</span>
-		<SwitchButtonTheme />
-	</div>
-</div>
+	<!-- Dark themes -->
+	{#if themeStore.mode !== 'light'}
+		<div class="flex flex-col gap-3">
+			<span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Dark Theme</span>
+			<div class="grid grid-cols-2 gap-2">
+				{#each darkThemeOrder as name}
+					{@const t = themes[name]}
+					{@const selected = themeStore.isSelected(name)}
+					<button
+						class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all"
+						style="
+							border-color: {selected ? t.primary + '60' : 'var(--color-border)'};
+							background: {selected ? t.primary + '10' : 'transparent'};
+						"
+						onclick={() => themeStore.selectTheme(name)}
+						onmouseenter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-surface)'; }}
+						onmouseleave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent'; }}
+					>
+						<div class="flex gap-0.5 shrink-0">
+							{#each t.previewColors as color}
+								<span class="w-2 h-2 rounded-full" style="background: {color};"></span>
+							{/each}
+						</div>
+						<span class="text-xs truncate" style="color: {selected ? t.primary : 'var(--color-text-dim)'};">{t.label}</span>
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
 
-<style>
-	.palette-option {
-		display: flex;
-		align-items: center;
-		justify-content: center;
-		padding: 0.5rem;
-		border-radius: 0.75rem;
-		border: 2px solid transparent;
-		transition: border-color 0.2s, transform 0.2s, box-shadow 0.2s;
-		background: rgba(255, 255, 255, 0.04);
-	}
-	.palette-option:hover {
-		background: rgba(255, 255, 255, 0.08);
-		transform: scale(1.05);
-	}
-	.palette-option.active {
-		border-color: var(--c0);
-		box-shadow: 0 0 12px var(--c0, #fff3);
-	}
-	.palette-preview {
-		display: flex;
-		gap: 4px;
-	}
-	.dot {
-		width: 1rem;
-		height: 1rem;
-		border-radius: 50%;
-	}
-</style>
+	<!-- Light themes -->
+	{#if themeStore.mode !== 'dark'}
+		<div class="flex flex-col gap-3">
+			<span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Light Theme</span>
+			<div class="grid grid-cols-2 gap-2">
+				{#each lightThemeOrder as name}
+					{@const t = themes[name]}
+					{@const selected = themeStore.isSelected(name)}
+					<button
+						class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all"
+						style="
+							border-color: {selected ? t.primary + '60' : 'var(--color-border)'};
+							background: {selected ? t.primary + '10' : 'transparent'};
+						"
+						onclick={() => themeStore.selectTheme(name)}
+						onmouseenter={(e) => { if (!selected) e.currentTarget.style.background = 'var(--color-surface)'; }}
+						onmouseleave={(e) => { if (!selected) e.currentTarget.style.background = 'transparent'; }}
+					>
+						<div class="flex gap-0.5 shrink-0">
+							{#each t.previewColors as color}
+								<span class="w-2 h-2 rounded-full" style="background: {color};"></span>
+							{/each}
+						</div>
+						<span class="text-xs truncate" style="color: {selected ? t.primary : 'var(--color-text-dim)'};">{t.label}</span>
+					</button>
+				{/each}
+			</div>
+		</div>
+	{/if}
+</div>

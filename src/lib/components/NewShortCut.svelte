@@ -1,13 +1,12 @@
 <script lang="ts">
 	import PlusIcon from '$lib/assets/icons/PlusIcon.svelte';
-	import { themeStore } from '$lib/stores/theme.svelte';
 
 	let { oncreate }: { oncreate: () => void } = $props();
 </script>
 
-<button class="new-shortcut-card" onclick={oncreate} style="--accent: #{themeStore.colors[0]};">
+<button class="new-shortcut-card" onclick={oncreate} style="--accent: var(--color-primary);">
 	<div class="new-shortcut-icon">
-		<PlusIcon colors={themeStore.colors} />
+		<PlusIcon />
 	</div>
 	<span class="new-shortcut-label">Add new</span>
 </button>
@@ -25,7 +24,7 @@
 	}
 	.new-shortcut-card:hover {
 		transform: translateY(-2px);
-		background-color: rgba(255, 255, 255, 0.06);
+		background-color: var(--color-surface-hover);
 	}
 	.new-shortcut-icon {
 		display: flex;
@@ -34,7 +33,7 @@
 		width: 2.75rem;
 		height: 2.75rem;
 		border-radius: 0.75rem;
-		border: 2px dashed rgba(255, 255, 255, 0.15);
+		border: 2px dashed var(--color-border);
 		transition: border-color 0.2s;
 	}
 	.new-shortcut-card:hover .new-shortcut-icon {

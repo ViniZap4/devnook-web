@@ -15,13 +15,13 @@
 	]);
 </script>
 
-<nav class="flex items-center gap-1 border-b border-white/[0.06] overflow-x-auto">
+<nav class="flex items-center gap-1 border-b border-[var(--color-border)] overflow-x-auto">
 	{#each tabs as tab}
 		{@const active = tab.match($page.url.pathname)}
 		<a
 			href={tab.href}
 			class="flex items-center gap-2 px-4 py-3 text-sm transition-colors border-b-2 whitespace-nowrap {active ? 'border-current font-medium' : 'border-transparent opacity-60 hover:opacity-100'}"
-			style={active ? 'color: var(--palette-0);' : 'color: var(--color-text);'}
+			style={active ? 'color: var(--color-primary);' : 'color: var(--color-text);'}
 		>
 			<tab.icon size={14} />
 			{tab.label}
@@ -30,7 +30,7 @@
 	<a
 		href="/{owner}/{repo}/settings"
 		class="flex items-center gap-2 px-4 py-3 text-sm transition-colors border-b-2 whitespace-nowrap ml-auto {$page.url.pathname === `/${owner}/${repo}/settings` ? 'border-current font-medium' : 'border-transparent opacity-60 hover:opacity-100'}"
-		style={$page.url.pathname === `/${owner}/${repo}/settings` ? 'color: var(--palette-0);' : 'color: var(--color-text);'}
+		style={$page.url.pathname === `/${owner}/${repo}/settings` ? 'color: var(--color-primary);' : 'color: var(--color-text);'}
 	>
 		Settings
 	</a>

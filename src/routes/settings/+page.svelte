@@ -65,7 +65,7 @@
 							id="full-name"
 							type="text"
 							bind:value={fullName}
-							class="w-full px-3 py-2 text-sm rounded-lg border border-white/[0.08] bg-white/[0.03] text-[var(--color-text)] focus:border-[var(--palette-0)] transition-colors"
+							class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-primary)] transition-colors"
 						/>
 					</div>
 					<div>
@@ -74,7 +74,7 @@
 							id="email"
 							type="email"
 							bind:value={email}
-							class="w-full px-3 py-2 text-sm rounded-lg border border-white/[0.08] bg-white/[0.03] text-[var(--color-text)] focus:border-[var(--palette-0)] transition-colors"
+							class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] focus:border-[var(--color-primary)] transition-colors"
 						/>
 					</div>
 					<div class="flex items-center gap-3">
@@ -82,7 +82,7 @@
 							type="submit"
 							disabled={saving}
 							class="px-5 py-2 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
-							style="background-color: var(--palette-0);"
+							style="background-color: var(--color-primary);"
 						>
 							{saving ? 'Saving...' : 'Save changes'}
 						</button>

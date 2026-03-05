@@ -5,7 +5,7 @@
 	let { commits }: { commits: Commit[] } = $props();
 </script>
 
-<div class="rounded-lg border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]">
+<div class="rounded-lg border border-[var(--color-border)] overflow-hidden divide-y divide-white/[0.04]">
 	{#each commits as commit}
 		<CommitRow {commit} />
 	{:else}

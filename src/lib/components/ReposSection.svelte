@@ -26,7 +26,7 @@
 <section>
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">Repositories</h2>
-		<a href="/new" class="text-xs font-medium rounded-md px-2.5 py-1 border border-white/10 text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-white/5 transition-all">
+		<a href="/new" class="text-xs font-medium rounded-md px-2.5 py-1 border border-[var(--color-border)] text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)] transition-all">
 			+ New
 		</a>
 	</div>
@@ -37,7 +37,7 @@
 			type="text"
 			bind:value={search}
 			placeholder="Find a repository..."
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/[0.08] bg-white/[0.03] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--palette-0)] transition-colors"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--color-primary)] transition-colors"
 		/>
 	</div>
 	{/if}
@@ -58,13 +58,13 @@
 				{search ? 'No repositories match your search.' : 'No repositories yet.'}
 			</p>
 			{#if !search}
-			<a href="/new" class="inline-block mt-3 text-xs font-medium" style="color: var(--palette-0);">Create your first repository</a>
+			<a href="/new" class="inline-block mt-3 text-xs font-medium" style="color: var(--color-primary);">Create your first repository</a>
 			{/if}
 		</div>
 	{:else}
-		<div class="rounded-xl border border-white/[0.06] overflow-hidden divide-y divide-white/[0.04]">
+		<div class="rounded-xl border border-[var(--color-border)] overflow-hidden divide-y divide-white/[0.04]">
 			{#each filtered as repo}
-				<a href="/{repo.owner}/{repo.name}" class="flex items-center gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors group">
+				<a href="/{repo.owner}/{repo.name}" class="flex items-center gap-3 px-4 py-3 hover:bg-[var(--color-surface)] transition-colors group">
 					<div class="shrink-0 opacity-40 group-hover:opacity-70 transition-opacity">
 						{#if repo.is_private}
 							<LockIcon size={14} />
@@ -76,7 +76,7 @@
 						<div class="flex items-center gap-1.5">
 							<span class="text-sm text-[var(--color-text)] opacity-50">{repo.owner}</span>
 							<span class="text-[var(--color-text)] opacity-15">/</span>
-							<span class="text-sm font-semibold group-hover:underline" style="color: var(--palette-0);">{repo.name}</span>
+							<span class="text-sm font-semibold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
 							{#if repo.is_private}
 								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500/60 border border-yellow-500/10 ml-1">Private</span>
 							{/if}

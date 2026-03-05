@@ -5,8 +5,8 @@
 	import type { Branch } from '$lib/types/repository';
 	import BranchList from '$lib/components/BranchList.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	let branches = $state<Branch[]>([]);
 	let loading = $state(true);

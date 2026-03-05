@@ -6,7 +6,7 @@
 	let { issue, owner, repo }: { issue: Issue; owner: string; repo: string } = $props();
 </script>
 
-<a href="/{owner}/{repo}/issues/{issue.number}" class="flex items-start gap-3 px-4 py-3 hover:bg-white/[0.02] transition-colors">
+<a href="/{owner}/{repo}/issues/{issue.number}" class="flex items-start gap-3 px-4 py-3 hover:bg-[var(--color-surface)] transition-colors">
 	<div class="mt-0.5">
 		<IssueIcon
 			size={16}

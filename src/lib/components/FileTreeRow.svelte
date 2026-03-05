@@ -24,15 +24,15 @@
 	}
 </script>
 
-<tr class="border-b border-white/[0.04] hover:bg-white/[0.03] transition-colors last:border-b-0">
+<tr class="border-b border-[var(--color-separator)] hover:bg-[var(--color-surface)] transition-colors last:border-b-0">
 	<td class="px-4 py-2.5">
 		<a href={href} class="flex items-center gap-3" style="color: var(--color-text);">
 			{#if entry.type === 'tree'}
-				<FolderIcon size={16} color="var(--palette-0, #58a6ff)" />
+				<FolderIcon size={16} color="var(--color-primary)" />
 			{:else}
 				<FileIcon size={16} />
 			{/if}
-			<span class="hover:underline" style={entry.type === 'tree' ? 'color: var(--palette-0);' : ''}>
+			<span class="hover:underline" style={entry.type === 'tree' ? 'color: var(--color-primary);' : ''}>
 				{entry.name}
 			</span>
 		</a>

@@ -1,43 +1,77 @@
 import { browser } from '$app/environment';
-import type { color } from '$lib/styles/colors';
-import { bluePalette } from '$lib/styles/colors';
-import dark from '$lib/styles/themes/dark';
-import { createPersistedState } from './persisted.svelte';
+import {
+	type ThemeMode,
+	type ThemeSettings,
+	themes,
+	applyTheme,
+	resolveTheme,
+	loadThemeSettings,
+	saveThemeSettings,
+	watchSystemTheme,
+} from '$lib/styles/themes';
 
-type Theme = typeof dark;
-
-const themeState = createPersistedState<Theme>('theme', dark);
-const colorsState = createPersistedState<color>('palette', bluePalette);
+let settings = $state<ThemeSettings>({ mode: 'dark', darkName: 'default-dark', lightName: 'default-light' });
 
 if (browser) {
-	$effect.root(() => {
-		$effect(() => {
-			const theme = themeState.value;
-			const colors = colorsState.value;
-			const root = document.documentElement;
+	settings = loadThemeSettings();
+	applyTheme(resolveTheme(settings.mode, settings.darkName, settings.lightName));
 
-			root.style.setProperty('--color-background', theme.colors.background);
-			root.style.setProperty('--color-text', theme.colors.text);
-
-			for (let i = 0; i < colors.length; i++) {
-				root.style.setProperty(`--palette-${i}`, colors[i]);
-			}
-		});
+	watchSystemTheme(() => {
+		if (settings.mode === 'auto') {
+			applyTheme(resolveTheme('auto', settings.darkName, settings.lightName));
+		}
 	});
 }
 
+function currentThemeName(): string {
+	if (!browser) return settings.darkName;
+	return resolveTheme(settings.mode, settings.darkName, settings.lightName);
+}
+
 export const themeStore = {
-	get theme() {
-		return themeState.value;
+	get mode() {
+		return settings.mode;
 	},
-	set theme(v: Theme) {
-		themeState.value = v;
+	set mode(m: ThemeMode) {
+		settings.mode = m;
+		if (browser) {
+			applyTheme(resolveTheme(m, settings.darkName, settings.lightName));
+			saveThemeSettings(m, settings.darkName, settings.lightName);
+		}
 	},
 
-	get colors() {
-		return colorsState.value;
+	get darkName() {
+		return settings.darkName;
 	},
-	set colors(v: color) {
-		colorsState.value = v;
-	}
+	get lightName() {
+		return settings.lightName;
+	},
+
+	get currentTheme() {
+		return themes[currentThemeName()] ?? themes['default-dark'];
+	},
+
+	get currentThemeName() {
+		return currentThemeName();
+	},
+
+	selectTheme(name: string) {
+		const t = themes[name];
+		if (!t) return;
+		if (t.isDark) {
+			settings.darkName = name;
+		} else {
+			settings.lightName = name;
+		}
+		if (browser) {
+			applyTheme(resolveTheme(settings.mode, settings.darkName, settings.lightName));
+			saveThemeSettings(settings.mode, settings.darkName, settings.lightName);
+		}
+	},
+
+	isSelected(name: string): boolean {
+		const t = themes[name];
+		if (!t) return false;
+		return t.isDark ? name === settings.darkName : name === settings.lightName;
+	},
 };

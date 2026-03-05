@@ -20,7 +20,7 @@
 {#if stats}
 <div class="grid grid-cols-3 gap-3">
 	<div class="card p-4 flex items-center gap-3">
-		<div class="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+		<div class="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
 			<RepoIcon size={16} color="var(--color-text)" />
 		</div>
 		<div>
@@ -29,7 +29,7 @@
 		</div>
 	</div>
 	<div class="card p-4 flex items-center gap-3">
-		<div class="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+		<div class="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
 			<OrgIcon size={16} color="var(--color-text)" />
 		</div>
 		<div>
@@ -38,7 +38,7 @@
 		</div>
 	</div>
 	<div class="card p-4 flex items-center gap-3">
-		<div class="w-9 h-9 rounded-lg bg-white/[0.04] flex items-center justify-center">
+		<div class="w-9 h-9 rounded-lg bg-[var(--color-surface)] flex items-center justify-center">
 			<IssueIcon size={16} color="#3fb950" state="open" />
 		</div>
 		<div>

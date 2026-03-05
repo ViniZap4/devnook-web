@@ -19,10 +19,10 @@
 	<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 		<div class="card p-6">
 			<h4 class="text-[var(--color-text)] font-semibold text-sm mb-3 flex items-center gap-2">
-				<span class="w-5 h-5 rounded-full bg-white/[0.06] flex items-center justify-center text-xs opacity-50">1</span>
+				<span class="w-5 h-5 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center text-xs opacity-50">1</span>
 				Create a new repository
 			</h4>
-			<pre class="text-xs bg-black/20 rounded-lg p-4 overflow-x-auto border border-white/[0.04] text-[var(--color-text)] opacity-60"><code>echo "# My Project" >> README.md
+			<pre class="text-xs bg-black/20 rounded-lg p-4 overflow-x-auto border border-[var(--color-separator)] text-[var(--color-text)] opacity-60"><code>echo "# My Project" >> README.md
 git init
 git add README.md
 git commit -m "first commit"
@@ -33,10 +33,10 @@ git push -u origin main</code></pre>
 
 		<div class="card p-6">
 			<h4 class="text-[var(--color-text)] font-semibold text-sm mb-3 flex items-center gap-2">
-				<span class="w-5 h-5 rounded-full bg-white/[0.06] flex items-center justify-center text-xs opacity-50">2</span>
+				<span class="w-5 h-5 rounded-full bg-[var(--color-surface-hover)] flex items-center justify-center text-xs opacity-50">2</span>
 				Push an existing repository
 			</h4>
-			<pre class="text-xs bg-black/20 rounded-lg p-4 overflow-x-auto border border-white/[0.04] text-[var(--color-text)] opacity-60"><code>git remote add origin {cloneUrl}
+			<pre class="text-xs bg-black/20 rounded-lg p-4 overflow-x-auto border border-[var(--color-separator)] text-[var(--color-text)] opacity-60"><code>git remote add origin {cloneUrl}
 git branch -M main
 git push -u origin main</code></pre>
 		</div>

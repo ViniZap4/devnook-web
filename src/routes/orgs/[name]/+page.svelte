@@ -14,7 +14,7 @@
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	const orgName = $derived($page.params.name);
+	const orgName = $derived($page.params.name!);
 
 	let org = $state<Organization | null>(null);
 	let members = $state<OrgMember[]>([]);
@@ -57,7 +57,7 @@
 				<OrgHeader {org} />
 				<a
 					href="/orgs/{orgName}/settings"
-					class="px-3 py-1.5 text-xs font-medium rounded-lg border border-white/10 text-[var(--color-text)] opacity-50 hover:opacity-100 hover:bg-white/5 transition-all"
+					class="px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-text)] opacity-50 hover:opacity-100 hover:bg-[var(--color-surface)] transition-all"
 				>
 					Settings
 				</a>
@@ -68,7 +68,7 @@
 					<div class="flex items-center justify-between mb-4">
 						<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">
 							Repositories
-							<span class="ml-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-xs normal-case">{repos.length}</span>
+							<span class="ml-1 px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] text-xs normal-case">{repos.length}</span>
 						</h2>
 					</div>
 					{#if repos.length === 0}
@@ -79,11 +79,11 @@
 					{:else}
 						<div class="flex flex-col gap-3">
 							{#each repos as repo}
-								<a href="/{orgName}/{repo.name}" class="card p-5 hover:border-white/[0.12] transition-colors group">
+								<a href="/{orgName}/{repo.name}" class="card p-5 hover:border-[var(--color-primary)] transition-colors group">
 									<div class="flex items-center justify-between gap-4">
 										<div class="flex items-center gap-3 min-w-0">
 											<RepoIcon size={16} color="var(--color-text)" />
-											<span class="text-sm font-semibold group-hover:underline" style="color: var(--palette-0);">{repo.name}</span>
+											<span class="text-sm font-semibold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
 											{#if repo.is_private}
 												<Badge label="Private" variant="warning" />
 											{/if}
@@ -104,7 +104,7 @@
 				<div>
 					<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50 mb-4">
 						Members
-						<span class="ml-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-xs normal-case">{members.length}</span>
+						<span class="ml-1 px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] text-xs normal-case">{members.length}</span>
 					</h2>
 					<OrgMemberList {members} />
 				</div>
@@ -113,7 +113,7 @@
 	{:else}
 		<div class="flex flex-col items-center justify-center py-20 gap-4">
 			<p class="text-[var(--color-text)] opacity-40 text-lg">Organization not found.</p>
-			<a href="/dashboard" class="text-sm font-medium hover:underline" style="color: var(--palette-0);">Back to dashboard</a>
+			<a href="/dashboard" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">Back to dashboard</a>
 		</div>
 	{/if}
 </PageShell>

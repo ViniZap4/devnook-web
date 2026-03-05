@@ -35,7 +35,7 @@
 			type="text"
 			bind:value={name}
 			placeholder="my-project"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 			required
 		/>
 	</div>
@@ -49,7 +49,7 @@
 			type="text"
 			bind:value={description}
 			placeholder="A short description"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 		/>
 	</div>
 
@@ -57,7 +57,7 @@
 		<button
 			type="button"
 			onclick={() => { isPrivate = !isPrivate; }}
-			class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {isPrivate ? 'bg-[var(--palette-0)]' : 'bg-white/20'}"
+			class="relative inline-flex h-6 w-11 items-center rounded-full transition-colors {isPrivate ? 'bg-[var(--color-primary)]' : 'bg-[var(--color-surface-hover)]'}"
 			aria-label="Toggle repository visibility"
 		>
 			<span class="inline-block h-4 w-4 rounded-full bg-white transition-transform {isPrivate ? 'translate-x-6' : 'translate-x-1'}"></span>
@@ -73,7 +73,7 @@
 		type="submit"
 		disabled={submitting || !name.trim()}
 		class="px-6 py-2.5 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
-		style="background-color: var(--palette-0);"
+		style="background-color: var(--color-primary);"
 	>
 		{submitting ? 'Creating...' : 'Create repository'}
 	</button>

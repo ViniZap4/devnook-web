@@ -10,7 +10,7 @@
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
-	const owner = $derived($page.params.owner);
+	const owner = $derived($page.params.owner!);
 
 	let user = $state<User | null>(null);
 	let repos = $state<Repository[]>([]);
@@ -44,7 +44,7 @@
 	{:else if error}
 		<div class="flex flex-col items-center justify-center py-20 gap-4">
 			<p class="text-[var(--color-text)] opacity-50">{error}</p>
-			<a href="/explore" class="text-sm hover:underline" style="color: var(--palette-0);">Explore repositories</a>
+			<a href="/explore" class="text-sm hover:underline" style="color: var(--color-primary);">Explore repositories</a>
 		</div>
 	{:else if user}
 		<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
@@ -75,7 +75,7 @@
 				<div class="flex items-center justify-between mb-4">
 					<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">
 						Public repositories
-						<span class="ml-1 px-2 py-0.5 rounded-full bg-white/[0.06] text-xs normal-case">{repos.length}</span>
+						<span class="ml-1 px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] text-xs normal-case">{repos.length}</span>
 					</h2>
 				</div>
 
@@ -87,12 +87,12 @@
 				{:else}
 					<div class="flex flex-col gap-3">
 						{#each repos as repo}
-							<a href="/{repo.owner}/{repo.name}" class="card p-5 hover:border-white/[0.12] transition-colors group">
+							<a href="/{repo.owner}/{repo.name}" class="card p-5 hover:border-[var(--color-primary)] transition-colors group">
 								<div class="flex items-start justify-between gap-4">
 									<div class="min-w-0 flex-1">
 										<div class="flex items-center gap-2">
 											<RepoIcon size={16} color="var(--color-text)" />
-											<span class="text-sm font-bold group-hover:underline" style="color: var(--palette-0);">{repo.name}</span>
+											<span class="text-sm font-bold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
 										</div>
 										{#if repo.description}
 											<p class="text-sm text-[var(--color-text)] opacity-40 mt-1.5">{repo.description}</p>

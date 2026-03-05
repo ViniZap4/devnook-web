@@ -5,8 +5,8 @@
 	import IssueList from '$lib/components/IssueList.svelte';
 	import IssueIcon from '$lib/assets/icons/IssueIcon.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	let stateFilter = $state<'open' | 'closed'>('open');
 
@@ -25,7 +25,7 @@
 		<div class="flex items-center gap-4">
 			<button
 				class="flex items-center gap-2 text-sm transition-colors {stateFilter === 'open' ? 'font-medium' : 'opacity-50 hover:opacity-80'}"
-				style={stateFilter === 'open' ? 'color: var(--palette-0);' : 'color: var(--color-text);'}
+				style={stateFilter === 'open' ? 'color: var(--color-primary);' : 'color: var(--color-text);'}
 				onclick={() => switchState('open')}
 			>
 				<IssueIcon size={14} state="open" color={stateFilter === 'open' ? '#3fb950' : 'currentColor'} />
@@ -33,7 +33,7 @@
 			</button>
 			<button
 				class="flex items-center gap-2 text-sm transition-colors {stateFilter === 'closed' ? 'font-medium' : 'opacity-50 hover:opacity-80'}"
-				style={stateFilter === 'closed' ? 'color: var(--palette-0);' : 'color: var(--color-text);'}
+				style={stateFilter === 'closed' ? 'color: var(--color-primary);' : 'color: var(--color-text);'}
 				onclick={() => switchState('closed')}
 			>
 				<IssueIcon size={14} state="closed" color={stateFilter === 'closed' ? '#8b949e' : 'currentColor'} />
@@ -43,7 +43,7 @@
 		<a
 			href="/{owner}/{repoName}/issues/new"
 			class="px-4 py-2 text-sm font-medium rounded-lg text-white transition-opacity"
-			style="background-color: var(--palette-0);"
+			style="background-color: var(--color-primary);"
 		>
 			New issue
 		</a>

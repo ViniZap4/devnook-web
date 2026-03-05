@@ -9,7 +9,7 @@
 	import OrgMemberList from '$lib/components/OrgMemberList.svelte';
 	import AddMemberModal from '$lib/components/AddMemberModal.svelte';
 
-	const orgName = $derived($page.params.name);
+	const orgName = $derived($page.params.name!);
 
 	let members = $state<OrgMember[]>([]);
 	let loading = $state(true);
@@ -51,12 +51,12 @@
 </script>
 
 <PageShell maxWidth="max-w-3xl">
-	<div class="flex items-center justify-between mb-8 pb-6 border-b border-white/[0.06]">
+	<div class="flex items-center justify-between mb-8 pb-6 border-b border-[var(--color-border)]">
 		<div>
 			<h1 class="text-[var(--color-text)] text-xl font-bold">{orgName} — Settings</h1>
 			<p class="text-sm text-[var(--color-text)] opacity-30 mt-1">Manage organization members and settings</p>
 		</div>
-		<a href="/orgs/{orgName}" class="text-sm hover:underline" style="color: var(--palette-0);">
+		<a href="/orgs/{orgName}" class="text-sm hover:underline" style="color: var(--color-primary);">
 			Back to {orgName}
 		</a>
 	</div>
@@ -72,7 +72,7 @@
 					<button
 						onclick={() => { showAddMember = true; }}
 						class="px-3 py-1.5 text-xs font-medium rounded-lg text-white"
-						style="background-color: var(--palette-0);"
+						style="background-color: var(--color-primary);"
 					>
 						Add member
 					</button>
@@ -92,7 +92,7 @@
 							type="text"
 							bind:value={confirmDelete}
 							placeholder="Type organization name to confirm"
-							class="w-full px-3 py-2 text-sm rounded-lg border border-white/[0.08] bg-white/[0.03] text-[var(--color-text)] placeholder:opacity-20"
+							class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-20"
 						/>
 						<button
 							onclick={deleteOrg}

@@ -25,7 +25,7 @@
 			type="text"
 			bind:value={title}
 			placeholder="Issue title"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 			required
 		/>
 	</div>
@@ -39,7 +39,7 @@
 			bind:value={body}
 			placeholder="Describe the issue..."
 			rows="8"
-			class="w-full px-4 py-3 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--palette-0)]"
+			class="w-full px-4 py-3 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--color-primary)]"
 		></textarea>
 	</div>
 
@@ -48,7 +48,7 @@
 			type="submit"
 			disabled={submitting || !title.trim()}
 			class="px-6 py-2.5 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
-			style="background-color: var(--palette-0);"
+			style="background-color: var(--color-primary);"
 		>
 			{submitting ? 'Submitting...' : 'Submit new issue'}
 		</button>

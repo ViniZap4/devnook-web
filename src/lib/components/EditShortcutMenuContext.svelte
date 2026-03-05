@@ -54,7 +54,7 @@
 	style="
 		top: {ctx.y}px;
 		left: {ctx.x}px;
-		--ctx-accent: #{themeStore.colors[0]};
+		--ctx-accent: var(--color-primary);
 	"
 >
 	<button class="ctx-item" onclick={openEditShortcut}>Edit</button>
@@ -74,8 +74,8 @@
 		padding: 0.375rem;
 		border-radius: 0.75rem;
 		background-color: var(--color-background);
-		border: 1px solid rgba(255, 255, 255, 0.1);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+		border: 1px solid var(--color-surface-hover);
+		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--color-surface) inset;
 		backdrop-filter: blur(24px) saturate(1.4);
 		animation: scale-in-center 0.15s ease;
 	}
@@ -91,15 +91,15 @@
 		transition: background-color 0.1s;
 	}
 	.ctx-item:hover {
-		background-color: rgba(255, 255, 255, 0.08);
+		background-color: var(--color-surface-hover);
 	}
 	.ctx-danger:hover {
-		background-color: rgba(255, 60, 60, 0.15);
+		background-color: color-mix(in srgb, var(--color-error) 15%, transparent);
 		color: #ff6b6b;
 	}
 	.ctx-divider {
 		height: 1px;
 		margin: 0.25rem 0.5rem;
-		background: rgba(255, 255, 255, 0.08);
+		background: var(--color-surface-hover);
 	}
 </style>

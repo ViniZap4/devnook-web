@@ -18,8 +18,8 @@
 	let loading = $state(true);
 	let error = $state('');
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	onMount(async () => {
 		if (!userStore.isLoggedIn) {
@@ -58,7 +58,7 @@
 					<path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/>
 				</svg>
 				<p class="text-[var(--color-text)] opacity-40 text-lg">{error}</p>
-				<a href="/dashboard" class="text-sm font-medium hover:underline" style="color: var(--palette-0);">Back to dashboard</a>
+				<a href="/dashboard" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">Back to dashboard</a>
 			</div>
 		{:else if repo}
 			<div class="flex flex-col gap-6">

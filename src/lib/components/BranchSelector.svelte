@@ -15,7 +15,7 @@
 
 <div class="relative">
 	<button
-		class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] hover:bg-white/10 transition-colors"
+		class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] hover:bg-[var(--color-surface-hover)] transition-colors"
 		onclick={() => { open = !open; }}
 	>
 		<BranchIcon size={14} />
@@ -28,15 +28,15 @@
 	{#if open}
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div class="fixed inset-0 z-40" onclick={() => { open = false; }} onkeydown={() => {}}></div>
-		<div class="absolute left-0 top-full mt-1 z-50 min-w-[200px] rounded-lg border border-white/10 bg-[var(--color-background)] shadow-xl">
-			<div class="p-2 border-b border-white/[0.06]">
+		<div class="absolute left-0 top-full mt-1 z-50 min-w-[200px] rounded-lg border border-[var(--color-border)] bg-[var(--color-background)] shadow-xl">
+			<div class="p-2 border-b border-[var(--color-border)]">
 				<p class="text-xs text-[var(--color-text)] opacity-50 px-2">Switch branch</p>
 			</div>
 			<div class="max-h-60 overflow-y-auto p-1">
 				{#each branches as branch}
 					<a
 						href="/{owner}/{repo}{basePath ? '/' + basePath + '/' + branch.name : ''}{basePath ? '' : ''}"
-						class="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors {branch.name === currentRef ? 'bg-white/10 font-medium' : 'hover:bg-white/5'}"
+						class="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors {branch.name === currentRef ? 'bg-[var(--color-surface)] font-medium' : 'hover:bg-[var(--color-surface)]'}"
 						style="color: var(--color-text);"
 						onclick={() => { open = false; }}
 					>
