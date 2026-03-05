@@ -349,9 +349,15 @@ export const orgs = {
 import type { Issue, IssueComment } from '$lib/types/issue';
 
 export const issues = {
-	list: (owner: string, repo: string, state?: string) => {
-		const qs = state ? `?state=${state}` : '';
-		return request<Issue[]>('GET', `/api/v1/repos/${owner}/${repo}/issues${qs}`);
+	list: (owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.state) params.set('state', opts.state);
+		if (opts?.labels) params.set('labels', opts.labels);
+		if (opts?.milestone) params.set('milestone', opts.milestone);
+		if (opts?.assignee) params.set('assignee', opts.assignee);
+		if (opts?.q) params.set('q', opts.q);
+		const qs = params.toString();
+		return request<Issue[]>('GET', `/api/v1/repos/${owner}/${repo}/issues${qs ? '?' + qs : ''}`);
 	},
 	create: (owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[] }) =>
 		request<{ id: number; number: number }>('POST', `/api/v1/repos/${owner}/${repo}/issues`, data),

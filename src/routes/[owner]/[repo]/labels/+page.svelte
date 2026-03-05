@@ -15,6 +15,12 @@
 	let description = $state('');
 	let submitting = $state(false);
 
+	let editingId = $state<number | null>(null);
+	let editName = $state('');
+	let editColor = $state('');
+	let editDescription = $state('');
+	let editSaving = $state(false);
+
 	onMount(() => fetchLabels());
 
 	async function fetchLabels() {
@@ -41,6 +47,31 @@
 			// ignore
 		} finally {
 			submitting = false;
+		}
+	}
+
+	function startEdit(label: Label) {
+		editingId = label.id;
+		editName = label.name;
+		editColor = label.color;
+		editDescription = label.description;
+	}
+
+	function cancelEdit() {
+		editingId = null;
+	}
+
+	async function saveEdit() {
+		if (!editingId || !editName) return;
+		editSaving = true;
+		try {
+			await labels.update(owner, repo, editingId, { name: editName, color: editColor, description: editDescription });
+			await fetchLabels();
+			editingId = null;
+		} catch {
+			// ignore
+		} finally {
+			editSaving = false;
 		}
 	}
 
@@ -118,20 +149,49 @@
 	{:else if items.length > 0}
 		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
 			{#each items as label, i}
-				<div class="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}" style="border-color: var(--color-border);">
-					<div class="flex items-center gap-3 min-w-0">
-						<span class="text-xs font-medium px-3 py-1 rounded-full text-white shrink-0" style="background-color: {label.color};">{label.name}</span>
-						{#if label.description}
-							<p class="text-xs truncate" style="color: var(--color-text-dim);">{label.description}</p>
-						{/if}
-					</div>
-					<button
-						class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10 shrink-0 ml-3"
-						style="border-color: var(--color-border); color: var(--color-error);"
-						onclick={() => handleDelete(label.id)}
-					>
-						Delete
-					</button>
+				<div class="px-5 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}" style="border-color: var(--color-border);">
+					{#if editingId === label.id}
+						<!-- Edit mode -->
+						<div class="flex flex-col gap-3">
+							<div class="flex items-center gap-3 flex-wrap">
+								<input type="text" bind:value={editName} class="px-3 py-1.5 text-sm rounded-lg border transition-colors focus:border-[var(--color-primary)] flex-1 min-w-[120px]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+								<div class="flex items-center gap-2">
+									<input type="color" bind:value={editColor} class="w-8 h-8 rounded-lg cursor-pointer border-0 p-0.5" />
+									<span class="text-xs font-mono" style="color: var(--color-text-dim);">{editColor}</span>
+								</div>
+							</div>
+							<input type="text" bind:value={editDescription} placeholder="Description" class="px-3 py-1.5 text-sm rounded-lg border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+							<div class="flex items-center gap-2">
+								<span class="text-xs font-medium px-3 py-1 rounded-full text-white" style="background-color: {editColor};">{editName || 'Preview'}</span>
+								<div class="ml-auto flex items-center gap-2">
+									<button class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-surface-hover)]" style="border-color: var(--color-border); color: var(--color-text-dim);" onclick={cancelEdit}>Cancel</button>
+									<button class="text-xs px-3 py-1.5 rounded-lg text-white disabled:opacity-40" style="background-color: var(--color-primary);" disabled={editSaving || !editName} onclick={saveEdit}>{editSaving ? 'Saving...' : 'Save'}</button>
+								</div>
+							</div>
+						</div>
+					{:else}
+						<!-- View mode -->
+						<div class="flex items-center justify-between">
+							<div class="flex items-center gap-3 min-w-0">
+								<span class="text-xs font-medium px-3 py-1 rounded-full text-white shrink-0" style="background-color: {label.color};">{label.name}</span>
+								{#if label.description}
+									<p class="text-xs truncate" style="color: var(--color-text-dim);">{label.description}</p>
+								{/if}
+							</div>
+							<div class="flex items-center gap-2 shrink-0 ml-3">
+								<button
+									class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-surface-hover)]"
+									style="border-color: var(--color-border); color: var(--color-text-dim);"
+									onclick={() => startEdit(label)}
+								>Edit</button>
+								<button
+									class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10"
+									style="border-color: var(--color-border); color: var(--color-error);"
+									onclick={() => handleDelete(label.id)}
+								>Delete</button>
+							</div>
+						</div>
+					{/if}
 				</div>
 			{/each}
 		</div>
