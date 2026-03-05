@@ -86,7 +86,7 @@
 	{#if open}
 		<div class="absolute right-0 top-full mt-2 w-80 max-h-96 overflow-y-auto rounded-xl border shadow-xl z-50" style="background-color: var(--color-surface); border-color: var(--color-border);">
 			<div class="flex items-center justify-between px-4 py-3 border-b" style="border-color: var(--color-border);">
-				<span class="text-sm font-semibold" style="color: var(--color-text);">Notifications</span>
+				<a href="/notifications" class="text-sm font-semibold hover:underline" style="color: var(--color-text);" onclick={() => { open = false; }}>Notifications</a>
 				{#if items.length > 0}
 					<button
 						class="text-xs hover:underline"

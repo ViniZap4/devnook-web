@@ -12,6 +12,7 @@
 	const cloneUrl = $derived(`${BASE_URL}/${repo.owner}/${repo.name}.git`);
 
 	let showClone = $state(false);
+	let showDownload = $state(false);
 	let starred = $state(false);
 	let starCount = $state(repo.stars_count ?? 0);
 	let forking = $state(false);
@@ -100,6 +101,30 @@
 				{forking ? 'Forking...' : 'Fork'}
 				<span class="text-[var(--color-text)] opacity-40">{repo.forks_count ?? 0}</span>
 			</button>
+
+			<!-- Download button -->
+			<div class="relative">
+				<button
+					class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
+					onclick={() => { showDownload = !showDownload; }}
+				>
+					<svg class="w-3.5 h-3.5 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
+				</button>
+				{#if showDownload}
+					<div class="absolute right-0 top-full mt-1 w-44 rounded-lg border shadow-lg z-20 py-1" style="background: var(--color-background); border-color: var(--color-border);">
+						<a
+							href={repos.archiveUrl(repo.owner, repo.name, repo.default_branch || 'main', 'zip')}
+							class="block px-3 py-2 text-xs hover:bg-[var(--color-surface)] transition-colors"
+							style="color: var(--color-text);"
+						>Download ZIP</a>
+						<a
+							href={repos.archiveUrl(repo.owner, repo.name, repo.default_branch || 'main', 'tar.gz')}
+							class="block px-3 py-2 text-xs hover:bg-[var(--color-surface)] transition-colors"
+							style="color: var(--color-text);"
+						>Download TAR.GZ</a>
+					</div>
+				{/if}
+			</div>
 
 			<!-- Clone button -->
 			<button

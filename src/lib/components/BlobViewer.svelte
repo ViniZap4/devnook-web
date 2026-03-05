@@ -1,5 +1,8 @@
 <script lang="ts">
 	import type { BlobContent } from '$lib/types/repository';
+	import { userStore } from '$lib/stores/user.svelte';
+	import { repos } from '$lib/services/api';
+	import { goto } from '$app/navigation';
 	import Breadcrumb from './Breadcrumb.svelte';
 
 	let { blob, owner, repo, ref }: {
@@ -10,11 +13,25 @@
 	} = $props();
 
 	const lines = $derived(blob.content ? blob.content.split('\n') : []);
+	const isOwner = $derived(userStore.user?.username === owner);
+	let deleting = $state(false);
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	async function handleDelete() {
+		if (!confirm(`Delete ${blob.name}?`)) return;
+		deleting = true;
+		try {
+			await repos.deleteFile(owner, repo, blob.path, { branch: ref });
+			const dir = blob.path.split('/').slice(0, -1).join('/');
+			goto(`/${owner}/${repo}/tree/${ref}/${dir}`);
+		} catch {
+			deleting = false;
+		}
 	}
 </script>
 
@@ -26,13 +43,36 @@
 			<span class="text-xs text-[var(--color-text)] opacity-50">
 				{lines.length} lines · {formatSize(blob.size)}
 			</span>
-			{#if !blob.binary}
-				<a
-					href="/{owner}/{repo}/blame/{blob.path}"
-					class="text-xs font-medium hover:underline"
-					style="color: var(--color-primary);"
-				>Blame</a>
-			{/if}
+			<div class="flex items-center gap-3">
+				{#if !blob.binary}
+					<a
+						href="/{owner}/{repo}/blame/{blob.path}"
+						class="text-xs font-medium hover:underline"
+						style="color: var(--color-primary);"
+					>Blame</a>
+				{/if}
+				{#if isOwner && !blob.binary}
+					<a
+						href="/{owner}/{repo}/_edit/{ref}/{blob.path}"
+						class="flex items-center gap-1 text-xs font-medium hover:underline"
+						style="color: var(--color-primary);"
+					>
+						<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+						Edit
+					</a>
+				{/if}
+				{#if isOwner}
+					<button
+						onclick={handleDelete}
+						disabled={deleting}
+						class="flex items-center gap-1 text-xs font-medium hover:underline disabled:opacity-40"
+						style="color: var(--color-error);"
+					>
+						<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+						{deleting ? 'Deleting...' : 'Delete'}
+					</button>
+				{/if}
+			</div>
 		</div>
 
 		{#if blob.binary}

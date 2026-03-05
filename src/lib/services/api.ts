@@ -89,6 +89,7 @@ export const users = {
 	updateProfile: (data: { full_name?: string; email?: string; avatar_url?: string; bio?: string; location?: string; website?: string }) =>
 		request<void>('PUT', '/api/v1/users/me', data),
 	dashboardStats: () => request<DashboardStats>('GET', '/api/v1/dashboard/stats'),
+	activity: () => request<ActivityItem[]>('GET', '/api/v1/dashboard/activity'),
 	starred: (username: string) =>
 		request<import('$lib/types/repository').Repository[]>('GET', `/api/v1/users/${username}/starred`)
 };
@@ -130,6 +131,32 @@ export const shortcuts = {
 		request<void>('PUT', `/api/v1/shortcuts/${id}`, data),
 	remove: (id: number) => request<void>('DELETE', `/api/v1/shortcuts/${id}`)
 };
+
+// Activity
+export interface ActivityItem {
+	type: string;
+	repo_owner: string;
+	repo_name: string;
+	title: string;
+	author: string;
+	number?: number;
+	created_at: string;
+}
+
+// Language stats
+export interface LanguageStat {
+	name: string;
+	bytes: number;
+	percentage: number;
+	color: string;
+}
+
+// Contributors
+export interface Contributor {
+	name: string;
+	email: string;
+	commits: number;
+}
 
 // Repositories
 import type { Repository, TreeEntry, Commit, CommitDetail, Branch, Tag, BlobContent, ReadmeContent, BlameLine, CompareResult } from '$lib/types/repository';
@@ -184,7 +211,33 @@ export const repos = {
 	fork: (owner: string, name: string) =>
 		request<{ id: number; name: string }>('POST', `/api/v1/repos/${owner}/${name}/forks`),
 	forks: (owner: string, name: string) =>
-		request<Repository[]>('GET', `/api/v1/repos/${owner}/${name}/forks`)
+		request<Repository[]>('GET', `/api/v1/repos/${owner}/${name}/forks`),
+
+	// File editor
+	createFile: (owner: string, name: string, path: string, data: { content: string; message?: string; branch?: string }) =>
+		request<{ message: string }>('POST', `/api/v1/repos/${owner}/${name}/contents/${path}`, data),
+	updateFile: (owner: string, name: string, path: string, data: { content: string; message?: string; branch?: string }) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${name}/contents/${path}`, data),
+	deleteFile: (owner: string, name: string, path: string, data: { message?: string; branch?: string }) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${name}/contents/${path}`, data),
+
+	// Branch management
+	createBranch: (owner: string, name: string, data: { name: string; from?: string }) =>
+		request<{ message: string }>('POST', `/api/v1/repos/${owner}/${name}/branches`, data),
+	deleteBranch: (owner: string, name: string, branch: string) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${name}/branches/${branch}`),
+
+	// Languages
+	languages: (owner: string, name: string) =>
+		request<LanguageStat[]>('GET', `/api/v1/repos/${owner}/${name}/languages`),
+
+	// Contributors
+	contributors: (owner: string, name: string) =>
+		request<Contributor[]>('GET', `/api/v1/repos/${owner}/${name}/contributors`),
+
+	// Archive URL (not an API call, returns download URL)
+	archiveUrl: (owner: string, name: string, ref: string, format: 'zip' | 'tar.gz' = 'zip') =>
+		`${BASE_URL}/api/v1/repos/${owner}/${name}/archive/${ref}.${format}`
 };
 
 // Labels
