@@ -1,17 +1,23 @@
 import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { auth, type User, registerUnauthorizedHandler } from '$lib/services/api';
+import { themeStore } from '$lib/stores/theme.svelte';
 
 let user = $state<User | null>(null);
 let token = $state<string | null>(null);
 let needsSetup = $state(false);
 let initialized = $state(false);
+let loggingOut = $state(false);
 
 if (browser) {
 	try {
 		token = localStorage.getItem('token');
+		const cached = localStorage.getItem('user');
+		if (cached && token) {
+			user = JSON.parse(cached);
+		}
 	} catch {
-		// unavailable
+		// unavailable or corrupted
 	}
 }
 
@@ -25,16 +31,36 @@ export const userStore = {
 	/**
 	 * Validate stored token + check setup status.
 	 * Called once from root layout before any page renders.
+	 * If user is cached, show immediately and revalidate silently.
 	 */
 	async init() {
 		if (initialized) return;
 
 		if (token) {
+			if (user) {
+				// User is cached — mark as initialized immediately, revalidate in background
+				initialized = true;
+				registerUnauthorizedHandler(() => userStore.logout());
+				// Silently refresh user data + sync theme
+				auth.me().then((fresh) => {
+					user = fresh;
+					persistUser(fresh);
+				}).catch(() => {
+					// Token expired — force logout
+					userStore.logout();
+				});
+				themeStore.loadFromServer();
+				return;
+			}
+			// Token exists but no cached user — must fetch
 			try {
-				user = await auth.me();
+				const fresh = await auth.me();
+				user = fresh;
+				persistUser(fresh);
 			} catch {
 				setToken(null);
 				user = null;
+				clearPersistedUser();
 			}
 		}
 
@@ -53,16 +79,18 @@ export const userStore = {
 	},
 
 	async login(username: string, password: string) {
-		// Server returns token + user in one response — no second round-trip
 		const res = await auth.login({ username, password });
 		setToken(res.token);
 		user = res.user;
+		persistUser(res.user);
+		themeStore.loadFromServer();
 	},
 
 	async setup(data: { username: string; email: string; password: string; full_name: string }) {
 		const res = await auth.setup(data);
 		setToken(res.token);
 		user = res.user;
+		persistUser(res.user);
 		needsSetup = false;
 	},
 
@@ -70,18 +98,28 @@ export const userStore = {
 		const res = await auth.register(data);
 		setToken(res.token);
 		user = res.user;
+		persistUser(res.user);
 	},
 
 	async fetchUser() {
 		if (!token) return;
-		user = await auth.me();
+		const fresh = await auth.me();
+		user = fresh;
+		persistUser(fresh);
 	},
 
 	logout() {
+		if (loggingOut) return;
 		if (!token && !user) return;
+		loggingOut = true;
 		user = null;
 		setToken(null);
-		if (browser) goto('/');
+		clearPersistedUser();
+		if (browser) {
+			goto('/').finally(() => { loggingOut = false; });
+		} else {
+			loggingOut = false;
+		}
 	}
 };
 
@@ -91,6 +129,26 @@ function setToken(t: string | null) {
 		try {
 			if (t) localStorage.setItem('token', t);
 			else localStorage.removeItem('token');
+		} catch {
+			// unavailable
+		}
+	}
+}
+
+function persistUser(u: User) {
+	if (browser) {
+		try {
+			localStorage.setItem('user', JSON.stringify(u));
+		} catch {
+			// unavailable
+		}
+	}
+}
+
+function clearPersistedUser() {
+	if (browser) {
+		try {
+			localStorage.removeItem('user');
 		} catch {
 			// unavailable
 		}
