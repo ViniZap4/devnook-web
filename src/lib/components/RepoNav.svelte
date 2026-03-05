@@ -5,7 +5,7 @@
 
 	const tabs = $derived([
 		{ label: 'Code', href: `/${owner}/${repo}`, icon: 'code', match: (p: string) => p === `/${owner}/${repo}` || p.startsWith(`/${owner}/${repo}/tree`) || p.startsWith(`/${owner}/${repo}/blob`) || p.startsWith(`/${owner}/${repo}/blame`) },
-		{ label: 'Issues', href: `/${owner}/${repo}/issues`, icon: 'issue', match: (p: string) => p.startsWith(`/${owner}/${repo}/issues`) },
+		{ label: 'Issues', href: `/${owner}/${repo}/issues`, icon: 'issue', match: (p: string) => p.startsWith(`/${owner}/${repo}/issues`) || p.startsWith(`/${owner}/${repo}/labels`) || p.startsWith(`/${owner}/${repo}/milestones`) },
 		{ label: 'Pull Requests', href: `/${owner}/${repo}/pulls`, icon: 'pr', match: (p: string) => p.startsWith(`/${owner}/${repo}/pulls`) },
 		{ label: 'Commits', href: `/${owner}/${repo}/commits`, icon: 'commit', match: (p: string) => p.startsWith(`/${owner}/${repo}/commits`) },
 		{ label: 'Branches', href: `/${owner}/${repo}/branches`, icon: 'branch', match: (p: string) => p.startsWith(`/${owner}/${repo}/branches`) || p.startsWith(`/${owner}/${repo}/tags`) },
