@@ -45,6 +45,17 @@
 			</span>
 			<div class="flex items-center gap-3">
 				{#if !blob.binary}
+					<button
+						class="text-xs font-medium hover:underline"
+						style="color: var(--color-text-dim);"
+						onclick={() => {
+							const b = new Blob([blob.content], { type: 'text/plain' });
+							const url = URL.createObjectURL(b);
+							const a = document.createElement('a');
+							a.href = url; a.download = blob.name; a.click();
+							URL.revokeObjectURL(url);
+						}}
+					>Raw</button>
 					<a
 						href="/{owner}/{repo}/blame/{blob.path}"
 						class="text-xs font-medium hover:underline"

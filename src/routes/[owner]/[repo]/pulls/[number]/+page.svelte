@@ -23,6 +23,8 @@
 	let activeTab = $state<'conversation' | 'diff'>('conversation');
 	let editingTitle = $state(false);
 	let editTitle = $state('');
+	let editingBody = $state(false);
+	let editBodyText = $state('');
 
 	let reviews = $state<PRReview[]>([]);
 	let showReviewForm = $state(false);
@@ -151,6 +153,17 @@
 		}
 	}
 
+	async function saveBody() {
+		if (!pr) return;
+		try {
+			await pulls.update(owner, repo, number, { body: editBodyText });
+			pr = { ...pr, body: editBodyText };
+			editingBody = false;
+		} catch {
+			// ignore
+		}
+	}
+
 	async function submitReview() {
 		if (!reviewBody.trim() && reviewState === 'comment') return;
 		submittingReview = true;
@@ -247,10 +260,36 @@
 		</div>
 
 		{#if activeTab === 'conversation'}
-			{#if pr.body}
-				<div class="card p-4">
-					<MarkdownRenderer content={pr.body} />
+			{#if editingBody}
+				<div class="card p-4 flex flex-col gap-2">
+					<textarea
+						bind:value={editBodyText}
+						rows={8}
+						class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
+						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					></textarea>
+					<div class="flex items-center gap-2">
+						<button onclick={saveBody} class="px-3 py-1.5 text-xs font-medium rounded-lg text-white" style="background-color: var(--color-primary);">Save</button>
+						<button onclick={() => { editingBody = false; }} class="px-3 py-1.5 text-xs rounded-lg" style="color: var(--color-text-dim);">Cancel</button>
+					</div>
 				</div>
+			{:else if pr.body}
+				<div class="card p-4 relative group">
+					<MarkdownRenderer content={pr.body} />
+					{#if isOwner}
+						<button
+							class="absolute top-2 right-2 text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+							style="background: var(--color-surface); color: var(--color-primary);"
+							onclick={() => { editBodyText = pr!.body; editingBody = true; }}
+						>Edit</button>
+					{/if}
+				</div>
+			{:else if isOwner}
+				<button
+					class="text-xs hover:underline"
+					style="color: var(--color-text-dim);"
+					onclick={() => { editBodyText = ''; editingBody = true; }}
+				>Add a description</button>
 			{/if}
 
 			<!-- Reviews -->
