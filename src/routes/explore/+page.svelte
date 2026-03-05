@@ -15,11 +15,13 @@
 	let currentPage = $state(1);
 	let totalPages = $state(1);
 	let totalCount = $state(0);
+	let visible = $state(false);
 
 	let debounceTimer: ReturnType<typeof setTimeout>;
 
 	async function loadRepos() {
 		loading = true;
+		visible = false;
 		try {
 			const result = await explore.repos({ page: currentPage, q: search || undefined, sort });
 			repos = result.repos;
@@ -29,6 +31,7 @@
 			repos = [];
 		} finally {
 			loading = false;
+			requestAnimationFrame(() => { visible = true; });
 		}
 	}
 
@@ -52,22 +55,25 @@
 <PageShell maxWidth="max-w-6xl">
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
-		<div class="flex items-center justify-between">
+		<div class="flex items-center justify-between animate-fade-up">
 			<div>
 				<h1 class="text-2xl font-bold" style="color: var(--color-text);">Explore</h1>
 				<p class="text-sm mt-1" style="color: var(--color-text-dim);">Discover public repositories</p>
 			</div>
 			{#if !loading}
-				<span class="text-sm font-medium px-3 py-1.5 rounded-lg" style="background-color: var(--color-surface); color: var(--color-text-dim);">
+				<span
+					class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all duration-300"
+					style="background-color: var(--color-surface); color: var(--color-text-dim); border: 1px solid var(--color-border);"
+				>
 					{totalCount} {totalCount === 1 ? 'repository' : 'repositories'}
 				</span>
 			{/if}
 		</div>
 
 		<!-- Filters -->
-		<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3">
-			<div class="flex-1 relative">
-				<svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+		<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 animate-fade-up stagger-1">
+			<div class="flex-1 relative group">
+				<svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 group-focus-within:text-[var(--color-primary)]" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
 				</svg>
 				<input
@@ -75,14 +81,14 @@
 					bind:value={search}
 					oninput={onSearchInput}
 					placeholder="Search repositories..."
-					class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
+					class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
 					style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
 				/>
 			</div>
 			<div class="flex items-center gap-1 rounded-xl border p-1" style="border-color: var(--color-border);">
 				{#each [['updated', 'Recent'], ['created', 'Newest'], ['name', 'Name']] as [val, label]}
 					<button
-						class="px-3 py-1.5 text-xs rounded-lg transition-colors"
+						class="px-3 py-1.5 text-xs rounded-lg transition-all duration-200"
 						style="
 							color: {sort === val ? 'var(--color-primary)' : 'var(--color-text-dim)'};
 							background: {sort === val ? 'var(--color-primary)10' : 'transparent'};
@@ -99,8 +105,8 @@
 		<!-- List -->
 		{#if loading}
 			<div class="flex flex-col gap-3">
-				{#each Array(5) as _}
-					<div class="rounded-xl border p-5" style="border-color: var(--color-border);">
+				{#each Array(5) as _, i}
+					<div class="rounded-xl border p-5 skeleton-loading" style="border-color: var(--color-border); animation-delay: {i * 100}ms;">
 						<div class="flex flex-col gap-2">
 							<Skeleton width="40%" height="16px" />
 							<Skeleton width="70%" height="12px" />
@@ -109,7 +115,7 @@
 				{/each}
 			</div>
 		{:else if repos.length === 0}
-			<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+			<div class="rounded-xl border p-16 text-center animate-fade-in" style="border-color: var(--color-border);">
 				<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 				</svg>
@@ -118,10 +124,20 @@
 				</p>
 			</div>
 		{:else}
-			<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
-				{#each repos as repo}
-					<a href="/{repo.owner}/{repo.name}" class="flex items-start gap-4 px-5 py-4 transition-colors hover:bg-[var(--color-surface)] group">
-						<div class="shrink-0 mt-1 opacity-40 group-hover:opacity-70 transition-opacity">
+			<div class="rounded-xl border overflow-hidden divide-y animate-fade-up stagger-2" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
+				{#each repos as repo, i}
+					<a
+						href="/{repo.owner}/{repo.name}"
+						class="flex items-start gap-4 px-5 py-4 transition-all duration-200 group"
+						style="
+							opacity: {visible ? 1 : 0};
+							transform: {visible ? 'translateY(0)' : 'translateY(8px)'};
+							transition-delay: {i * 40}ms;
+						"
+						onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'; }}
+						onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+					>
+						<div class="shrink-0 mt-1 opacity-40 group-hover:opacity-70 transition-all duration-200 group-hover:scale-110">
 							{#if repo.is_private}
 								<LockIcon size={16} />
 							{:else}
@@ -146,7 +162,7 @@
 							{#if repo.topics && repo.topics.length > 0}
 								<div class="flex flex-wrap gap-1.5 mt-2">
 									{#each repo.topics.slice(0, 5) as topic}
-										<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium" style="background-color: var(--color-primary)12; color: var(--color-primary);">{topic}</span>
+										<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium transition-colors duration-200" style="background-color: var(--color-primary)12; color: var(--color-primary);">{topic}</span>
 									{/each}
 								</div>
 							{/if}
@@ -179,18 +195,18 @@
 			{#if totalPages > 1}
 				<div class="flex items-center justify-center gap-3 mt-2">
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-colors hover:bg-[var(--color-surface)] disabled:opacity-20 disabled:cursor-not-allowed"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)30] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
 						style="border-color: var(--color-border); color: var(--color-text);"
 						disabled={currentPage <= 1}
 						onclick={() => { currentPage--; loadRepos(); }}
 					>
 						Previous
 					</button>
-					<span class="text-sm" style="color: var(--color-text-dim);">
+					<span class="text-sm font-medium px-3 py-1 rounded-lg" style="color: var(--color-text-dim); background: var(--color-surface);">
 						{currentPage} / {totalPages}
 					</span>
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-colors hover:bg-[var(--color-surface)] disabled:opacity-20 disabled:cursor-not-allowed"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)30] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
 						style="border-color: var(--color-border); color: var(--color-text);"
 						disabled={currentPage >= totalPages}
 						onclick={() => { currentPage++; loadRepos(); }}
