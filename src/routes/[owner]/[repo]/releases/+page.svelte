@@ -58,7 +58,7 @@
 					<div class="flex items-start justify-between gap-3">
 						<div class="min-w-0">
 							<div class="flex items-center gap-3 flex-wrap">
-								<h3 class="text-lg font-bold" style="color: var(--color-text);">{release.title}</h3>
+								<a href="/{owner}/{repo}/releases/{release.id}" class="text-lg font-bold hover:underline" style="color: var(--color-text);">{release.title}</a>
 								<code class="text-xs px-2 py-0.5 rounded-lg" style="background: var(--color-surface-hover); color: var(--color-primary);">{release.tag_name}</code>
 							</div>
 							<div class="flex items-center gap-2 mt-1.5 text-xs" style="color: var(--color-text-dim);">

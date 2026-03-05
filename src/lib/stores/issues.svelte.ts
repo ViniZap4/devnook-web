@@ -8,10 +8,10 @@ export const issuesStore = {
 	get issues() { return issuesList; },
 	get loading() { return loading; },
 
-	async load(owner: string, repo: string, state?: string) {
+	async load(owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string }) {
 		loading = true;
 		try {
-			issuesList = await api.list(owner, repo, state);
+			issuesList = await api.list(owner, repo, opts);
 		} catch {
 			// keep current state
 		} finally {
@@ -19,7 +19,7 @@ export const issuesStore = {
 		}
 	},
 
-	async create(owner: string, repo: string, data: { title: string; body: string }) {
+	async create(owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[] }) {
 		return await api.create(owner, repo, data);
 	},
 
