@@ -21,6 +21,12 @@
 			branches = await repos.branches(owner, repo);
 			const def = branches.find(b => b.is_default);
 			if (def) baseBranch = def.name;
+
+			// Pre-fill from URL params (e.g., from compare page)
+			const urlBase = $page.url.searchParams.get('base');
+			const urlHead = $page.url.searchParams.get('head');
+			if (urlBase && branches.some(b => b.name === urlBase)) baseBranch = urlBase;
+			if (urlHead && branches.some(b => b.name === urlHead)) headBranch = urlHead;
 		} catch {
 			// ignore
 		}

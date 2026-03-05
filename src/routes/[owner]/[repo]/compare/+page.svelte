@@ -75,6 +75,29 @@
 	{/if}
 
 	{#if result}
+		<!-- Summary bar -->
+		{#if result.commits.length > 0 || (result.diff && result.diff.length > 0)}
+			{@const totalAdds = result.diff?.reduce((sum, f) => sum + f.hunks.reduce((hs, h) => hs + h.lines.filter(l => l.startsWith('+')).length, 0), 0) ?? 0}
+			{@const totalDels = result.diff?.reduce((sum, f) => sum + f.hunks.reduce((hs, h) => hs + h.lines.filter(l => l.startsWith('-')).length, 0), 0) ?? 0}
+			<div class="flex items-center justify-between gap-4 flex-wrap">
+				<div class="flex items-center gap-4 text-xs" style="color: var(--color-text-dim);">
+					<span>{result.commits.length} commit{result.commits.length !== 1 ? 's' : ''}</span>
+					<span>{result.diff?.length ?? 0} file{(result.diff?.length ?? 0) !== 1 ? 's' : ''} changed</span>
+					{#if totalAdds > 0}
+						<span style="color: var(--color-success);">+{totalAdds}</span>
+					{/if}
+					{#if totalDels > 0}
+						<span style="color: var(--color-error);">-{totalDels}</span>
+					{/if}
+				</div>
+				<a
+					href="/{owner}/{repo}/pulls/new?head={headBranch}&base={baseBranch}"
+					class="px-4 py-2 text-sm font-medium rounded-lg text-white"
+					style="background-color: var(--color-success);"
+				>Create pull request</a>
+			</div>
+		{/if}
+
 		{#if result.commits.length > 0}
 			<div>
 				<h3 class="text-sm font-semibold mb-3" style="color: var(--color-text-dim);">Commits ({result.commits.length})</h3>
