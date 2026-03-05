@@ -311,7 +311,7 @@ export const releases = {
 };
 
 // Pull Requests
-import type { PullRequest, PRComment } from '$lib/types/pull_request';
+import type { PullRequest, PRComment, PRReview } from '$lib/types/pull_request';
 
 export const pulls = {
 	list: (owner: string, repo: string, state?: string) => {
@@ -328,8 +328,12 @@ export const pulls = {
 		request<void>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/merge`),
 	comments: (owner: string, repo: string, number: number) =>
 		request<PRComment[]>('GET', `/api/v1/repos/${owner}/${repo}/pulls/${number}/comments`),
-	addComment: (owner: string, repo: string, number: number, data: { body: string }) =>
-		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/comments`, data)
+	addComment: (owner: string, repo: string, number: number, data: { body: string; path?: string; line?: number }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/comments`, data),
+	reviews: (owner: string, repo: string, number: number) =>
+		request<PRReview[]>('GET', `/api/v1/repos/${owner}/${repo}/pulls/${number}/reviews`),
+	addReview: (owner: string, repo: string, number: number, data: { state: string; body: string }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/pulls/${number}/reviews`, data)
 };
 
 // Webhooks

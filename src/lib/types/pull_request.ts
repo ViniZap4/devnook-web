@@ -16,10 +16,22 @@ export interface PullRequest {
 
 export interface PRComment {
 	id: number;
-	pull_request_id: number;
+	pr_id: number;
 	author_id: number;
 	author: string;
 	body: string;
+	path?: string;
+	line?: number;
 	created_at: string;
 	updated_at: string;
+}
+
+export interface PRReview {
+	id: number;
+	pr_id: number;
+	author_id: number;
+	author: string;
+	state: 'approved' | 'changes_requested' | 'comment';
+	body: string;
+	created_at: string;
 }
