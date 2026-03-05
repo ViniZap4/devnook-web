@@ -17,6 +17,13 @@
 	let starCount = $state(repo.stars_count ?? 0);
 	let forking = $state(false);
 
+	function handleClickOutside(e: MouseEvent) {
+		const target = e.target as HTMLElement;
+		if (showDownload && !target.closest('.download-dropdown')) {
+			showDownload = false;
+		}
+	}
+
 	onMount(async () => {
 		try {
 			const res = await repos.isStarred(repo.owner, repo.name);
@@ -52,6 +59,8 @@
 		}
 	}
 </script>
+
+<svelte:window onclick={handleClickOutside} />
 
 <div class="flex flex-col gap-3">
 	<div class="flex items-center justify-between flex-wrap gap-3">
@@ -103,7 +112,7 @@
 			</button>
 
 			<!-- Download button -->
-			<div class="relative">
+			<div class="relative download-dropdown">
 				<button
 					class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors"
 					onclick={() => { showDownload = !showDownload; }}

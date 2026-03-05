@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
-	import { orgs as orgsApi } from '$lib/services/api';
+	import { admin, orgs as orgsApi } from '$lib/services/api';
 	import type { Organization } from '$lib/types/organization';
 	import OrgIcon from '$lib/assets/icons/OrgIcon.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
@@ -21,7 +21,7 @@
 
 	onMount(async () => {
 		try {
-			orgsList = await orgsApi.list();
+			orgsList = await admin.listOrgs();
 		} catch {
 			// ignore
 		} finally {

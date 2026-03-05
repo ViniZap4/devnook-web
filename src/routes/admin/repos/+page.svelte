@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { admin, repos as reposApi } from '$lib/services/api';
-	import { explore } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
 	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
@@ -13,21 +12,12 @@
 	let currentPage = $state(1);
 	let totalPages = $state(1);
 	let totalCount = $state(0);
-
-	const filtered = $derived(
-		search
-			? repos.filter(r =>
-				r.name.toLowerCase().includes(search.toLowerCase()) ||
-				r.owner.toLowerCase().includes(search.toLowerCase()) ||
-				(r.description && r.description.toLowerCase().includes(search.toLowerCase()))
-			)
-			: repos
-	);
+	let searchTimeout: ReturnType<typeof setTimeout>;
 
 	async function loadRepos() {
 		loading = true;
 		try {
-			const result = await explore.repos({ page: currentPage, q: search || undefined });
+			const result = await admin.listRepos({ page: currentPage, q: search || undefined });
 			repos = result.repos;
 			totalPages = result.total_pages;
 			totalCount = result.total_count;
@@ -39,6 +29,14 @@
 	}
 
 	onMount(loadRepos);
+
+	function handleSearchInput() {
+		clearTimeout(searchTimeout);
+		searchTimeout = setTimeout(() => {
+			currentPage = 1;
+			loadRepos();
+		}, 300);
+	}
 
 	async function deleteRepo(owner: string, name: string) {
 		if (!confirm(`Delete repository "${owner}/${name}"? This action cannot be undone.`)) return;
@@ -67,7 +65,7 @@
 		<input
 			type="text"
 			bind:value={search}
-			oninput={() => { currentPage = 1; loadRepos(); }}
+			oninput={handleSearchInput}
 			placeholder="Search repositories..."
 			class="w-full px-4 py-2.5 text-sm rounded-xl border bg-transparent transition-colors focus:border-[var(--color-primary)]"
 			style="border-color: var(--color-border); color: var(--color-text);"
@@ -76,7 +74,7 @@
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading repositories...</div>
-	{:else if filtered.length === 0}
+	{:else if repos.length === 0}
 		<div class="rounded-xl border p-12 text-center" style="border-color: var(--color-border);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
@@ -85,7 +83,7 @@
 		</div>
 	{:else}
 		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
-			{#each filtered as repo, i}
+			{#each repos as repo, i}
 				<div
 					class="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}"
 					style="border-color: var(--color-border);"
