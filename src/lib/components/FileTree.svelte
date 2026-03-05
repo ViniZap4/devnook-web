@@ -17,9 +17,9 @@
 	}));
 </script>
 
-<div class="rounded-xl border border-white/[0.06] overflow-hidden">
+<div class="rounded-xl border border-[var(--color-border)] overflow-hidden">
 	<!-- Header -->
-	<div class="flex items-center justify-between px-4 py-2.5 border-b border-white/[0.06] bg-white/[0.02]">
+	<div class="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
 		<span class="text-xs text-[var(--color-text)] opacity-40">
 			{sorted.filter(e => e.type === 'tree').length} directories, {sorted.filter(e => e.type === 'blob').length} files
 		</span>

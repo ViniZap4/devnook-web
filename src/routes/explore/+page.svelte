@@ -65,13 +65,13 @@
 					bind:value={search}
 					oninput={onSearchInput}
 					placeholder="Search repositories..."
-					class="w-full px-4 py-2.5 text-sm rounded-xl border border-white/[0.08] bg-white/[0.03] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--palette-0)] transition-colors"
+					class="w-full px-4 py-2.5 text-sm rounded-xl border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--color-primary)] transition-colors"
 				/>
 			</div>
-			<div class="flex items-center gap-1 rounded-xl border border-white/[0.08] p-1">
+			<div class="flex items-center gap-1 rounded-xl border border-[var(--color-border)] p-1">
 				{#each [['updated', 'Recently updated'], ['created', 'Newest'], ['name', 'Name']] as [val, label]}
 					<button
-						class="px-3 py-1.5 text-xs rounded-lg transition-colors {sort === val ? 'bg-white/[0.08] text-[var(--color-text)] font-medium' : 'text-[var(--color-text)] opacity-40 hover:opacity-70'}"
+						class="px-3 py-1.5 text-xs rounded-lg transition-colors {sort === val ? 'bg-[var(--color-surface-hover)] text-[var(--color-text)] font-medium' : 'text-[var(--color-text)] opacity-40 hover:opacity-70'}"
 						onclick={() => changeSort(val)}
 					>
 						{label}
@@ -109,14 +109,14 @@
 		{:else}
 			<div class="flex flex-col gap-3">
 				{#each repos as repo}
-					<a href="/{repo.owner}/{repo.name}" class="card p-5 hover:border-white/[0.12] transition-colors group">
+					<a href="/{repo.owner}/{repo.name}" class="card p-5 hover:border-[var(--color-primary)] transition-colors group">
 						<div class="flex items-start justify-between gap-4">
 							<div class="min-w-0 flex-1">
 								<div class="flex items-center gap-2">
 									<RepoIcon size={16} color="var(--color-text)" />
 									<span class="text-sm text-[var(--color-text)] opacity-50">{repo.owner}</span>
 									<span class="text-[var(--color-text)] opacity-15">/</span>
-									<span class="text-sm font-bold group-hover:underline" style="color: var(--palette-0);">{repo.name}</span>
+									<span class="text-sm font-bold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
 								</div>
 								{#if repo.description}
 									<p class="text-sm text-[var(--color-text)] opacity-40 mt-2 line-clamp-2">{repo.description}</p>
@@ -139,7 +139,7 @@
 			{#if totalPages > 1}
 				<div class="flex items-center justify-center gap-3 mt-4">
 					<button
-						class="px-4 py-2 text-sm rounded-lg border border-white/10 text-[var(--color-text)] hover:bg-white/5 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+						class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
 						disabled={currentPage <= 1}
 						onclick={() => { currentPage--; loadRepos(); }}
 					>
@@ -149,7 +149,7 @@
 						{currentPage} / {totalPages}
 					</span>
 					<button
-						class="px-4 py-2 text-sm rounded-lg border border-white/10 text-[var(--color-text)] hover:bg-white/5 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+						class="px-4 py-2 text-sm rounded-lg border border-[var(--color-border)] text-[var(--color-text)] hover:bg-[var(--color-surface)] transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
 						disabled={currentPage >= totalPages}
 						onclick={() => { currentPage++; loadRepos(); }}
 					>

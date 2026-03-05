@@ -7,6 +7,6 @@
 </script>
 
 <div
-	class="animate-pulse bg-white/[0.06] {rounded}"
+	class="animate-pulse bg-[var(--color-surface-hover)] {rounded}"
 	style="width: {width}; height: {height};"
 ></div>

@@ -6,8 +6,8 @@
 	import CommitList from '$lib/components/CommitList.svelte';
 	import Pagination from '$lib/components/Pagination.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	let commits = $state<Commit[]>([]);
 	let loading = $state(true);

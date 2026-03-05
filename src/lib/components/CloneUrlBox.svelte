@@ -12,7 +12,7 @@
 	}
 </script>
 
-<div class="flex items-center gap-2 rounded-lg border border-white/10 bg-white/5 px-3 py-2">
+<div class="flex items-center gap-2 rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] px-3 py-2">
 	<code class="text-xs text-[var(--color-text)] opacity-70 flex-1 overflow-hidden text-ellipsis whitespace-nowrap">{url}</code>
 	<button
 		onclick={handleCopy}

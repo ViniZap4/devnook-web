@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
-	import { themeStore } from '$lib/stores/theme.svelte';
 	import { userStore } from '$lib/stores/user.svelte';
 
 	type Mode = 'setup' | 'login' | 'register';
@@ -86,31 +85,31 @@
 
 <div class="min-h-screen flex">
 	<!-- Left side — branding -->
-	<div class="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, #{themeStore.colors[0]}15, #{themeStore.colors[2]}10);">
+	<div class="hidden lg:flex lg:w-1/2 items-center justify-center relative overflow-hidden" style="background: linear-gradient(135deg, var(--color-primary)15, var(--color-secondary)10);">
 		<div class="absolute inset-0 noise-bg-medium opacity-50"></div>
 		<div class="relative z-10 max-w-md px-12 text-center">
 			<div class="flex items-center justify-center gap-3 mb-8">
-				<div class="w-4 h-4 rounded-full" style="background-color: #{themeStore.colors[0]};"></div>
-				<span class="text-[var(--color-text)] font-bold text-3xl tracking-tight">Dev Nook</span>
+				<div class="w-4 h-4 rounded-full" style="background-color: var(--color-primary);"></div>
+				<span style="color: var(--color-text);" class="font-bold text-3xl tracking-tight">Dev Nook</span>
 			</div>
 			<p class="text-[var(--color-text)] opacity-50 text-lg leading-relaxed mb-10">
 				Your self-hosted developer platform. Git hosting, issue tracking, and team collaboration — all in one place.
 			</p>
 			<div class="grid grid-cols-3 gap-4">
 				<div class="card p-4 text-center">
-					<div class="text-2xl mb-1" style="color: #{themeStore.colors[0]};">
+					<div class="text-2xl mb-1" style="color: var(--color-primary);">
 						<svg class="w-6 h-6 mx-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/></svg>
 					</div>
 					<p class="text-xs text-[var(--color-text)] opacity-40">Repositories</p>
 				</div>
 				<div class="card p-4 text-center">
-					<div class="text-2xl mb-1" style="color: #{themeStore.colors[0]};">
+					<div class="text-2xl mb-1" style="color: var(--color-primary);">
 						<svg class="w-6 h-6 mx-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
 					</div>
 					<p class="text-xs text-[var(--color-text)] opacity-40">Issues</p>
 				</div>
 				<div class="card p-4 text-center">
-					<div class="text-2xl mb-1" style="color: #{themeStore.colors[0]};">
+					<div class="text-2xl mb-1" style="color: var(--color-primary);">
 						<svg class="w-6 h-6 mx-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 16A1.75 1.75 0 0 1 0 14.25V1.75C0 .784.784 0 1.75 0h8.5C11.216 0 12 .784 12 1.75v12.5c0 .085-.006.168-.018.25h2.268a.25.25 0 0 0 .25-.25V8.285a.25.25 0 0 0-.111-.208l-1.055-.703a.749.749 0 1 1 .832-1.248l1.64 1.094c.487.325.778.862.778 1.44v5.59A1.75 1.75 0 0 1 14.75 16Z"/></svg>
 					</div>
 					<p class="text-xs text-[var(--color-text)] opacity-40">Teams</p>
@@ -124,7 +123,7 @@
 		<div class="w-full max-w-sm animate-fade-in">
 			<!-- Mobile branding -->
 			<div class="flex items-center gap-2 mb-8 lg:hidden">
-				<div class="w-3 h-3 rounded-full" style="background-color: #{themeStore.colors[0]};"></div>
+				<div class="w-3 h-3 rounded-full" style="background-color: var(--color-primary);"></div>
 				<span class="text-[var(--color-text)] font-bold text-xl tracking-tight">Dev Nook</span>
 			</div>
 
@@ -193,7 +192,7 @@
 				</form>
 				<p class="text-center text-sm text-[var(--color-text)] opacity-40 mt-6">
 					Already have an account?
-					<button class="font-medium hover:underline" style="color: var(--palette-0);" onclick={() => switchMode('login')}>Sign in</button>
+					<button class="font-medium hover:underline" style="color: var(--color-primary);" onclick={() => switchMode('login')}>Sign in</button>
 				</p>
 
 			{:else}
@@ -221,7 +220,7 @@
 				</form>
 				<p class="text-center text-sm text-[var(--color-text)] opacity-40 mt-6">
 					Don't have an account?
-					<button class="font-medium hover:underline" style="color: var(--palette-0);" onclick={() => switchMode('register')}>Create one</button>
+					<button class="font-medium hover:underline" style="color: var(--color-primary);" onclick={() => switchMode('register')}>Create one</button>
 				</p>
 			{/if}
 
@@ -234,8 +233,8 @@
 	.auth-input {
 		width: 100%;
 		padding: 0.625rem 0.75rem;
-		background: rgba(255, 255, 255, 0.04);
-		border: 1px solid rgba(255, 255, 255, 0.08);
+		background: var(--color-surface);
+		border: 1px solid var(--color-surface-hover);
 		border-radius: 0.5rem;
 		color: var(--color-text);
 		font-size: 0.875rem;
@@ -246,9 +245,9 @@
 		opacity: 0.2;
 	}
 	.auth-input:focus {
-		border-color: var(--palette-0);
-		background: rgba(255, 255, 255, 0.06);
-		box-shadow: 0 0 0 3px rgba(var(--palette-0), 0.1);
+		border-color: var(--color-primary);
+		background: var(--color-surface-hover);
+		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent);
 		outline: none;
 	}
 	.auth-btn {
@@ -258,7 +257,7 @@
 		font-weight: 600;
 		font-size: 0.875rem;
 		color: #fff;
-		background-color: var(--palette-0);
+		background-color: var(--color-primary);
 		transition: opacity 0.15s, transform 0.15s;
 	}
 	.auth-btn:hover:not(:disabled) {

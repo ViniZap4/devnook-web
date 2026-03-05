@@ -49,8 +49,8 @@
 	}
 	.field-input {
 		padding: 0.625rem 0.75rem;
-		background: rgba(255, 255, 255, 0.06);
-		border: 1px solid rgba(255, 255, 255, 0.1);
+		background: var(--color-surface-hover);
+		border: 1px solid var(--color-surface-hover);
 		border-radius: 0.625rem;
 		color: var(--color-text);
 		font-size: 0.9375rem;
@@ -61,8 +61,8 @@
 		opacity: 0.25;
 	}
 	.field-input:focus {
-		border-color: rgba(255, 255, 255, 0.25);
-		background: rgba(255, 255, 255, 0.08);
+		border-color: var(--color-border);
+		background: var(--color-surface-hover);
 	}
 	.submit-btn {
 		margin-top: 0.25rem;
@@ -71,7 +71,7 @@
 		font-weight: 600;
 		font-size: 0.875rem;
 		color: #fff;
-		background-color: var(--palette-0);
+		background-color: var(--color-primary);
 		transition: opacity 0.15s, transform 0.15s;
 	}
 	.submit-btn:hover {

@@ -8,9 +8,9 @@
 	import IssueComment from '$lib/components/IssueComment.svelte';
 	import CommentForm from '$lib/components/CommentForm.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
-	const number = $derived(Number($page.params.number));
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
+	const number = $derived(Number($page.params.number!));
 
 	let issue = $state<Issue | null>(null);
 	let comments = $state<IssueCommentType[]>([]);

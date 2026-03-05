@@ -20,11 +20,11 @@
 	target="_blank"
 	rel="noopener noreferrer"
 	oncontextmenu={handleContextMenu}
-	style="--accent: #{themeStore.colors[0]};"
+	style="--accent: var(--color-primary);"
 >
 	<!-- svelte-ignore a11y_missing_attribute -->
 	<object class="shortcut-icon" data={urlIcon} type="image/png" aria-label="{name} icon">
-		<span class="shortcut-fallback" style="background: linear-gradient(135deg, #{themeStore.colors[0]}40, #{themeStore.colors[3]}40); color: #{themeStore.colors[0]};">
+		<span class="shortcut-fallback" style="background: linear-gradient(135deg, var(--color-primary)40, var(--color-secondary)40); color: var(--color-primary);">
 			{name[0].toUpperCase()}{name.length > 1 ? name[1].toLowerCase() : ''}
 		</span>
 	</object>
@@ -45,13 +45,13 @@
 	}
 	.shortcut-card:hover {
 		transform: translateY(-2px);
-		background-color: rgba(255, 255, 255, 0.06);
+		background-color: var(--color-surface-hover);
 	}
 	.shortcut-icon {
 		width: 2.75rem;
 		height: 2.75rem;
 		border-radius: 0.75rem;
-		background: rgba(255, 255, 255, 0.08);
+		background: var(--color-surface-hover);
 		padding: 0.375rem;
 		display: flex;
 		align-items: center;

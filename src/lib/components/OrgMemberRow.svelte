@@ -8,9 +8,9 @@
 	} = $props();
 </script>
 
-<div class="flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors">
+<div class="flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface)] transition-colors">
 	<div class="flex items-center gap-3">
-		<div class="w-8 h-8 rounded-full bg-white/10 flex items-center justify-center text-xs text-[var(--color-text)] font-medium">
+		<div class="w-8 h-8 rounded-full bg-[var(--color-surface)] flex items-center justify-center text-xs text-[var(--color-text)] font-medium">
 			{member.username.substring(0, 2).toUpperCase()}
 		</div>
 		<span class="text-sm text-[var(--color-text)] font-medium">{member.username}</span>

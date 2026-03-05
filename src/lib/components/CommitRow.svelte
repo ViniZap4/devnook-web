@@ -6,7 +6,7 @@
 	let { commit }: { commit: Commit } = $props();
 </script>
 
-<div class="flex items-center justify-between px-4 py-3 hover:bg-white/[0.02] transition-colors">
+<div class="flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface)] transition-colors">
 	<div class="flex items-center gap-3 min-w-0">
 		<CommitIcon size={16} color="var(--color-text)" />
 		<div class="min-w-0">
@@ -16,7 +16,7 @@
 			</p>
 		</div>
 	</div>
-	<code class="text-xs px-2 py-1 rounded bg-white/5 text-[var(--color-text)] opacity-60 shrink-0 ml-4 font-mono">
+	<code class="text-xs px-2 py-1 rounded bg-[var(--color-surface)] text-[var(--color-text)] opacity-60 shrink-0 ml-4 font-mono">
 		{commit.short_hash}
 	</code>
 </div>

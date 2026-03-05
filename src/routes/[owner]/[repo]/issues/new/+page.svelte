@@ -4,8 +4,8 @@
 	import { issues } from '$lib/services/api';
 	import IssueForm from '$lib/components/IssueForm.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	async function handleSubmit(title: string, body: string) {
 		const result = await issues.create(owner, repoName, { title, body });

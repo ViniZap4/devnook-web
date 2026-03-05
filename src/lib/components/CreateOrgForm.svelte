@@ -34,7 +34,7 @@
 			type="text"
 			bind:value={name}
 			placeholder="my-org"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 			required
 		/>
 	</div>
@@ -48,7 +48,7 @@
 			type="text"
 			bind:value={displayName}
 			placeholder="My Organization"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 		/>
 	</div>
 
@@ -61,7 +61,7 @@
 			type="text"
 			bind:value={description}
 			placeholder="A short description"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 		/>
 	</div>
 
@@ -73,7 +73,7 @@
 		type="submit"
 		disabled={submitting || !name.trim()}
 		class="px-6 py-2.5 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
-		style="background-color: var(--palette-0);"
+		style="background-color: var(--color-primary);"
 	>
 		{submitting ? 'Creating...' : 'Create organization'}
 	</button>

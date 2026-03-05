@@ -29,14 +29,14 @@
 </script>
 
 {#if open}
-	<Modal onclose={onClose}>
+	<Modal open={true} onclose={onClose}>
 		<h3 class="text-[var(--color-text)] font-semibold mb-4">Add member</h3>
 		<form onsubmit={handleSubmit} class="flex flex-col gap-4">
 			<input
 				type="text"
 				bind:value={username}
 				placeholder="Username"
-				class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--palette-0)]"
+				class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 				required
 			/>
 			{#if error}
@@ -46,7 +46,7 @@
 				type="submit"
 				disabled={submitting || !username.trim()}
 				class="px-4 py-2 text-sm font-medium rounded-lg text-white transition-opacity disabled:opacity-40"
-				style="background-color: var(--palette-0);"
+				style="background-color: var(--color-primary);"
 			>
 				{submitting ? 'Adding...' : 'Add member'}
 			</button>

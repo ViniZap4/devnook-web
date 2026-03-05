@@ -3,8 +3,8 @@
 	import { goto } from '$app/navigation';
 	import { repos } from '$lib/services/api';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 
 	let deleting = $state(false);
 	let confirmName = $state('');
@@ -34,7 +34,7 @@
 				type="text"
 				bind:value={confirmName}
 				placeholder="Type repository name to confirm"
-				class="w-full px-3 py-2 text-sm rounded-lg border border-white/10 bg-white/5 text-[var(--color-text)] placeholder:opacity-30"
+				class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30"
 			/>
 			<button
 				onclick={handleDelete}

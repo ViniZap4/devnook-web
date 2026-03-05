@@ -8,8 +8,8 @@
 	import BranchSelector from '$lib/components/BranchSelector.svelte';
 	import EmptyRepo from '$lib/components/EmptyRepo.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
 	const BASE_URL = import.meta.env.VITE_DEVNOOK_SERVER_URL || 'http://localhost:8080';
 
 	let entries = $state<TreeEntry[]>([]);

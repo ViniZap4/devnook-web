@@ -7,9 +7,9 @@
 	import BranchSelector from '$lib/components/BranchSelector.svelte';
 	import Breadcrumb from '$lib/components/Breadcrumb.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
-	const fullPath = $derived($page.params.path);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
+	const fullPath = $derived($page.params.path!);
 
 	// First segment of path is the ref, rest is the actual path
 	const ref = $derived(fullPath.split('/')[0]);

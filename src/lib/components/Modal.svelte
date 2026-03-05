@@ -66,8 +66,8 @@
 		padding: 1.5rem;
 		border-radius: 1.25rem;
 		background-color: var(--color-background);
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+		border: 1px solid var(--color-surface-hover);
+		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-surface) inset;
 		backdrop-filter: blur(32px) saturate(1.4);
 	}
 	.close-btn {
@@ -83,6 +83,6 @@
 	}
 	.close-btn:hover {
 		opacity: 1;
-		background-color: rgba(255, 255, 255, 0.08);
+		background-color: var(--color-surface-hover);
 	}
 </style>

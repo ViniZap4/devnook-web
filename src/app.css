@@ -1,5 +1,24 @@
 @import "tailwindcss";
 
+:root {
+	--color-primary: #7C3AED;
+	--color-secondary: #06B6D4;
+	--color-accent: #8B5CF6;
+	--color-muted: #6B7280;
+	--color-background: #0d1117;
+	--color-surface: #161b22;
+	--color-surface-hover: #1c2128;
+	--color-overlay: #090c10;
+	--color-text: #e6edf3;
+	--color-text-dim: #7d8590;
+	--color-border: #30363d;
+	--color-separator: #21262d;
+	--color-error: #f85149;
+	--color-warning: #d29922;
+	--color-success: #3fb950;
+	--color-info: #58a6ff;
+}
+
 @theme {
 	--font-title: 2rem;
 	--font-subtitle: 1.25rem;
@@ -24,6 +43,9 @@
 			sans-serif;
 		-webkit-font-smoothing: antialiased;
 		-moz-osx-font-smoothing: grayscale;
+		background-color: var(--color-background);
+		color: var(--color-text);
+		transition: background-color 0.3s ease, color 0.3s ease;
 	}
 
 	code {
@@ -37,34 +59,32 @@
 	a { text-decoration: none; }
 	button { cursor: pointer; border: none; background: none; }
 	input:focus, textarea:focus, select:focus { outline: none; }
+
+	::-webkit-scrollbar { width: 8px; }
+	::-webkit-scrollbar-track { background: var(--color-background); }
+	::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
+	::-webkit-scrollbar-thumb:hover { background: var(--color-text-dim); }
 }
 
 /* Animations */
 @keyframes slide-in-blurred-top {
-	0% {
-		transform: translateY(-40px);
-		opacity: 0;
-	}
-	100% {
-		transform: translateY(0);
-		opacity: 1;
-	}
+	0% { transform: translateY(-40px); opacity: 0; }
+	100% { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes scale-in-center {
-	0% {
-		transform: scale(0.95);
-		opacity: 0;
-	}
-	100% {
-		transform: scale(1);
-		opacity: 1;
-	}
+	0% { transform: scale(0.95); opacity: 0; }
+	100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes fade-in {
 	0% { opacity: 0; }
 	100% { opacity: 1; }
+}
+
+@keyframes fade-slide-in {
+	0% { opacity: 0; transform: translateY(12px); }
+	100% { opacity: 1; transform: translateY(0); }
 }
 
 /* Custom utilities */
@@ -78,13 +98,17 @@
 }
 
 @utility noise-bg-strong {
-	background-image: linear-gradient(360deg, var(--color-background, #121212)d9, var(--color-background, #121212)99), url('/noise.svg');
+	background-image: linear-gradient(360deg, var(--color-background)d9, var(--color-background)99), url('/noise.svg');
 }
 
 @utility noise-bg-medium {
-	background-image: linear-gradient(360deg, var(--color-background, #121212)99, var(--color-background, #121212)72), url('/noise.svg');
+	background-image: linear-gradient(360deg, var(--color-background)99, var(--color-background)72), url('/noise.svg');
 }
 
 @utility card {
-	@apply rounded-2xl glass noise-bg-medium border border-white/[0.06];
+	@apply rounded-2xl border;
+	backdrop-filter: blur(24px) saturate(1.4);
+	background-color: var(--color-surface);
+	border-color: var(--color-border);
+	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
 }

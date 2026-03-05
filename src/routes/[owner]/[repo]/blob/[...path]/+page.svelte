@@ -5,9 +5,9 @@
 	import type { BlobContent } from '$lib/types/repository';
 	import BlobViewer from '$lib/components/BlobViewer.svelte';
 
-	const owner = $derived($page.params.owner);
-	const repoName = $derived($page.params.repo);
-	const fullPath = $derived($page.params.path);
+	const owner = $derived($page.params.owner!);
+	const repoName = $derived($page.params.repo!);
+	const fullPath = $derived($page.params.path!);
 
 	const ref = $derived(fullPath.split('/')[0]);
 	const filePath = $derived(fullPath.split('/').slice(1).join('/'));
