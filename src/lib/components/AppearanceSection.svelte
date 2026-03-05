@@ -1,5 +1,4 @@
 <script lang="ts">
-	import ColorIcon from '$lib/assets/icons/ColorIcon.svelte';
 	import SwitchButtonTheme from './SwitchButtonTheme.svelte';
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { cianoPalette, pinkPalette, orangePalette, bluePalette } from '$lib/styles/colors';
@@ -7,36 +6,33 @@
 	const palettes = [cianoPalette, pinkPalette, orangePalette, bluePalette];
 </script>
 
-<section class="card p-6 animate-fade-in">
-	<h2 class="text-[var(--color-text)] mb-5">Appearance</h2>
-
-	<div class="flex flex-col gap-5">
-		<div class="flex flex-col gap-3">
-			<span class="text-[var(--color-text)] text-sm opacity-50 uppercase tracking-wider font-medium">Color Palette</span>
-			<div class="flex flex-row gap-3">
-				{#each palettes as palette}
-					<button
-						class="palette-option"
-						class:active={palette[0] === themeStore.colors[0]}
-						onclick={() => { themeStore.colors = palette; }}
-						style="--c0: #{palette[0]}; --c1: #{palette[1]}; --c2: #{palette[2]}; --c3: #{palette[3]};"
-					>
-						<div class="palette-preview">
-							<div class="dot" style="background: #{palette[0]};"></div>
-							<div class="dot" style="background: #{palette[2]};"></div>
-							<div class="dot" style="background: #{palette[3]};"></div>
-						</div>
-					</button>
-				{/each}
-			</div>
-		</div>
-
-		<div class="flex flex-col gap-3">
-			<span class="text-[var(--color-text)] text-sm opacity-50 uppercase tracking-wider font-medium">Theme</span>
-			<SwitchButtonTheme />
+<div class="flex flex-col gap-5">
+	<div class="flex flex-col gap-3">
+		<span class="text-[var(--color-text)] text-xs font-semibold opacity-40 uppercase tracking-wider">Color Palette</span>
+		<div class="flex flex-row gap-3">
+			{#each palettes as palette}
+				<button
+					class="palette-option"
+					class:active={palette[0] === themeStore.colors[0]}
+					onclick={() => { themeStore.colors = palette; }}
+					style="--c0: #{palette[0]};"
+				aria-label="Select color palette"
+				>
+					<div class="palette-preview">
+						<div class="dot" style="background: #{palette[0]};"></div>
+						<div class="dot" style="background: #{palette[2]};"></div>
+						<div class="dot" style="background: #{palette[3]};"></div>
+					</div>
+				</button>
+			{/each}
 		</div>
 	</div>
-</section>
+
+	<div class="flex flex-col gap-3">
+		<span class="text-[var(--color-text)] text-xs font-semibold opacity-40 uppercase tracking-wider">Theme</span>
+		<SwitchButtonTheme />
+	</div>
+</div>
 
 <style>
 	.palette-option {

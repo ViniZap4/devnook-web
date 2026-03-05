@@ -14,7 +14,7 @@
 		children: Snippet;
 	} = $props();
 
-	let overlayEl: HTMLDivElement;
+	let overlayEl = $state<HTMLDivElement | null>(null);
 
 	function handleOverlayClick(e: MouseEvent) {
 		if (e.target === overlayEl) onclose();
@@ -46,6 +46,7 @@
 				<button
 					class="close-btn"
 					onclick={onclose}
+					aria-label="Close modal"
 				>
 					<svg width="14" height="14" viewBox="0 0 14 14" fill="none">
 						<path d="M1 1L13 13M13 1L1 13" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
