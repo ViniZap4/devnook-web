@@ -24,6 +24,8 @@
 
 	let editingTitle = $state(false);
 	let editTitle = $state('');
+	let editingBody = $state(false);
+	let editBody = $state('');
 
 	let editingAssignee = $state(false);
 	let assigneeInput = $state('');
@@ -59,6 +61,16 @@
 		comments = await issuesApi.comments(owner, repoName, number);
 	}
 
+	async function editComment(id: number, body: string) {
+		await issuesApi.updateComment(owner, repoName, number, id, { body });
+		comments = await issuesApi.comments(owner, repoName, number);
+	}
+
+	async function deleteComment(id: number) {
+		await issuesApi.removeComment(owner, repoName, number, id);
+		comments = comments.filter(c => c.id !== id);
+	}
+
 	async function addLabel(labelId: number) {
 		try {
 			await labelsApi.addToIssue(owner, repoName, number, labelId);
@@ -83,6 +95,17 @@
 			await issuesApi.update(owner, repoName, number, { title: editTitle.trim() });
 			issue = { ...issue, title: editTitle.trim() };
 			editingTitle = false;
+		} catch {
+			// ignore
+		}
+	}
+
+	async function saveBody() {
+		if (!issue) return;
+		try {
+			await issuesApi.update(owner, repoName, number, { body: editBody });
+			issue = { ...issue, body: editBody };
+			editingBody = false;
 		} catch {
 			// ignore
 		}
@@ -173,10 +196,36 @@
 			</div>
 
 			<!-- Body -->
-			{#if issue.body}
-				<div class="card p-4">
-					<MarkdownRenderer content={issue.body} />
+			{#if editingBody}
+				<div class="card p-4 flex flex-col gap-2">
+					<textarea
+						bind:value={editBody}
+						rows={8}
+						class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
+						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					></textarea>
+					<div class="flex items-center gap-2">
+						<button onclick={saveBody} class="px-3 py-1.5 text-xs font-medium rounded-lg text-white" style="background-color: var(--color-primary);">Save</button>
+						<button onclick={() => { editingBody = false; }} class="px-3 py-1.5 text-xs rounded-lg" style="color: var(--color-text-dim);">Cancel</button>
+					</div>
 				</div>
+			{:else if issue.body}
+				<div class="card p-4 relative group">
+					<MarkdownRenderer content={issue.body} />
+					{#if isOwner}
+						<button
+							class="absolute top-2 right-2 text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
+							style="background: var(--color-surface); color: var(--color-primary);"
+							onclick={() => { editBody = issue!.body; editingBody = true; }}
+						>Edit</button>
+					{/if}
+				</div>
+			{:else if isOwner}
+				<button
+					class="text-xs hover:underline"
+					style="color: var(--color-text-dim);"
+					onclick={() => { editBody = ''; editingBody = true; }}
+				>Add a description</button>
 			{/if}
 
 			<!-- Actions -->
@@ -195,7 +244,7 @@
 				<div class="flex flex-col gap-4">
 					<h3 class="text-sm font-semibold" style="color: var(--color-text-dim);">Comments ({comments.length})</h3>
 					{#each comments as comment}
-						<IssueComment {comment} />
+						<IssueComment {comment} currentUser={userStore.user?.username ?? ''} onEdit={editComment} onDelete={deleteComment} />
 					{/each}
 				</div>
 			{/if}
