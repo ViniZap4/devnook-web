@@ -1,9 +1,9 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { issues as issuesApi, labels as labelsApi } from '$lib/services/api';
+	import { issues as issuesApi, labels as labelsApi, milestones as milestonesApi } from '$lib/services/api';
 	import { userStore } from '$lib/stores/user.svelte';
-	import type { Issue, Label } from '$lib/types/issue';
+	import type { Issue, Label, Milestone } from '$lib/types/issue';
 	import type { IssueComment as IssueCommentType } from '$lib/types/issue';
 	import IssueComment from '$lib/components/IssueComment.svelte';
 	import CommentForm from '$lib/components/CommentForm.svelte';
@@ -18,19 +18,28 @@
 	let issue = $state<Issue | null>(null);
 	let comments = $state<IssueCommentType[]>([]);
 	let repoLabels = $state<Label[]>([]);
+	let repoMilestones = $state<Milestone[]>([]);
 	let loading = $state(true);
 	let showLabelPicker = $state(false);
 
+	let editingTitle = $state(false);
+	let editTitle = $state('');
+
+	let editingAssignee = $state(false);
+	let assigneeInput = $state('');
+
 	onMount(async () => {
 		try {
-			const [issueData, commentsData, labelsData] = await Promise.all([
+			const [issueData, commentsData, labelsData, milestonesData] = await Promise.all([
 				issuesApi.get(owner, repoName, number),
 				issuesApi.comments(owner, repoName, number),
-				labelsApi.list(owner, repoName)
+				labelsApi.list(owner, repoName),
+				milestonesApi.list(owner, repoName)
 			]);
 			issue = issueData;
 			comments = commentsData;
 			repoLabels = labelsData;
+			repoMilestones = milestonesData;
 		} catch {
 			// handled below
 		} finally {
@@ -68,9 +77,59 @@
 		}
 	}
 
+	async function saveTitle() {
+		if (!editTitle.trim() || !issue) return;
+		try {
+			await issuesApi.update(owner, repoName, number, { title: editTitle.trim() });
+			issue = { ...issue, title: editTitle.trim() };
+			editingTitle = false;
+		} catch {
+			// ignore
+		}
+	}
+
+	async function setAssignee() {
+		if (!issue) return;
+		// For now, we clear assignee if empty, otherwise we'd need a user lookup
+		// The server accepts assignee_id; since we don't have username→id lookup on client,
+		// we use 0 to clear and handle it on the next refetch
+		if (!assigneeInput.trim()) {
+			try {
+				await issuesApi.update(owner, repoName, number, { assignee_id: 0 });
+				issue = await issuesApi.get(owner, repoName, number);
+			} catch {
+				// ignore
+			}
+		}
+		editingAssignee = false;
+	}
+
+	async function clearAssignee() {
+		if (!issue) return;
+		try {
+			await issuesApi.update(owner, repoName, number, { assignee_id: 0 });
+			issue = await issuesApi.get(owner, repoName, number);
+		} catch {
+			// ignore
+		}
+	}
+
+	async function setMilestone(milestoneId: number) {
+		if (!issue) return;
+		try {
+			await issuesApi.update(owner, repoName, number, { milestone_id: milestoneId });
+			issue = await issuesApi.get(owner, repoName, number);
+		} catch {
+			// ignore
+		}
+	}
+
 	const issueLabels = $derived(issue?.labels ?? []);
 	const issueLabelIds = $derived(new Set(issueLabels.map(l => l.id)));
 	const availableLabels = $derived(repoLabels.filter(l => !issueLabelIds.has(l.id)));
+	const currentMilestone = $derived(
+		issue?.milestone_id ? repoMilestones.find(m => m.id === issue!.milestone_id) : null
+	);
 </script>
 
 {#if loading}
@@ -81,10 +140,28 @@
 		<div class="flex flex-col gap-6">
 			<!-- Header -->
 			<div class="flex flex-col gap-3">
-				<h2 class="text-xl font-bold" style="color: var(--color-text);">
-					{issue.title}
-					<span class="font-normal" style="color: var(--color-text-dim);">#{issue.number}</span>
-				</h2>
+				{#if editingTitle}
+					<div class="flex items-center gap-2">
+						<input
+							type="text"
+							bind:value={editTitle}
+							class="flex-1 text-xl font-bold px-2 py-1 rounded-lg border"
+							style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						/>
+						<button class="px-3 py-1 text-sm rounded-lg text-white" style="background-color: var(--color-primary);" onclick={saveTitle}>Save</button>
+						<button class="px-3 py-1 text-sm rounded-lg border" style="border-color: var(--color-border); color: var(--color-text-dim);" onclick={() => { editingTitle = false; }}>Cancel</button>
+					</div>
+				{:else}
+					<div class="flex items-center gap-2">
+						<h2 class="text-xl font-bold" style="color: var(--color-text);">
+							{issue.title}
+							<span class="font-normal" style="color: var(--color-text-dim);">#{issue.number}</span>
+						</h2>
+						{#if isOwner}
+							<button class="text-xs hover:underline shrink-0" style="color: var(--color-primary);" onclick={() => { editTitle = issue!.title; editingTitle = true; }}>Edit</button>
+						{/if}
+					</div>
+				{/if}
 				<div class="flex items-center gap-2 text-sm">
 					<span class="px-2.5 py-0.5 rounded-full text-xs font-medium text-white"
 						style="background-color: {issue.state === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};"
@@ -173,15 +250,44 @@
 				{/if}
 			</div>
 
+			<!-- Milestone -->
+			<div>
+				<h3 class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--color-text-dim);">Milestone</h3>
+				{#if isOwner && repoMilestones.length > 0}
+					<select
+						value={issue.milestone_id ?? ''}
+						onchange={(e) => setMilestone(Number((e.target as HTMLSelectElement).value))}
+						class="w-full px-2 py-1.5 text-xs rounded-lg border bg-transparent"
+						style="border-color: var(--color-border); color: var(--color-text);"
+					>
+						<option value="0">None</option>
+						{#each repoMilestones as m}
+							<option value={m.id}>{m.title}</option>
+						{/each}
+					</select>
+				{:else if currentMilestone}
+					<p class="text-sm font-medium" style="color: var(--color-text);">{currentMilestone.title}</p>
+				{:else}
+					<p class="text-xs" style="color: var(--color-text-dim);">No milestone</p>
+				{/if}
+			</div>
+
 			<!-- Assignee -->
-			{#if issue.assignee}
-				<div>
-					<h3 class="text-xs font-semibold uppercase tracking-wider mb-2" style="color: var(--color-text-dim);">Assignee</h3>
+			<div>
+				<div class="flex items-center justify-between mb-2">
+					<h3 class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Assignee</h3>
+					{#if isOwner && issue.assignee}
+						<button class="text-xs hover:underline" style="color: var(--color-text-dim);" onclick={clearAssignee}>Clear</button>
+					{/if}
+				</div>
+				{#if issue.assignee}
 					<a href="/{issue.assignee}" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">
 						{issue.assignee}
 					</a>
-				</div>
-			{/if}
+				{:else}
+					<p class="text-xs" style="color: var(--color-text-dim);">No assignee</p>
+				{/if}
+			</div>
 		</div>
 	</div>
 {:else}
