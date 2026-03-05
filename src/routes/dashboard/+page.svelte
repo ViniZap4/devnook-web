@@ -9,6 +9,7 @@
 	import ReposSection from '$lib/components/ReposSection.svelte';
 	import OrgsSection from '$lib/components/OrgsSection.svelte';
 	import StatsCards from '$lib/components/StatsCards.svelte';
+	import ActivityFeed from '$lib/components/ActivityFeed.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 
 	let ready = $state(false);
@@ -58,6 +59,7 @@
 		<!-- Main column -->
 		<div class="lg:col-span-2 flex flex-col gap-8">
 			<ReposSection />
+			<ActivityFeed />
 		</div>
 
 		<!-- Sidebar -->

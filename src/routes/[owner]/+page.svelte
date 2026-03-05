@@ -15,8 +15,10 @@
 
 	let user = $state<User | null>(null);
 	let repos = $state<Repository[]>([]);
+	let starredRepos = $state<Repository[]>([]);
 	let loading = $state(true);
 	let error = $state('');
+	let tab = $state<'repos' | 'starred'>('repos');
 
 	onMount(async () => {
 		try {
@@ -29,6 +31,22 @@
 			loading = false;
 		}
 	});
+
+	async function loadStarred() {
+		if (starredRepos.length > 0) return;
+		try {
+			starredRepos = await users.starred(owner);
+		} catch {
+			// ignore
+		}
+	}
+
+	function switchTab(t: 'repos' | 'starred') {
+		tab = t;
+		if (t === 'starred') loadStarred();
+	}
+
+	const displayedRepos = $derived(tab === 'repos' ? repos : starredRepos);
 </script>
 
 <PageShell maxWidth="max-w-6xl">
@@ -96,21 +114,38 @@
 
 			<!-- Repos -->
 			<div>
-				<div class="flex items-center gap-3 mb-5 pb-4 border-b" style="border-color: var(--color-separator);">
-					<h2 class="text-sm font-semibold" style="color: var(--color-text);">Repositories</h2>
-					<span class="text-xs px-2 py-0.5 rounded-full" style="background-color: var(--color-surface); color: var(--color-text-dim);">{repos.length}</span>
+				<div class="flex items-center gap-1 mb-5 pb-4 border-b rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
+					<button
+						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
+						style="{tab === 'repos' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						onclick={() => switchTab('repos')}
+					>
+						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+						Repositories
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{repos.length}</span>
+					</button>
+					<button
+						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
+						style="{tab === 'starred' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						onclick={() => switchTab('starred')}
+					>
+						<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+						Starred
+					</button>
 				</div>
 
-				{#if repos.length === 0}
+				{#if displayedRepos.length === 0}
 					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
 						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 						</svg>
-						<p class="text-sm" style="color: var(--color-text-dim);">No public repositories.</p>
+						<p class="text-sm" style="color: var(--color-text-dim);">
+							{tab === 'repos' ? 'No public repositories.' : 'No starred repositories.'}
+						</p>
 					</div>
 				{:else}
 					<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
-						{#each repos as repo}
+						{#each displayedRepos as repo}
 							<a href="/{repo.owner}/{repo.name}" class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-[var(--color-surface)] group">
 								<div class="shrink-0 mt-0.5 opacity-40 group-hover:opacity-70 transition-opacity">
 									{#if repo.is_private}
