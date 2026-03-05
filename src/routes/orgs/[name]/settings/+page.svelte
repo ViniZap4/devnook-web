@@ -17,16 +17,42 @@
 	let confirmDelete = $state('');
 	let deleting = $state(false);
 
+	let displayName = $state('');
+	let description = $state('');
+	let saving = $state(false);
+	let saved = $state(false);
+
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
 		try {
-			members = await orgs.members(orgName);
+			const [org, mems] = await Promise.all([
+				orgs.get(orgName),
+				orgs.members(orgName)
+			]);
+			members = mems;
+			displayName = org.display_name || '';
+			description = org.description || '';
 		} catch {
 			// handled below
 		} finally {
 			loading = false;
 		}
 	});
+
+	async function handleSaveOrg(e: Event) {
+		e.preventDefault();
+		saving = true;
+		saved = false;
+		try {
+			await orgs.update(orgName, { display_name: displayName, description });
+			saved = true;
+			setTimeout(() => { saved = false; }, 3000);
+		} catch {
+			// ignore
+		} finally {
+			saving = false;
+		}
+	}
 
 	async function addMember(username: string) {
 		await orgs.addMember(orgName, { username });
@@ -65,6 +91,27 @@
 		<div class="py-12 text-center text-[var(--color-text)] opacity-50">Loading...</div>
 	{:else}
 		<div class="flex flex-col gap-10">
+			<!-- Profile -->
+			<section>
+				<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50 mb-4">Organization Profile</h2>
+				<form onsubmit={handleSaveOrg} class="card p-6 flex flex-col gap-4 max-w-lg">
+					<div>
+						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Display name</label>
+						<input type="text" bind:value={displayName} class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)]" />
+					</div>
+					<div>
+						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Description</label>
+						<textarea bind:value={description} rows={3} class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] resize-y"></textarea>
+					</div>
+					<div class="flex items-center gap-3">
+						<button type="submit" disabled={saving} class="px-4 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40" style="background-color: var(--color-primary);">{saving ? 'Saving...' : 'Save'}</button>
+						{#if saved}
+							<span class="text-sm text-green-400">Saved!</span>
+						{/if}
+					</div>
+				</form>
+			</section>
+
 			<!-- Members -->
 			<section>
 				<div class="flex items-center justify-between mb-4">

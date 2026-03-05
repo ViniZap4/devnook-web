@@ -88,6 +88,8 @@ export const users = {
 	profile: (username: string) => request<UserProfile>('GET', `/api/v1/users/${username}`),
 	updateProfile: (data: { full_name?: string; email?: string; avatar_url?: string; bio?: string; location?: string; website?: string }) =>
 		request<void>('PUT', '/api/v1/users/me', data),
+	changePassword: (data: { old_password: string; new_password: string }) =>
+		request<void>('PUT', '/api/v1/users/me/password', data),
 	dashboardStats: () => request<DashboardStats>('GET', '/api/v1/dashboard/stats'),
 	activity: () => request<ActivityItem[]>('GET', '/api/v1/dashboard/activity'),
 	starred: (username: string) =>
