@@ -85,6 +85,14 @@ export interface DashboardStats {
 	total_commits: number;
 }
 
+// Preferences (server-synced)
+export interface UserPreferences {
+	theme: string;
+	mode: string;
+	locale: string;
+	settings: Record<string, unknown>;
+}
+
 export const users = {
 	profile: (username: string) => request<UserProfile>('GET', `/api/v1/users/${username}`),
 	updateProfile: (data: { full_name?: string; email?: string; avatar_url?: string; bio?: string; location?: string; website?: string }) =>
@@ -94,7 +102,9 @@ export const users = {
 	dashboardStats: () => request<DashboardStats>('GET', '/api/v1/dashboard/stats'),
 	activity: () => request<ActivityItem[]>('GET', '/api/v1/dashboard/activity'),
 	starred: (username: string) =>
-		request<import('$lib/types/repository').Repository[]>('GET', `/api/v1/users/${username}/starred`)
+		request<import('$lib/types/repository').Repository[]>('GET', `/api/v1/users/${username}/starred`),
+	getPreferences: () => request<UserPreferences>('GET', '/api/v1/users/me/preferences'),
+	updatePreferences: (data: UserPreferences) => request<UserPreferences>('PUT', '/api/v1/users/me/preferences', data)
 };
 
 // Explore
