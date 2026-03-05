@@ -62,8 +62,11 @@
 	<div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
 		<!-- Left -->
 		<div class="flex items-center gap-6">
-			<a href="/dashboard" class="flex items-center gap-2 shrink-0">
-				<div class="w-2.5 h-2.5 rounded-full" style="background-color: var(--color-primary);"></div>
+			<a href="/dashboard" class="flex items-center gap-2 shrink-0 group">
+				<div class="relative">
+					<div class="w-2.5 h-2.5 rounded-full transition-transform duration-300 group-hover:scale-125" style="background-color: var(--color-primary);"></div>
+					<div class="absolute inset-0 w-2.5 h-2.5 rounded-full live-dot" style="background-color: var(--color-primary); opacity: 0.4;"></div>
+				</div>
 				<span style="color: var(--color-text);" class="font-bold tracking-tight text-sm">Dev Nook</span>
 			</a>
 
