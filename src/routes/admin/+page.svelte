@@ -2,7 +2,6 @@
 	import { onMount } from 'svelte';
 	import { admin } from '$lib/services/api';
 	import type { AdminStats } from '$lib/services/api';
-	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
 	let stats = $state<AdminStats | null>(null);
 	let loading = $state(true);

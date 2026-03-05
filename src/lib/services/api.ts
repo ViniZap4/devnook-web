@@ -400,11 +400,40 @@ export interface AdminStats {
 	total_issues: number;
 }
 
+export interface AdminUsersResponse {
+	users: User[];
+	total_count: number;
+	page: number;
+	per_page: number;
+}
+
+export interface AdminReposResponse {
+	repos: import('$lib/types/repository').Repository[];
+	total_count: number;
+	page: number;
+	per_page: number;
+	total_pages: number;
+}
+
 export const admin = {
 	stats: () => request<AdminStats>('GET', '/api/v1/admin/stats'),
-	listUsers: () => request<User[]>('GET', '/api/v1/admin/users'),
+	listUsers: (opts?: { page?: number; q?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.page) params.set('page', String(opts.page));
+		if (opts?.q) params.set('q', opts.q);
+		const qs = params.toString();
+		return request<AdminUsersResponse>('GET', `/api/v1/admin/users${qs ? '?' + qs : ''}`);
+	},
 	getUser: (username: string) => request<User>('GET', `/api/v1/admin/users/${username}`),
 	updateUser: (username: string, data: { is_admin?: boolean; full_name?: string; email?: string }) =>
 		request<void>('PUT', `/api/v1/admin/users/${username}`, data),
-	removeUser: (username: string) => request<void>('DELETE', `/api/v1/admin/users/${username}`)
+	removeUser: (username: string) => request<void>('DELETE', `/api/v1/admin/users/${username}`),
+	listRepos: (opts?: { page?: number; q?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.page) params.set('page', String(opts.page));
+		if (opts?.q) params.set('q', opts.q);
+		const qs = params.toString();
+		return request<AdminReposResponse>('GET', `/api/v1/admin/repos${qs ? '?' + qs : ''}`);
+	},
+	listOrgs: () => request<import('$lib/types/organization').Organization[]>('GET', '/api/v1/admin/orgs')
 };

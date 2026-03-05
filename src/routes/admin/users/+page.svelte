@@ -9,6 +9,7 @@
 	let users = $state<User[]>([]);
 	let loading = $state(true);
 	let search = $state('');
+	let totalCount = $state(0);
 
 	const filtered = $derived(
 		search
@@ -21,19 +22,29 @@
 	);
 
 	onMount(async () => {
+		await loadUsers();
+	});
+
+	async function loadUsers() {
+		loading = true;
 		try {
-			users = await admin.listUsers();
+			const res = await admin.listUsers();
+			users = res.users;
+			totalCount = res.total_count;
 		} catch {
 			// ignore
 		} finally {
 			loading = false;
 		}
-	});
+	}
 
 	async function toggleAdmin(username: string, isAdmin: boolean) {
+		if (username === userStore.user?.username) {
+			if (!confirm('You are about to revoke your own admin access. You will lose access to this panel. Continue?')) return;
+		}
 		try {
 			await admin.updateUser(username, { is_admin: !isAdmin });
-			users = await admin.listUsers();
+			await loadUsers();
 		} catch {
 			// ignore
 		}
@@ -44,6 +55,7 @@
 		try {
 			await admin.removeUser(username);
 			users = users.filter(u => u.username !== username);
+			totalCount--;
 		} catch {
 			// ignore
 		}
@@ -55,7 +67,7 @@
 		<div>
 			<h1 class="text-2xl font-bold" style="color: var(--color-text);">User Accounts</h1>
 			<p class="text-sm mt-1" style="color: var(--color-text-dim);">
-				{users.length} registered {users.length === 1 ? 'user' : 'users'}
+				{totalCount} registered {totalCount === 1 ? 'user' : 'users'}
 			</p>
 		</div>
 	</div>
@@ -120,7 +132,7 @@
 					<div class="w-40 flex items-center justify-end gap-2">
 						<button
 							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-surface-hover)]"
-							style="border-color: var(--color-border); color: var(--color-text-dim);"
+							style="border-color: var(--color-border); color: {user.username === userStore.user?.username && user.is_admin ? 'var(--color-warning)' : 'var(--color-text-dim)'};"
 							onclick={() => toggleAdmin(user.username, user.is_admin)}
 						>
 							{user.is_admin ? 'Revoke Admin' : 'Make Admin'}
