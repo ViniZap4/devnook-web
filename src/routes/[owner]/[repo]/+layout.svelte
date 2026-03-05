@@ -38,7 +38,7 @@
 
 <div class="min-h-screen flex flex-col" style="background-color: var(--color-background);">
 	<Navbar />
-	<main class="max-w-5xl mx-auto px-6 py-6 w-full flex-1">
+	<main class="max-w-6xl mx-auto px-6 py-6 w-full flex-1">
 		{#if loading}
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-3">

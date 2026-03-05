@@ -7,6 +7,7 @@
 	import PageShell from '$lib/components/PageShell.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
+	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
@@ -30,11 +31,11 @@
 	});
 </script>
 
-<PageShell>
+<PageShell maxWidth="max-w-6xl">
 	{#if loading}
 		<div class="flex flex-col gap-6">
 			<div class="flex items-center gap-4">
-				<Skeleton width="80px" height="80px" rounded="rounded-full" />
+				<Skeleton width="96px" height="96px" rounded="rounded-full" />
 				<div class="flex flex-col gap-2">
 					<Skeleton width="160px" height="20px" />
 					<Skeleton width="100px" height="14px" />
@@ -43,64 +44,102 @@
 		</div>
 	{:else if error}
 		<div class="flex flex-col items-center justify-center py-20 gap-4">
-			<p class="text-[var(--color-text)] opacity-50">{error}</p>
-			<a href="/explore" class="text-sm hover:underline" style="color: var(--color-primary);">Explore repositories</a>
+			<svg class="w-16 h-16 opacity-10" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+				<path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+			</svg>
+			<p class="text-lg" style="color: var(--color-text-dim);">{error}</p>
+			<a href="/explore" class="text-sm font-medium hover:underline" style="color: var(--color-primary);">Explore repositories</a>
 		</div>
 	{:else if user}
-		<div class="grid grid-cols-1 lg:grid-cols-4 gap-8">
+		<div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
 			<!-- Profile sidebar -->
-			<div class="lg:col-span-1">
-				<div class="flex flex-col items-center lg:items-start gap-4">
-					<Avatar username={user.username} size={120} />
-					<div class="text-center lg:text-left">
+			<aside class="flex flex-col gap-5">
+				<div class="flex items-center lg:flex-col lg:items-start gap-5">
+					<Avatar username={user.username} size={96} />
+					<div>
 						{#if user.full_name}
-							<h1 class="text-[var(--color-text)] text-xl font-bold">{user.full_name}</h1>
+							<h1 class="text-xl font-bold" style="color: var(--color-text);">{user.full_name}</h1>
 						{/if}
-						<p class="text-sm text-[var(--color-text)] opacity-40">@{user.username}</p>
+						<p class="text-sm" style="color: var(--color-text-dim);">@{user.username}</p>
 					</div>
+				</div>
+
+				{#if user.bio}
+					<p class="text-sm" style="color: var(--color-text);">{user.bio}</p>
+				{/if}
+
+				<div class="flex flex-col gap-2.5">
+					{#if user.location}
+						<div class="flex items-center gap-2 text-sm" style="color: var(--color-text-dim);">
+							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
+							{user.location}
+						</div>
+					{/if}
 					{#if user.email}
-						<div class="flex items-center gap-2 text-sm text-[var(--color-text)] opacity-30">
-							<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M1.75 2h12.5c.966 0 1.75.784 1.75 1.75v8.5A1.75 1.75 0 0 1 14.25 14H1.75A1.75 1.75 0 0 1 0 12.25v-8.5C0 2.784.784 2 1.75 2ZM1.5 12.251c0 .138.112.25.25.25h12.5a.25.25 0 0 0 .25-.25V5.809L8.38 9.397a.75.75 0 0 1-.76 0L1.5 5.809v6.442Zm13-8.181v-.32a.25.25 0 0 0-.25-.25H1.75a.25.25 0 0 0-.25.25v.32L8 7.88Z"/></svg>
+						<div class="flex items-center gap-2 text-sm" style="color: var(--color-text-dim);">
+							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>
 							{user.email}
 						</div>
 					{/if}
-					<p class="text-xs text-[var(--color-text)] opacity-20">
+					{#if user.website}
+						<div class="flex items-center gap-2 text-sm" style="color: var(--color-text-dim);">
+							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
+							<a href={user.website} target="_blank" rel="noopener noreferrer" class="hover:underline" style="color: var(--color-primary);">{user.website.replace(/^https?:\/\//, '')}</a>
+						</div>
+					{/if}
+					<div class="flex items-center gap-2 text-xs pt-1" style="color: var(--color-text-dim); opacity: 0.6;">
+						<svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
 						Joined {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
-					</p>
+					</div>
 				</div>
-			</div>
+			</aside>
 
 			<!-- Repos -->
-			<div class="lg:col-span-3">
-				<div class="flex items-center justify-between mb-4">
-					<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">
-						Public repositories
-						<span class="ml-1 px-2 py-0.5 rounded-full bg-[var(--color-surface-hover)] text-xs normal-case">{repos.length}</span>
-					</h2>
+			<div>
+				<div class="flex items-center gap-3 mb-5 pb-4 border-b" style="border-color: var(--color-separator);">
+					<h2 class="text-sm font-semibold" style="color: var(--color-text);">Repositories</h2>
+					<span class="text-xs px-2 py-0.5 rounded-full" style="background-color: var(--color-surface); color: var(--color-text-dim);">{repos.length}</span>
 				</div>
 
 				{#if repos.length === 0}
-					<div class="card p-12 text-center">
-						<RepoIcon size={32} color="var(--color-text)" />
-						<p class="text-sm text-[var(--color-text)] opacity-30 mt-4">No public repositories.</p>
+					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+						</svg>
+						<p class="text-sm" style="color: var(--color-text-dim);">No public repositories.</p>
 					</div>
 				{:else}
-					<div class="flex flex-col gap-3">
+					<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
 						{#each repos as repo}
-							<a href="/{repo.owner}/{repo.name}" class="card p-5 hover:border-[var(--color-primary)] transition-colors group">
-								<div class="flex items-start justify-between gap-4">
-									<div class="min-w-0 flex-1">
-										<div class="flex items-center gap-2">
-											<RepoIcon size={16} color="var(--color-text)" />
-											<span class="text-sm font-bold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
-										</div>
-										{#if repo.description}
-											<p class="text-sm text-[var(--color-text)] opacity-40 mt-1.5">{repo.description}</p>
+							<a href="/{repo.owner}/{repo.name}" class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-[var(--color-surface)] group">
+								<div class="shrink-0 mt-0.5 opacity-40 group-hover:opacity-70 transition-opacity">
+									{#if repo.is_private}
+										<LockIcon size={16} />
+									{:else}
+										<RepoIcon size={16} />
+									{/if}
+								</div>
+								<div class="min-w-0 flex-1">
+									<div class="flex items-center gap-2">
+										<span class="text-sm font-semibold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
+										{#if repo.is_private}
+											<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border border-yellow-500/20 text-yellow-500/60">Private</span>
 										{/if}
 									</div>
-									<span class="text-xs text-[var(--color-text)] opacity-15 shrink-0">
-										<RelativeTime date={repo.updated_at} />
-									</span>
+									{#if repo.description}
+										<p class="text-sm mt-1" style="color: var(--color-text-dim);">{repo.description}</p>
+									{/if}
+									<div class="flex items-center gap-3 mt-2">
+										{#if repo.stars_count}
+											<span class="flex items-center gap-1 text-xs" style="color: var(--color-text-dim);">
+												<svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
+												{repo.stars_count}
+											</span>
+										{/if}
+										<span class="text-xs" style="color: var(--color-text-dim); opacity: 0.6;">
+											Updated <RelativeTime date={repo.updated_at} />
+										</span>
+									</div>
 								</div>
 							</a>
 						{/each}

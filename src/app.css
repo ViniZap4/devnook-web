@@ -60,10 +60,15 @@
 	button { cursor: pointer; border: none; background: none; }
 	input:focus, textarea:focus, select:focus { outline: none; }
 
-	::-webkit-scrollbar { width: 8px; }
+	::-webkit-scrollbar { width: 8px; height: 8px; }
 	::-webkit-scrollbar-track { background: var(--color-background); }
 	::-webkit-scrollbar-thumb { background: var(--color-border); border-radius: 4px; }
 	::-webkit-scrollbar-thumb:hover { background: var(--color-text-dim); }
+
+	::selection {
+		background-color: var(--color-primary);
+		color: white;
+	}
 }
 
 /* Animations */
@@ -87,6 +92,11 @@
 	100% { opacity: 1; transform: translateY(0); }
 }
 
+@keyframes shimmer {
+	0% { background-position: -200% 0; }
+	100% { background-position: 200% 0; }
+}
+
 /* Custom utilities */
 @utility glass {
 	backdrop-filter: blur(24px) saturate(1.4);
@@ -106,9 +116,13 @@
 }
 
 @utility card {
-	@apply rounded-2xl border;
-	backdrop-filter: blur(24px) saturate(1.4);
+	@apply rounded-xl border;
 	background-color: var(--color-surface);
 	border-color: var(--color-border);
-	box-shadow: 0 1px 3px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 1px 2px rgba(0, 0, 0, 0.05);
+}
+
+@utility section-title {
+	@apply text-sm font-semibold uppercase tracking-wider;
+	color: var(--color-text-dim);
 }

@@ -6,19 +6,19 @@
 	let { branches }: { branches: Branch[] } = $props();
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] overflow-hidden divide-y divide-white/[0.04]">
+<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
 	{#each branches as branch}
-		<div class="flex items-center justify-between px-4 py-3 hover:bg-[var(--color-surface)] transition-colors">
+		<div class="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-surface)] transition-colors">
 			<div class="flex items-center gap-3">
-				<BranchIcon size={16} color="var(--color-text)" />
-				<span class="text-sm text-[var(--color-text)] font-medium">{branch.name}</span>
+				<BranchIcon size={16} color="var(--color-text-dim)" />
+				<span class="text-sm font-medium" style="color: var(--color-text);">{branch.name}</span>
 				{#if branch.is_default}
 					<Badge label="default" variant="success" />
 				{/if}
 			</div>
 		</div>
 	{:else}
-		<div class="p-8 text-center text-[var(--color-text)] opacity-40">
+		<div class="p-12 text-center" style="color: var(--color-text-dim);">
 			No branches found.
 		</div>
 	{/each}

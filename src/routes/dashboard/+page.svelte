@@ -18,26 +18,33 @@
 			goto('/');
 			return;
 		}
-		// User already loaded by init() — just load shortcuts
 		await shortcutsStore.load();
 		ready = true;
 	});
 </script>
 
 {#if ready}
-<PageShell>
+<PageShell maxWidth="max-w-6xl">
 	<!-- Welcome header -->
-	<div class="flex items-center gap-4 mb-8">
-		<Avatar username={userStore.user?.username ?? '?'} size={48} />
-		<div>
-			<h1 class="text-[var(--color-text)] text-xl font-bold">
-				{#if userStore.user?.full_name}
-					Welcome back, {userStore.user.full_name.split(' ')[0]}
-				{:else}
-					Welcome back
-				{/if}
-			</h1>
-			<p class="text-sm text-[var(--color-text)] opacity-30">@{userStore.user?.username}</p>
+	<div class="flex items-center justify-between mb-8 pb-6 border-b" style="border-color: var(--color-separator);">
+		<div class="flex items-center gap-4">
+			<Avatar username={userStore.user?.username ?? '?'} size={52} />
+			<div>
+				<h1 class="text-xl font-bold" style="color: var(--color-text);">
+					{#if userStore.user?.full_name}
+						Welcome back, {userStore.user.full_name.split(' ')[0]}
+					{:else}
+						Welcome back
+					{/if}
+				</h1>
+				<p class="text-sm mt-0.5" style="color: var(--color-text-dim);">@{userStore.user?.username}</p>
+			</div>
+		</div>
+		<div class="hidden sm:flex items-center gap-2">
+			<a href="/new" class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-colors" style="background-color: var(--color-primary); color: white;">
+				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+				New Repository
+			</a>
 		</div>
 	</div>
 
@@ -54,10 +61,13 @@
 		</div>
 
 		<!-- Sidebar -->
-		<div class="flex flex-col gap-8">
+		<div class="flex flex-col gap-6">
 			<OrgsSection />
 			<ShortCutsBox />
-			<AppearanceSection />
+			<div class="card p-6">
+				<h2 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--color-text-dim);">Appearance</h2>
+				<AppearanceSection />
+			</div>
 		</div>
 	</div>
 </PageShell>

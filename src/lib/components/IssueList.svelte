@@ -5,11 +5,11 @@
 	let { issues, owner, repo }: { issues: Issue[]; owner: string; repo: string } = $props();
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] overflow-hidden divide-y divide-white/[0.04]">
+<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
 	{#each issues as issue}
 		<IssueRow {issue} {owner} {repo} />
 	{:else}
-		<div class="p-8 text-center text-[var(--color-text)] opacity-40">
+		<div class="p-12 text-center" style="color: var(--color-text-dim);">
 			No issues found.
 		</div>
 	{/each}
