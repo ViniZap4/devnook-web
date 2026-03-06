@@ -4,35 +4,42 @@
 
 	let { open = false, onclose }: { open: boolean; onclose: () => void } = $props();
 
-	async function handleEditShortcut(event: SubmitEvent) {
+	const editing = $derived(shortcutsStore.editShortcut);
+	const modalTitle = $derived(editing ? 'Edit Shortcut' : 'Create Shortcut');
+
+	async function handleSubmit(event: SubmitEvent) {
 		event.preventDefault();
 		const formData = new FormData(event.target as HTMLFormElement);
-		const data = Object.fromEntries(formData);
-		const id = shortcutsStore.editShortcutInfo.id;
+		const title = formData.get('title') as string;
+		const url = formData.get('url') as string;
 
 		try {
-			await shortcutsStore.update(id, data.name.toString(), data.url.toString());
-			shortcutsStore.editShortcutInfo = { id, name: data.name.toString(), link: data.url.toString() };
+			if (editing) {
+				await shortcutsStore.update(editing.id, title, url);
+			} else {
+				await shortcutsStore.create(title, url);
+			}
+			(event.target as HTMLFormElement).reset();
 			onclose();
 		} catch {
-			// TODO: show error
+			// error shown via toast in store
 		}
 	}
 </script>
 
-<Modal {open} title="Edit Shortcut" {onclose}>
-	<form class="flex flex-col gap-4" onsubmit={handleEditShortcut}>
+<Modal {open} title={modalTitle} {onclose}>
+	<form class="flex flex-col gap-4" onsubmit={handleSubmit}>
 		<label class="field">
 			<span class="field-label">Name</span>
-			<input class="field-input" type="text" value={shortcutsStore.editShortcutInfo.name} name="name" required />
+			<input class="field-input" type="text" placeholder="My site" name="title" value={editing?.title ?? ''} required />
 		</label>
 
 		<label class="field">
 			<span class="field-label">URL</span>
-			<input class="field-input" type="url" name="url" value={shortcutsStore.editShortcutInfo.link} pattern="https://.*" required />
+			<input class="field-input" type="url" name="url" placeholder="https://example.com" value={editing?.url ?? ''} pattern="https://.*" required />
 		</label>
 
-		<button class="submit-btn" type="submit">Save changes</button>
+		<button class="submit-btn" type="submit">{editing ? 'Save changes' : 'Create'}</button>
 	</form>
 </Modal>
 

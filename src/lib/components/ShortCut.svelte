@@ -1,34 +1,33 @@
 <script lang="ts">
-	import { themeStore } from '$lib/stores/theme.svelte';
 	import { shortcutsStore } from '$lib/stores/shortcuts.svelte';
 
-	let { id, name, link }: { id: number; name: string; link: string } = $props();
+	let { id, title, url }: { id: number; title: string; url: string } = $props();
 
-	const url = $derived(new URL(link));
-	const urlIcon = $derived(`https://${url.hostname}/favicon.ico`);
+	const parsed = $derived(new URL(url));
+	const urlIcon = $derived(`https://${parsed.hostname}/favicon.ico`);
 
 	function handleContextMenu(e: MouseEvent) {
 		e.preventDefault();
-		shortcutsStore.contextMenu = { x: e.x, y: e.y, id, name, link };
+		shortcutsStore.contextMenu = { x: e.x, y: e.y, shortcut: { id, title, url } };
 	}
 </script>
 
 <!-- svelte-ignore a11y_no_static_element_interactions -->
 <a
 	class="shortcut-card"
-	href={url.href}
+	href={parsed.href}
 	target="_blank"
 	rel="noopener noreferrer"
 	oncontextmenu={handleContextMenu}
 	style="--accent: var(--color-primary);"
 >
 	<!-- svelte-ignore a11y_missing_attribute -->
-	<object class="shortcut-icon" data={urlIcon} type="image/png" aria-label="{name} icon">
+	<object class="shortcut-icon" data={urlIcon} type="image/png" aria-label="{title} icon">
 		<span class="shortcut-fallback" style="background: linear-gradient(135deg, var(--color-primary)40, var(--color-secondary)40); color: var(--color-primary);">
-			{name[0].toUpperCase()}{name.length > 1 ? name[1].toLowerCase() : ''}
+			{title[0].toUpperCase()}{title.length > 1 ? title[1].toLowerCase() : ''}
 		</span>
 	</object>
-	<span class="shortcut-name">{name}</span>
+	<span class="shortcut-name">{title}</span>
 </a>
 
 <style>

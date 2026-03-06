@@ -1,11 +1,9 @@
 <script lang="ts">
-	import { themeStore } from '$lib/stores/theme.svelte';
 	import { shortcutsStore } from '$lib/stores/shortcuts.svelte';
 	import { copyTextToClipboard } from '$lib/util/copyTextToClipboard';
+	import { clickOutside } from '$lib/actions/clickOutside';
 
 	let { onedit }: { onedit: () => void } = $props();
-
-	let menuEl: HTMLDivElement;
 
 	let ctx = $derived(shortcutsStore.contextMenu!);
 
@@ -14,42 +12,30 @@
 	}
 
 	function handleCopyAddress() {
-		copyTextToClipboard(ctx.link);
+		copyTextToClipboard(ctx.shortcut.url);
 		close();
 	}
 
 	async function handleDelete() {
-		if (confirm(`Delete "${ctx.name}" shortcut?`)) {
+		if (confirm(`Delete "${ctx.shortcut.title}" shortcut?`)) {
 			try {
-				await shortcutsStore.remove(ctx.id);
+				await shortcutsStore.remove(ctx.shortcut.id);
 			} catch {
-				// TODO: show error
+				// error shown via toast in store
 			}
 			close();
 		}
 	}
 
 	function openEditShortcut() {
-		shortcutsStore.editShortcutInfo = { id: ctx.id, name: ctx.name, link: ctx.link };
+		shortcutsStore.editShortcut = { ...ctx.shortcut };
 		close();
 		onedit();
 	}
-
-	$effect(() => {
-		function handleClickOutside(event: MouseEvent) {
-			if (menuEl && !menuEl.contains(event.target as Node)) {
-				close();
-			}
-		}
-		document.addEventListener('mousedown', handleClickOutside);
-		return () => {
-			document.removeEventListener('mousedown', handleClickOutside);
-		};
-	});
 </script>
 
 <div
-	bind:this={menuEl}
+	use:clickOutside={close}
 	class="ctx-menu"
 	style="
 		top: {ctx.y}px;
@@ -60,7 +46,7 @@
 	<button class="ctx-item" onclick={openEditShortcut}>Edit</button>
 	<button class="ctx-item ctx-danger" onclick={handleDelete}>Delete</button>
 	<div class="ctx-divider"></div>
-	<a class="ctx-item" href={ctx.link} target="_blank" rel="noopener noreferrer" onclick={close}>Open in new tab</a>
+	<a class="ctx-item" href={ctx.shortcut.url} target="_blank" rel="noopener noreferrer" onclick={close}>Open in new tab</a>
 	<button class="ctx-item" onclick={handleCopyAddress}>Copy link</button>
 </div>
 

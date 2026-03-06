@@ -1,4 +1,4 @@
-const BASE_URL = import.meta.env.VITE_DEVNOOK_SERVER_URL || 'http://localhost:8080';
+import { BASE_URL } from '$lib/config';
 
 // 401 callback — registered by userStore after init to trigger auto-logout
 let _onUnauthorized: (() => void) | null = null;

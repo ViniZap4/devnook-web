@@ -8,6 +8,7 @@
 	import PageShell from '$lib/components/PageShell.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	let items = $state<ActivityItem[]>([]);
 	let feedPosts = $state<Post[]>([]);
@@ -231,7 +232,7 @@
 
 		{#if loading}
 			<div class="py-16 flex flex-col items-center gap-3">
-				<div class="w-6 h-6 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+				<Spinner size="md" />
 			</div>
 		{:else if tab === 'posts' || tab === 'feed'}
 			<!-- Posts -->
@@ -307,7 +308,7 @@
 								<div class="border-t px-4 py-3 flex flex-col gap-3" style="border-color: var(--color-separator); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
 									{#if loadingComments[post.id]}
 										<div class="py-3 text-center">
-											<div class="w-4 h-4 border-2 rounded-full animate-spin mx-auto" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+											<div class="mx-auto w-fit"><Spinner size="xs" /></div>
 										</div>
 									{:else}
 										{#if (postComments[post.id] || []).length > 0}

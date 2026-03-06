@@ -3,6 +3,7 @@
 	import { users } from '$lib/services/api';
 	import type { ActivityItem } from '$lib/services/api';
 	import RelativeTime from './RelativeTime.svelte';
+	import Spinner from './Spinner.svelte';
 
 	let items = $state<ActivityItem[]>([]);
 	let loading = $state(true);
@@ -39,7 +40,7 @@
 
 	{#if loading}
 		<div class="py-8 flex flex-col items-center gap-3">
-			<div class="w-5 h-5 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+			<Spinner size="sm" />
 			<span class="text-xs" style="color: var(--color-text-dim);">Loading activity...</span>
 		</div>
 	{:else if items.length === 0}

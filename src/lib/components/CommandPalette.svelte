@@ -2,6 +2,7 @@
 	import { goto } from '$app/navigation';
 	import { onMount } from 'svelte';
 	import { explore } from '$lib/services/api';
+	import Spinner from './Spinner.svelte';
 
 	let open = $state(false);
 	let query = $state('');
@@ -166,7 +167,7 @@
 					placeholder="Search repos or type a command..."
 				/>
 				{#if searching}
-					<div class="w-4 h-4 rounded-full border-2 animate-spin shrink-0" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+					<Spinner size="xs" />
 				{:else}
 					<kbd class="px-1.5 py-0.5 rounded border text-[10px] font-mono" style="border-color: var(--color-border); color: var(--color-text-dim);">
 						ESC

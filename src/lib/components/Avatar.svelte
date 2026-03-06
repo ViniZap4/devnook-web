@@ -1,6 +1,4 @@
 <script lang="ts">
-	import { themeStore } from '$lib/stores/theme.svelte';
-
 	let { username, size = 32 }: { username: string; size?: number } = $props();
 
 	const initials = $derived(username.substring(0, 2).toUpperCase());

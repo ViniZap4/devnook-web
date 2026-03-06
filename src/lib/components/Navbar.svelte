@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { themeStore } from '$lib/stores/theme.svelte';
 	import UserDropdown from './UserDropdown.svelte';
 	import CreateDropdown from './CreateDropdown.svelte';
 	import ThemePicker from './ThemePicker.svelte';
