@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { onMount } from 'svelte';
-	import { issues as issuesApi, labels as labelsApi, milestones as milestonesApi } from '$lib/services/api';
+	import { issues as issuesApi, labels as labelsApi, milestones as milestonesApi, repos as reposApi } from '$lib/services/api';
+	import type { Collaborator } from '$lib/services/api';
 	import { userStore } from '$lib/stores/user.svelte';
 	import type { Issue, Label, Milestone } from '$lib/types/issue';
 	import type { IssueComment as IssueCommentType } from '$lib/types/issue';
@@ -31,19 +32,22 @@
 	let editingAssignee = $state(false);
 	let assigneeInput = $state('');
 	let editPreview = $state(false);
+	let collaboratorsList = $state<Collaborator[]>([]);
 
 	onMount(async () => {
 		try {
-			const [issueData, commentsData, labelsData, milestonesData] = await Promise.all([
+			const [issueData, commentsData, labelsData, milestonesData, collabsData] = await Promise.all([
 				issuesApi.get(owner, repoName, number),
 				issuesApi.comments(owner, repoName, number),
 				labelsApi.list(owner, repoName),
-				milestonesApi.list(owner, repoName)
+				milestonesApi.list(owner, repoName),
+				reposApi.listCollaborators(owner, repoName).catch(() => [] as Collaborator[])
 			]);
 			issue = issueData;
 			comments = commentsData;
 			repoLabels = labelsData;
 			repoMilestones = milestonesData;
+			collaboratorsList = collabsData;
 		} catch {
 			// handled below
 		} finally {
@@ -137,18 +141,16 @@
 		}
 	}
 
-	async function setAssignee() {
+	async function setAssignee(userId: number) {
 		if (!issue) return;
-		if (!assigneeInput.trim()) {
-			try {
-				await issuesApi.update(owner, repoName, number, { assignee_id: 0 });
-				issue = await issuesApi.get(owner, repoName, number);
-				toastStore.success('Assignee updated');
-			} catch (err) {
-				toastStore.error(err instanceof Error ? err.message : 'Failed to update assignee');
-			}
+		try {
+			await issuesApi.update(owner, repoName, number, { assignee_id: userId });
+			issue = await issuesApi.get(owner, repoName, number);
+			editingAssignee = false;
+			toastStore.success('Assignee updated');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update assignee');
 		}
-		editingAssignee = false;
 	}
 
 	async function clearAssignee() {
@@ -417,16 +419,51 @@
 			<div class="card p-4 sidebar-animate" style="animation-delay: 0.35s;">
 				<div class="flex items-center justify-between mb-3">
 					<h3 class="section-title">Assignee</h3>
-					{#if isOwner && issue.assignee}
-						<button class="text-xs animated-link" style="color: var(--color-text-dim);" onclick={clearAssignee}>Clear</button>
+					{#if isOwner}
+						<button
+							class="text-xs animated-link"
+							style="color: var(--color-primary);"
+							onclick={() => { editingAssignee = !editingAssignee; }}
+						>
+							{editingAssignee ? 'Done' : 'Edit'}
+						</button>
 					{/if}
 				</div>
 				{#if issue.assignee}
-					<a href="/{issue.assignee}" class="text-sm font-medium animated-link" style="color: var(--color-primary);">
-						{issue.assignee}
-					</a>
-				{:else}
+					<div class="flex items-center justify-between">
+						<a href="/{issue.assignee}" class="flex items-center gap-2 text-sm font-medium animated-link" style="color: var(--color-primary);">
+							<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">{issue.assignee.charAt(0).toUpperCase()}</div>
+							{issue.assignee}
+						</a>
+						{#if isOwner}
+							<button class="text-xs" style="color: var(--color-text-dim); opacity: 0.5;" onclick={clearAssignee}>&times;</button>
+						{/if}
+					</div>
+				{:else if !editingAssignee}
 					<p class="text-xs" style="color: var(--color-text-dim);">No assignee</p>
+				{/if}
+				{#if editingAssignee}
+					<div class="mt-2 flex flex-col gap-1 animate-fade-up-sm">
+						{#if collaboratorsList.length > 0}
+							{#each collaboratorsList as collab}
+								<button
+									class="flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg w-full text-left transition-all duration-200"
+									style="color: var(--color-text); {issue.assignee === collab.username ? 'background: color-mix(in srgb, var(--color-primary) 8%, transparent);' : ''}"
+									onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 6%, transparent)'; }}
+									onmouseleave={(e) => { e.currentTarget.style.background = issue?.assignee === collab.username ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'; }}
+									onclick={() => setAssignee(collab.id)}
+								>
+									<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold shrink-0" style="background: var(--color-primary)15; color: var(--color-primary);">{collab.username.charAt(0).toUpperCase()}</div>
+									<span class="truncate">{collab.username}</span>
+									{#if issue.assignee === collab.username}
+										<svg class="w-3 h-3 ml-auto shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+									{/if}
+								</button>
+							{/each}
+						{:else}
+							<p class="text-xs py-2" style="color: var(--color-text-dim);">No collaborators to assign.</p>
+						{/if}
+					</div>
 				{/if}
 			</div>
 		</div>
