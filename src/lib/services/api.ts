@@ -93,6 +93,12 @@ export interface UserPreferences {
 	settings: Record<string, unknown>;
 }
 
+export interface UserStatus {
+	emoji: string;
+	message: string;
+	busy: boolean;
+}
+
 export const users = {
 	profile: (username: string) => request<UserProfile>('GET', `/api/v1/users/${username}`),
 	updateProfile: (data: { full_name?: string; email?: string; avatar_url?: string; bio?: string; location?: string; website?: string }) =>
@@ -110,7 +116,17 @@ export const users = {
 	unfollow: (username: string) => request<void>('DELETE', `/api/v1/users/${username}/follow`),
 	followers: (username: string) => request<User[]>('GET', `/api/v1/users/${username}/followers`),
 	following: (username: string) => request<User[]>('GET', `/api/v1/users/${username}/following`),
-	isFollowing: (username: string) => request<{ following: boolean }>('GET', `/api/v1/users/${username}/follow`)
+	isFollowing: (username: string) => request<{ following: boolean }>('GET', `/api/v1/users/${username}/follow`),
+	// Block
+	block: (username: string) => request<void>('POST', `/api/v1/users/${username}/block`),
+	unblock: (username: string) => request<void>('DELETE', `/api/v1/users/${username}/block`),
+	isBlocked: (username: string) => request<{ blocked: boolean }>('GET', `/api/v1/users/${username}/block`),
+	blockedUsers: () => request<User[]>('GET', '/api/v1/users/me/blocked'),
+	// Status
+	setStatus: (data: { emoji?: string; message?: string; busy?: boolean }) =>
+		request<void>('PUT', '/api/v1/users/me/status', data),
+	getStatus: (username: string) => request<UserStatus>('GET', `/api/v1/users/${username}/status`),
+	clearStatus: () => request<void>('DELETE', '/api/v1/users/me/status'),
 };
 
 // Explore

@@ -2,7 +2,7 @@
 	import { page } from '$app/stores';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { users } from '$lib/services/api';
-	import type { User } from '$lib/services/api';
+	import type { User, UserStatus } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
 	import type { Organization } from '$lib/types/organization';
 	import PageShell from '$lib/components/PageShell.svelte';
@@ -28,6 +28,10 @@
 	let followingList = $state<User[]>([]);
 	let followerCount = $state(0);
 	let followingCount = $state(0);
+	let blocked = $state(false);
+	let blockLoading = $state(false);
+	let userStatus = $state<UserStatus | null>(null);
+	let showMoreMenu = $state(false);
 	let fetchId = 0;
 
 	$effect(() => {
@@ -46,6 +50,9 @@
 		followingCount = 0;
 		tab = 'repos';
 		following = false;
+		blocked = false;
+		userStatus = null;
+		showMoreMenu = false;
 
 		users.profile(_owner).then(data => {
 			if (id !== fetchId) return;
@@ -72,11 +79,21 @@
 			followingCount = fng.length;
 		}).catch(() => {});
 
-		// Check follow status
+		// Fetch user status
+		users.getStatus(_owner).then(res => {
+			if (id !== fetchId) return;
+			userStatus = res;
+		}).catch(() => {});
+
+		// Check follow/block status
 		if (userStore.isLoggedIn && _owner !== userStore.user?.username) {
 			users.isFollowing(_owner).then(res => {
 				if (id !== fetchId) return;
 				following = res.following;
+			}).catch(() => {});
+			users.isBlocked(_owner).then(res => {
+				if (id !== fetchId) return;
+				blocked = res.blocked;
 			}).catch(() => {});
 		}
 	});
@@ -98,6 +115,31 @@
 			// ignore
 		} finally {
 			followLoading = false;
+		}
+	}
+
+	async function toggleBlock() {
+		if (blockLoading || !user) return;
+		blockLoading = true;
+		try {
+			if (blocked) {
+				await users.unblock(owner);
+				blocked = false;
+			} else {
+				await users.block(owner);
+				blocked = true;
+				// Also unfollow when blocking
+				if (following) {
+					await users.unfollow(owner);
+					following = false;
+					followerCount = Math.max(0, followerCount - 1);
+				}
+			}
+		} catch {
+			// ignore
+		} finally {
+			blockLoading = false;
+			showMoreMenu = false;
 		}
 	}
 
@@ -148,6 +190,19 @@
 							<h1 class="text-xl font-bold" style="color: var(--color-text);">{user.full_name}</h1>
 						{/if}
 						<p class="text-sm" style="color: var(--color-text-dim);">@{user.username}</p>
+						{#if userStatus?.message}
+							<div class="flex items-center gap-1.5 mt-1.5">
+								{#if userStatus.emoji}
+									<span class="text-sm">{userStatus.emoji}</span>
+								{/if}
+								<span class="text-xs" style="color: {userStatus.busy ? 'var(--color-warning)' : 'var(--color-text-dim)'};">
+									{userStatus.message}
+								</span>
+								{#if userStatus.busy}
+									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium" style="background: color-mix(in srgb, var(--color-warning) 15%, transparent); color: var(--color-warning);">Busy</span>
+								{/if}
+							</div>
+						{/if}
 					</div>
 				</div>
 
@@ -174,6 +229,36 @@
 						>
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
 						</a>
+						<!-- More menu -->
+						<div class="relative">
+							<button
+								class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+								style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-dim);"
+								onclick={() => { showMoreMenu = !showMoreMenu; }}
+							>
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01" /></svg>
+							</button>
+							{#if showMoreMenu}
+								<div class="absolute right-0 top-12 w-48 rounded-xl border overflow-hidden shadow-lg z-20" style="background: var(--color-surface); border-color: var(--color-border);">
+									<button
+										class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors"
+										style="color: {blocked ? 'var(--color-text)' : 'var(--color-error)'};"
+										onmouseenter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
+										onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
+										onclick={toggleBlock}
+										disabled={blockLoading}
+									>
+										{#if blocked}
+											<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+											Unblock @{user.username}
+										{:else}
+											<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" /></svg>
+											Block @{user.username}
+										{/if}
+									</button>
+								</div>
+							{/if}
+						</div>
 					</div>
 				{/if}
 
