@@ -24,13 +24,29 @@
 	let passwordChanged = $state(false);
 	let passwordError = $state('');
 
-	let activeSection = $state<'profile' | 'password' | 'ssh' | 'appearance'>('profile');
+	// Status
+	let statusEmoji = $state('');
+	let statusMessage = $state('');
+	let statusBusy = $state(false);
+	let savingStatus = $state(false);
+
+	let activeSection = $state<'profile' | 'status' | 'password' | 'ssh' | 'appearance'>('profile');
 
 	const sections = [
 		{ id: 'profile' as const, label: 'Public Profile', icon: 'user' },
+		{ id: 'status' as const, label: 'Status', icon: 'status' },
 		{ id: 'password' as const, label: 'Password', icon: 'lock' },
 		{ id: 'ssh' as const, label: 'SSH Keys', icon: 'key' },
 		{ id: 'appearance' as const, label: 'Appearance', icon: 'palette' },
+	];
+
+	const statusPresets = [
+		{ emoji: '🏠', message: 'Working from home' },
+		{ emoji: '🚀', message: 'Shipping code' },
+		{ emoji: '🎯', message: 'Focusing' },
+		{ emoji: '🌴', message: 'On vacation' },
+		{ emoji: '🤒', message: 'Out sick' },
+		{ emoji: '⛔', message: 'Do not disturb', busy: true },
 	];
 
 	onMount(() => {
@@ -41,6 +57,12 @@
 			bio = userStore.user.bio || '';
 			location = userStore.user.location || '';
 			website = userStore.user.website || '';
+			// Load current status
+			users.getStatus(userStore.user.username).then(s => {
+				statusEmoji = s.emoji || '';
+				statusMessage = s.message || '';
+				statusBusy = s.busy || false;
+			}).catch(() => {});
 		}
 	});
 
@@ -58,6 +80,33 @@
 			toastStore.error('Failed to update profile');
 		} finally {
 			saving = false;
+		}
+	}
+
+	async function handleStatusSave() {
+		savingStatus = true;
+		try {
+			await users.setStatus({ emoji: statusEmoji, message: statusMessage, busy: statusBusy });
+			toastStore.success('Status updated');
+		} catch {
+			toastStore.error('Failed to update status');
+		} finally {
+			savingStatus = false;
+		}
+	}
+
+	async function handleStatusClear() {
+		savingStatus = true;
+		try {
+			await users.clearStatus();
+			statusEmoji = '';
+			statusMessage = '';
+			statusBusy = false;
+			toastStore.success('Status cleared');
+		} catch {
+			toastStore.error('Failed to clear status');
+		} finally {
+			savingStatus = false;
 		}
 	}
 
@@ -112,6 +161,8 @@
 					>
 						{#if section.icon === 'user'}
 							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+						{:else if section.icon === 'status'}
+							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14.828 14.828a4 4 0 01-5.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 						{:else if section.icon === 'lock'}
 							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
 						{:else if section.icon === 'key'}
@@ -214,6 +265,97 @@
 								{/if}
 							</div>
 						</form>
+					</div>
+				{:else if activeSection === 'status'}
+					<div class="card p-6 animate-fade-up">
+						<h2 class="text-sm font-semibold mb-1" style="color: var(--color-text);">Your Status</h2>
+						<p class="text-xs mb-6" style="color: var(--color-text-dim);">Let others know what you're up to. Set "Busy" to indicate you may not respond quickly.</p>
+
+						<!-- Current status preview -->
+						{#if statusEmoji || statusMessage}
+							<div class="flex items-center gap-2 mb-5 px-3 py-2.5 rounded-xl" style="background: color-mix(in srgb, var(--color-surface) 60%, transparent); border: 1px solid var(--color-border);">
+								{#if statusEmoji}<span class="text-lg">{statusEmoji}</span>{/if}
+								<span class="text-sm" style="color: var(--color-text);">{statusMessage || 'No message'}</span>
+								{#if statusBusy}
+									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium ml-auto" style="background: color-mix(in srgb, var(--color-warning) 15%, transparent); color: var(--color-warning);">Busy</span>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Presets -->
+						<div class="mb-5">
+							<p class="text-xs font-medium mb-2.5" style="color: var(--color-text-dim);">Quick presets</p>
+							<div class="flex flex-wrap gap-1.5">
+								{#each statusPresets as preset}
+									<button
+										class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all duration-200 hover:scale-[1.02]"
+										style="border: 1px solid var(--color-border); color: var(--color-text); background: {statusMessage === preset.message ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'};"
+										onclick={() => { statusEmoji = preset.emoji; statusMessage = preset.message; statusBusy = preset.busy || false; }}
+									>
+										<span>{preset.emoji}</span>
+										{preset.message}
+									</button>
+								{/each}
+							</div>
+						</div>
+
+						<!-- Custom status form -->
+						<div class="flex flex-col gap-4 max-w-md">
+							<div class="grid grid-cols-[64px_1fr] gap-3">
+								<div>
+									<label class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Emoji</label>
+									<input
+										type="text"
+										bind:value={statusEmoji}
+										placeholder="😊"
+										maxlength="2"
+										class="w-full px-3 py-2.5 text-sm text-center rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); color: var(--color-text);"
+									/>
+								</div>
+								<div>
+									<label class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">What's happening?</label>
+									<input
+										type="text"
+										bind:value={statusMessage}
+										placeholder="Working on something cool..."
+										maxlength="80"
+										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+									/>
+								</div>
+							</div>
+
+							<!-- Busy toggle -->
+							<label class="flex items-center gap-3 cursor-pointer">
+								<div class="relative">
+									<input type="checkbox" bind:checked={statusBusy} class="sr-only peer" />
+									<div class="w-9 h-5 rounded-full transition-colors duration-200 peer-checked:bg-[var(--color-warning)]" style="background: var(--color-border);"></div>
+									<div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-4"></div>
+								</div>
+								<div>
+									<span class="text-sm font-medium" style="color: var(--color-text);">Do not disturb</span>
+									<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Others will see that you may be slow to respond</p>
+								</div>
+							</label>
+
+							<div class="flex items-center gap-3 pt-2">
+								<button
+									onclick={handleStatusSave}
+									disabled={savingStatus}
+									class="btn-glow px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all duration-200 disabled:opacity-40 hover:scale-[1.02] active:scale-[0.98]"
+									style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
+								>{savingStatus ? 'Saving...' : 'Set status'}</button>
+								{#if statusEmoji || statusMessage}
+									<button
+										onclick={handleStatusClear}
+										disabled={savingStatus}
+										class="px-4 py-2.5 text-sm rounded-xl border transition-all duration-200 hover:scale-[1.02]"
+										style="border-color: var(--color-border); color: var(--color-text-dim);"
+									>Clear status</button>
+								{/if}
+							</div>
+						</div>
 					</div>
 				{:else if activeSection === 'password'}
 					<div class="card p-6 animate-fade-up">
