@@ -25,7 +25,7 @@
 
 <div class="min-h-screen flex flex-col" style="background-color: var(--color-background);">
 	<FloatingNav />
-	<div class="flex-1 flex">
+	<div class="flex-1 flex pt-16">
 		<!-- Sidebar -->
 		<aside class="w-64 shrink-0 border-r hidden lg:flex flex-col" style="border-color: var(--color-border); background-color: var(--color-surface);">
 			<div class="p-5 border-b" style="border-color: var(--color-border);">

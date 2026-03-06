@@ -104,7 +104,13 @@ export const users = {
 	starred: (username: string) =>
 		request<import('$lib/types/repository').Repository[]>('GET', `/api/v1/users/${username}/starred`),
 	getPreferences: () => request<UserPreferences>('GET', '/api/v1/users/me/preferences'),
-	updatePreferences: (data: UserPreferences) => request<UserPreferences>('PUT', '/api/v1/users/me/preferences', data)
+	updatePreferences: (data: UserPreferences) => request<UserPreferences>('PUT', '/api/v1/users/me/preferences', data),
+	search: (query: string) => request<User[]>('GET', `/api/v1/users/search?q=${encodeURIComponent(query)}`),
+	follow: (username: string) => request<void>('POST', `/api/v1/users/${username}/follow`),
+	unfollow: (username: string) => request<void>('DELETE', `/api/v1/users/${username}/follow`),
+	followers: (username: string) => request<User[]>('GET', `/api/v1/users/${username}/followers`),
+	following: (username: string) => request<User[]>('GET', `/api/v1/users/${username}/following`),
+	isFollowing: (username: string) => request<{ following: boolean }>('GET', `/api/v1/users/${username}/follow`)
 };
 
 // Explore
