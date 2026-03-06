@@ -11,10 +11,11 @@
 	let navContainer = $state<HTMLDivElement>();
 	let indicatorStyle = $state('opacity: 0;');
 	let mounted = $state(false);
+	let mobileOpen = $state(false);
 
 	const navItems = [
-		{ to: '/dashboard', label: 'Dashboard' },
-		{ to: '/explore', label: 'Explore' },
+		{ to: '/dashboard', label: 'Dashboard', icon: '<path stroke-linecap="round" stroke-linejoin="round" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6" />' },
+		{ to: '/explore', label: 'Explore', icon: '<circle cx="11" cy="11" r="8" /><path stroke-linecap="round" d="m21 21-4.3-4.3" />' },
 	];
 
 	function getActiveIndex(pathname: string): number {
@@ -46,6 +47,7 @@
 
 	afterNavigate(() => {
 		tick().then(updateIndicator);
+		mobileOpen = false;
 	});
 
 	$effect(() => {
@@ -59,9 +61,9 @@
 <svelte:window onresize={updateIndicator} />
 
 <nav class="sticky top-0 z-40 glass-strong">
-	<div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
 		<!-- Left -->
-		<div class="flex items-center gap-6">
+		<div class="flex items-center gap-4 sm:gap-6">
 			<a href="/dashboard" class="flex items-center gap-2.5 shrink-0 group">
 				<div class="relative">
 					<div class="w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_12px_var(--color-primary)]" style="background-color: var(--color-primary);"></div>
@@ -70,7 +72,7 @@
 				<span class="font-bold tracking-tight text-sm gradient-text">Dev Nook</span>
 			</a>
 
-			<!-- Nav links with sliding indicator -->
+			<!-- Nav links with sliding indicator — desktop -->
 			<div bind:this={navContainer} class="hidden sm:flex items-center gap-1 relative">
 				{#if mounted}
 					<div
@@ -94,7 +96,7 @@
 			</div>
 		</div>
 
-		<!-- Center: search trigger -->
+		<!-- Center: search trigger — desktop -->
 		<button
 			class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-200 glass-subtle"
 			style="color: var(--color-text-dim);"
@@ -113,11 +115,101 @@
 
 		<!-- Right -->
 		<div class="flex items-center gap-2">
-			<ThemePicker />
-			<div class="w-px h-4 mx-1" style="background: var(--color-border);"></div>
+			<div class="hidden sm:contents">
+				<ThemePicker />
+				<div class="w-px h-4 mx-1" style="background: var(--color-border);"></div>
+			</div>
 			<NotificationBell />
-			<CreateDropdown />
+			<div class="hidden sm:contents">
+				<CreateDropdown />
+			</div>
 			<UserDropdown />
+
+			<!-- Mobile menu button -->
+			<button
+				class="sm:hidden flex items-center justify-center w-8 h-8 rounded-lg transition-colors duration-200"
+				style="color: var(--color-text-dim);"
+				onclick={() => { mobileOpen = !mobileOpen; }}
+				aria-label="Menu"
+			>
+				{#if mobileOpen}
+					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M6 18L18 6M6 6l12 12" /></svg>
+				{:else}
+					<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" d="M4 6h16M4 12h16M4 18h16" /></svg>
+				{/if}
+			</button>
 		</div>
 	</div>
 </nav>
+
+<!-- Mobile menu panel -->
+{#if mobileOpen}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<!-- svelte-ignore a11y_click_events_have_key_events -->
+	<div
+		class="fixed inset-0 z-30 sm:hidden"
+		style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);"
+		onclick={() => { mobileOpen = false; }}
+	>
+		<div
+			class="mobile-menu-enter absolute right-0 top-14 bottom-0 w-72 overflow-y-auto"
+			style="background: var(--color-background); border-left: 1px solid var(--color-border);"
+			onclick={(e) => e.stopPropagation()}
+		>
+			<div class="flex flex-col gap-1 p-4">
+				{#each navItems as item, i}
+					{@const isActive = activeIndex === i}
+					<a
+						href={item.to}
+						class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+						style="
+							color: {isActive ? 'var(--color-primary)' : 'var(--color-text)'};
+							background: {isActive ? 'var(--color-primary)10' : 'transparent'};
+						"
+					>
+						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							{@html item.icon}
+						</svg>
+						{item.label}
+					</a>
+				{/each}
+
+				<div class="my-2 border-t" style="border-color: var(--color-separator);"></div>
+
+				<!-- Search -->
+				<button
+					class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200 w-full text-left"
+					style="color: var(--color-text);"
+					onclick={() => { mobileOpen = false; document.dispatchEvent(new CustomEvent('open-command-palette')); }}
+				>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" /></svg>
+					Search
+				</button>
+
+				<a
+					href="/new"
+					class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+					style="color: var(--color-text);"
+				>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+					New Repository
+				</a>
+
+				<a
+					href="/settings"
+					class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
+					style="color: var(--color-text);"
+				>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
+					Settings
+				</a>
+
+				<div class="my-2 border-t" style="border-color: var(--color-separator);"></div>
+
+				<div class="px-4 py-3">
+					<ThemePicker />
+				</div>
+			</div>
+		</div>
+	</div>
+{/if}

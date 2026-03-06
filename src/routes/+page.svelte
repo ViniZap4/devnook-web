@@ -86,15 +86,10 @@
 </script>
 
 <div class="min-h-screen flex relative overflow-hidden" style="background-color: var(--color-background);">
-	<!-- Full-page animated gradient orbs -->
-	<div class="absolute inset-0 overflow-hidden pointer-events-none">
-		<div class="gradient-orb" style="width: 600px; height: 600px; top: -200px; right: -100px; background: var(--color-primary);"></div>
-		<div class="gradient-orb" style="width: 500px; height: 500px; bottom: -150px; left: -100px; background: var(--color-secondary); animation-delay: -3s;"></div>
-		<div class="gradient-orb" style="width: 400px; height: 400px; top: 40%; left: 30%; background: var(--color-accent); animation-delay: -5s; opacity: 0.08;"></div>
-	</div>
-
-	<!-- Mesh gradient overlay -->
-	<div class="absolute inset-0 mesh-gradient pointer-events-none"></div>
+	<!-- Organic floating background orbs -->
+	<div class="bg-orb bg-orb-1" style="position: absolute;"></div>
+	<div class="bg-orb bg-orb-2" style="position: absolute;"></div>
+	<div class="bg-orb bg-orb-3" style="position: absolute;"></div>
 
 	<!-- Left side — branding -->
 	<div class="hidden lg:flex lg:w-1/2 items-center justify-center relative">

@@ -26,6 +26,16 @@
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
 
+	// Derive a tab key from the pathname for transition animation
+	const tabKey = $derived(() => {
+		const path = $page.url.pathname;
+		const base = `/${owner}/${repoName}`;
+		const rest = path.slice(base.length);
+		// Extract first path segment as tab key
+		const seg = rest.split('/')[1] || 'code';
+		return seg;
+	});
+
 	onMount(async () => {
 		if (window.matchMedia('(pointer: fine)').matches) {
 			showSpotlight = true;
@@ -59,7 +69,7 @@
 
 	<div class="relative" style="z-index: 1;">
 	<Navbar />
-	<main class="max-w-6xl mx-auto px-6 py-6 w-full flex-1">
+	<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
 		{#if loading}
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-3">
@@ -85,7 +95,11 @@
 			<div class="flex flex-col gap-6">
 				<RepoHeader {repo} />
 				<RepoNav owner={owner} repo={repoName} />
-				{@render children()}
+				{#key tabKey()}
+					<div class="content-reveal">
+						{@render children()}
+					</div>
+				{/key}
 			</div>
 		{/if}
 	</main>

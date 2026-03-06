@@ -4,6 +4,7 @@
 	import { pulls, repos } from '$lib/services/api';
 	import type { Branch } from '$lib/types/repository';
 	import { onMount } from 'svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	const owner = $derived($page.params.owner!);
 	const repo = $derived($page.params.repo!);
@@ -39,9 +40,11 @@
 		error = '';
 		try {
 			const result = await pulls.create(owner, repo, { title, body, head_branch: headBranch, base_branch: baseBranch });
+			toastStore.success('Pull request created successfully');
 			goto(`/${owner}/${repo}/pulls/${result.number}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to create pull request';
+			toastStore.error(err instanceof Error ? err.message : 'Failed to create pull request');
 			submitting = false;
 		}
 	}

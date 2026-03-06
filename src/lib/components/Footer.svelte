@@ -1,5 +1,5 @@
 <footer class="border-t mt-auto" style="border-color: var(--color-separator);">
-	<div class="max-w-7xl mx-auto px-6 py-6">
+	<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
 		<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
 			<div class="flex items-center gap-3">
 				<div class="relative">
@@ -14,6 +14,7 @@
 				<a href="/dashboard" class="text-xs animated-link transition-colors hover:text-[var(--color-text)]" style="color: var(--color-text-dim);">Dashboard</a>
 				<span class="w-px h-3" style="background: var(--color-border);"></span>
 				<a href="/settings" class="text-xs animated-link transition-colors hover:text-[var(--color-text)]" style="color: var(--color-text-dim);">Settings</a>
+				<a href="/notifications" class="text-xs animated-link transition-colors hover:text-[var(--color-text)]" style="color: var(--color-text-dim);">Notifications</a>
 			</nav>
 		</div>
 	</div>

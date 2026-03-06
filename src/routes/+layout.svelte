@@ -4,6 +4,8 @@
 	import { onMount } from 'svelte';
 	import { userStore } from '$lib/stores/user.svelte';
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
+	import Toast from '$lib/components/Toast.svelte';
+	import NavigationProgress from '$lib/components/NavigationProgress.svelte';
 
 	let { children } = $props();
 	let ready = $state(false);
@@ -13,6 +15,8 @@
 		ready = true;
 	});
 </script>
+
+<NavigationProgress />
 
 <div class="min-h-screen" style="background-color: var(--color-background);">
 	{#if ready}
@@ -25,3 +29,4 @@
 </div>
 
 <CommandPalette />
+<Toast />

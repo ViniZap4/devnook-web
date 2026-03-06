@@ -6,6 +6,7 @@
 	import PageShell from '$lib/components/PageShell.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import AppearanceSection from '$lib/components/AppearanceSection.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	let fullName = $state('');
 	let email = $state('');
@@ -42,9 +43,10 @@
 			await users.updateProfile({ full_name: fullName, email, avatar_url: '', bio, location, website });
 			await userStore.fetchUser();
 			saved = true;
+			toastStore.success('Profile updated');
 			setTimeout(() => { saved = false; }, 3000);
 		} catch {
-			// ignore
+			toastStore.error('Failed to update profile');
 		} finally {
 			saving = false;
 		}
@@ -67,6 +69,7 @@
 			await users.changePassword({ old_password: oldPassword, new_password: newPassword });
 			oldPassword = ''; newPassword = ''; confirmPassword = '';
 			passwordChanged = true;
+			toastStore.success('Password changed');
 			setTimeout(() => { passwordChanged = false; }, 3000);
 		} catch (err) {
 			passwordError = err instanceof Error ? err.message : 'Failed to change password';
