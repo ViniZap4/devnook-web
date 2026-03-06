@@ -7,9 +7,11 @@
 	import type { Repository } from '$lib/types/repository';
 	import Navbar from '$lib/components/Navbar.svelte';
 	import Footer from '$lib/components/Footer.svelte';
+	import BackgroundEffect from '$lib/components/BackgroundEffect.svelte';
 	import RepoHeader from '$lib/components/RepoHeader.svelte';
 	import RepoNav from '$lib/components/RepoNav.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import { browser } from '$app/environment';
 	import type { Snippet } from 'svelte';
 
 	let { children }: { children: Snippet } = $props();
@@ -17,11 +19,17 @@
 	let repo = $state<Repository | null>(null);
 	let loading = $state(true);
 	let error = $state('');
+	let mouseX = $state(0);
+	let mouseY = $state(0);
+	let showSpotlight = $state(false);
 
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
 
 	onMount(async () => {
+		if (window.matchMedia('(pointer: fine)').matches) {
+			showSpotlight = true;
+		}
 		if (!userStore.isLoggedIn) {
 			goto('/');
 			return;
@@ -34,9 +42,22 @@
 			loading = false;
 		}
 	});
+
+	function handleMouseMove(e: MouseEvent) {
+		mouseX = e.clientX;
+		mouseY = e.clientY;
+	}
 </script>
 
-<div class="min-h-screen flex flex-col" style="background-color: var(--color-background);">
+<!-- svelte-ignore a11y_no_static_element_interactions -->
+<div class="min-h-screen flex flex-col relative" style="background-color: var(--color-background);" onmousemove={handleMouseMove}>
+	<BackgroundEffect {mouseX} {mouseY} />
+
+	{#if showSpotlight && browser}
+		<div class="spotlight" style="left: {mouseX}px; top: {mouseY}px;"></div>
+	{/if}
+
+	<div class="relative" style="z-index: 1;">
 	<Navbar />
 	<main class="max-w-6xl mx-auto px-6 py-6 w-full flex-1">
 		{#if loading}
@@ -69,4 +90,5 @@
 		{/if}
 	</main>
 	<Footer />
+	</div>
 </div>

@@ -1,4 +1,5 @@
 export type ThemeMode = 'dark' | 'light' | 'auto';
+export type BackgroundEffect = 'none' | 'mesh' | 'particles' | 'aurora';
 
 export interface Theme {
 	name: string;
@@ -27,6 +28,7 @@ export interface ThemeSettings {
 	mode: ThemeMode;
 	darkName: string;
 	lightName: string;
+	backgroundEffect: BackgroundEffect;
 }
 
 export const themeOrder: string[] = [
@@ -56,14 +58,14 @@ export const themes: Record<string, Theme> = {
 		secondary: '#06B6D4',
 		accent: '#A78BFA',
 		muted: '#6B7280',
-		background: '#0d1117',
-		surface: '#161b22',
-		surfaceHover: '#1c2128',
-		overlay: '#090c10',
-		text: '#e6edf3',
-		textDim: '#8b949e',
-		border: '#30363d',
-		separator: '#21262d',
+		background: '#0a0a0f',
+		surface: '#12121a',
+		surfaceHover: '#1a1a25',
+		overlay: '#08080d',
+		text: '#e8ecf4',
+		textDim: '#8890a0',
+		border: '#1e1e2e',
+		separator: '#16161f',
 		error: '#f85149',
 		warning: '#e3b341',
 		success: '#3fb950',
@@ -424,16 +426,16 @@ export function loadThemeSettings(): ThemeSettings {
 	if (saved) {
 		try {
 			const s = JSON.parse(saved);
-			if (s.mode && s.darkName && s.lightName) return s as ThemeSettings;
+			if (s.mode && s.darkName && s.lightName) return { backgroundEffect: 'mesh', ...s } as ThemeSettings;
 		} catch {
 			// corrupted
 		}
 	}
-	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light' };
+	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'mesh' };
 }
 
-export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string): void {
-	localStorage.setItem(SETTINGS_KEY, JSON.stringify({ mode, darkName, lightName }));
+export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'mesh'): void {
+	localStorage.setItem(SETTINGS_KEY, JSON.stringify({ mode, darkName, lightName, backgroundEffect }));
 }
 
 export function watchSystemTheme(callback: (isDark: boolean) => void): () => void {
