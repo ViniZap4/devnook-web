@@ -11,8 +11,6 @@
 	let navEl = $state<HTMLElement>();
 	let indicatorStyle = $state('opacity: 0;');
 	let mounted = $state(false);
-	let hovered = $state(false);
-
 	const navItems = [
 		{ to: '/dashboard', label: 'Dashboard', icon: 'dashboard' },
 		{ to: '/feed', label: 'Feed', icon: 'feed' },
@@ -66,8 +64,6 @@
 <!-- Top floating dock navbar -->
 <div
 	class="fixed top-4 left-1/2 -translate-x-1/2 z-50 flex items-center gap-2"
-	onmouseenter={() => { hovered = true; }}
-	onmouseleave={() => { hovered = false; }}
 >
 	<!-- Main nav dock -->
 	<nav
@@ -113,7 +109,7 @@
 				{:else if item.icon === 'docs'}
 					<svg class="w-4 h-4 shrink-0 transition-transform duration-300 {isActive ? 'scale-110' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
 				{/if}
-				<span class="text-[0.6875rem] font-medium whitespace-nowrap nav-label" class:nav-label-visible={hovered || isActive}>{item.label}</span>
+				<span class="text-[0.6875rem] font-medium whitespace-nowrap">{item.label}</span>
 			</a>
 		{/each}
 
@@ -178,18 +174,6 @@
 	.dock-item:active {
 		transform: scale(0.92);
 		transition-duration: 0.1s;
-	}
-
-	.nav-label {
-		max-width: 0;
-		opacity: 0;
-		overflow: hidden;
-		transition: max-width 0.3s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;
-	}
-
-	.nav-label-visible {
-		max-width: 80px;
-		opacity: 1;
 	}
 
 	.indicator-glow {

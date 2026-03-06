@@ -17,7 +17,8 @@
 	let msgLoading = $state(false);
 	let newMessage = $state('');
 	let sending = $state(false);
-	let searchQuery = $state('');
+	let userSearchQuery = $state('');
+	let filterQuery = $state('');
 	let searchResults = $state<User[]>([]);
 	let searching = $state(false);
 	let showNewChat = $state(false);
@@ -41,7 +42,7 @@
 				selectConvo(existing);
 			} else {
 				showNewChat = true;
-				searchQuery = targetUser;
+				userSearchQuery = targetUser;
 				handleSearch();
 			}
 		}
@@ -118,7 +119,7 @@
 	}
 
 	function handleSearch() {
-		const q = searchQuery.trim();
+		const q = userSearchQuery.trim();
 		if (!q) { searchResults = []; return; }
 		clearTimeout(searchTimeout);
 		searchTimeout = setTimeout(async () => {
@@ -144,7 +145,7 @@
 		if (existing) {
 			selectConvo(existing);
 			showNewChat = false;
-			searchQuery = '';
+			userSearchQuery = '';
 			searchResults = [];
 			return;
 		}
@@ -155,7 +156,7 @@
 				participants: [user.username]
 			});
 			showNewChat = false;
-			searchQuery = '';
+			userSearchQuery = '';
 			searchResults = [];
 			await loadConversations();
 			const convo = conversations.find(c => c.id === result.id);
@@ -198,9 +199,9 @@
 	}
 
 	function convoFilter(convo: Conversation): boolean {
-		if (!searchQuery.trim() || showNewChat) return true;
+		if (!filterQuery.trim() || showNewChat) return true;
 		const name = getConvoDisplayName(convo).toLowerCase();
-		return name.includes(searchQuery.toLowerCase());
+		return name.includes(filterQuery.toLowerCase());
 	}
 
 	const filteredConversations = $derived(conversations.filter(convoFilter));
@@ -219,7 +220,7 @@
 			<button
 				class="btn-glow flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl text-white transition-all duration-200 hover:scale-[1.02]"
 				style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
-				onclick={() => { showNewChat = !showNewChat; searchQuery = ''; searchResults = []; }}
+				onclick={() => { showNewChat = !showNewChat; userSearchQuery = ''; searchResults = []; }}
 			>
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
 				New Chat
@@ -234,7 +235,7 @@
 						<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path stroke-linecap="round" d="m21 21-4.3-4.3" /></svg>
 						<input
 							type="text"
-							bind:value={searchQuery}
+							bind:value={userSearchQuery}
 							oninput={handleSearch}
 							placeholder="Search users to message..."
 							class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
@@ -269,11 +270,11 @@
 							</button>
 						{/each}
 					</div>
-				{:else if searchQuery.trim() && !searching}
+				{:else if userSearchQuery.trim() && !searching}
 					<div class="p-6 text-center">
-						<p class="text-sm" style="color: var(--color-text-dim);">No users found for "{searchQuery}"</p>
+						<p class="text-sm" style="color: var(--color-text-dim);">No users found for "{userSearchQuery}"</p>
 					</div>
-				{:else if !searchQuery.trim()}
+				{:else if !userSearchQuery.trim()}
 					<div class="p-6 text-center">
 						<p class="text-xs" style="color: var(--color-text-dim); opacity: 0.6;">Type a username to find someone to chat with</p>
 					</div>
@@ -291,7 +292,7 @@
 						<svg class="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style="color: var(--color-text-dim); opacity: 0.5;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path stroke-linecap="round" d="m21 21-4.3-4.3" /></svg>
 						<input
 							type="text"
-							bind:value={searchQuery}
+							bind:value={filterQuery}
 							placeholder="Filter conversations..."
 							class="w-full pl-8 pr-3 py-1.5 text-xs rounded-lg border bg-transparent transition-colors focus:border-[var(--color-primary)]"
 							style="border-color: var(--color-border); color: var(--color-text);"

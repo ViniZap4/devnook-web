@@ -21,9 +21,13 @@
 	let orgs = $state<Organization[]>([]);
 	let loading = $state(true);
 	let error = $state('');
-	let tab = $state<'repos' | 'starred' | 'orgs'>('repos');
+	let tab = $state<'repos' | 'starred' | 'orgs' | 'followers' | 'following'>('repos');
 	let following = $state(false);
 	let followLoading = $state(false);
+	let followersList = $state<User[]>([]);
+	let followingList = $state<User[]>([]);
+	let followerCount = $state(0);
+	let followingCount = $state(0);
 	let fetchId = 0;
 
 	$effect(() => {
@@ -36,6 +40,10 @@
 		repos = [];
 		starredRepos = [];
 		orgs = [];
+		followersList = [];
+		followingList = [];
+		followerCount = 0;
+		followingCount = 0;
 		tab = 'repos';
 		following = false;
 
@@ -51,6 +59,18 @@
 			if (id !== fetchId) return;
 			loading = false;
 		});
+
+		// Fetch follower/following counts
+		Promise.all([
+			users.followers(_owner),
+			users.following(_owner)
+		]).then(([frs, fng]) => {
+			if (id !== fetchId) return;
+			followersList = frs;
+			followingList = fng;
+			followerCount = frs.length;
+			followingCount = fng.length;
+		}).catch(() => {});
 
 		// Check follow status
 		if (userStore.isLoggedIn && _owner !== userStore.user?.username) {
@@ -68,9 +88,11 @@
 			if (following) {
 				await users.unfollow(owner);
 				following = false;
+				followerCount = Math.max(0, followerCount - 1);
 			} else {
 				await users.follow(owner);
 				following = true;
+				followerCount += 1;
 			}
 		} catch {
 			// ignore
@@ -88,7 +110,7 @@
 		}
 	}
 
-	function switchTab(t: 'repos' | 'starred' | 'orgs') {
+	function switchTab(t: typeof tab) {
 		tab = t;
 		if (t === 'starred') loadStarred();
 	}
@@ -183,6 +205,17 @@
 						Joined {new Date(user.created_at).toLocaleDateString('en-US', { month: 'long', year: 'numeric' })}
 					</div>
 				</div>
+
+				<div class="flex items-center gap-4 text-sm">
+					<button class="flex items-center gap-1 hover:underline" style="color: var(--color-text);" onclick={() => switchTab('followers')}>
+						<span class="font-semibold">{followerCount}</span>
+						<span style="color: var(--color-text-dim);">followers</span>
+					</button>
+					<button class="flex items-center gap-1 hover:underline" style="color: var(--color-text);" onclick={() => switchTab('following')}>
+						<span class="font-semibold">{followingCount}</span>
+						<span style="color: var(--color-text-dim);">following</span>
+					</button>
+				</div>
 			</aside>
 
 			<!-- Repos -->
@@ -216,9 +249,50 @@
 							<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{orgs.length}</span>
 						</button>
 					{/if}
+					<button
+						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
+						style="{tab === 'followers' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						onclick={() => switchTab('followers')}
+					>
+						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+						Followers
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{followerCount}</span>
+					</button>
+					<button
+						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
+						style="{tab === 'following' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						onclick={() => switchTab('following')}
+					>
+						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+						Following
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{followingCount}</span>
+					</button>
 				</div>
 
-				{#if tab === 'orgs'}
+				{#if tab === 'followers' || tab === 'following'}
+				{@const people = tab === 'followers' ? followersList : followingList}
+				{#if people.length === 0}
+					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+						<p class="text-sm" style="color: var(--color-text-dim);">No {tab} yet.</p>
+					</div>
+				{:else}
+					<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); divide-color: var(--color-border);">
+						{#each people as person}
+							<a href="/{person.username}" class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--color-surface)] group">
+								<Avatar username={person.username} size={36} />
+								<div class="flex-1 min-w-0">
+									<span class="text-sm font-semibold group-hover:underline block truncate" style="color: var(--color-text);">{person.full_name || person.username}</span>
+									<span class="text-xs" style="color: var(--color-text-dim);">@{person.username}</span>
+								</div>
+								{#if person.bio}
+									<span class="text-xs hidden sm:block max-w-[200px] truncate" style="color: var(--color-text-dim);">{person.bio}</span>
+								{/if}
+							</a>
+						{/each}
+					</div>
+				{/if}
+			{:else if tab === 'orgs'}
 				{#if orgs.length === 0}
 					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
 						<p class="text-sm" style="color: var(--color-text-dim);">No organizations.</p>
