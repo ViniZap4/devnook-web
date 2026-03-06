@@ -1,18 +1,37 @@
 <script lang="ts">
 	import { notifications } from '$lib/services/api';
 	import type { Notification } from '$lib/types/notification';
-	import { onMount } from 'svelte';
+	import { onMount, onDestroy } from 'svelte';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 	import RelativeTime from './RelativeTime.svelte';
 
 	let unreadCount = $state(0);
 	let items = $state<Notification[]>([]);
 	let open = $state(false);
 	let loading = $state(false);
+	let unsubNotif: (() => void) | null = null;
+	let unsubCount: (() => void) | null = null;
 
 	onMount(() => {
 		fetchCount();
-		const interval = setInterval(fetchCount, 30000);
+		// Keep polling as fallback but less frequently
+		const interval = setInterval(fetchCount, 60000);
+
+		// Real-time via WebSocket
+		unsubNotif = wsStore.on('notification', (data: Notification) => {
+			items = [data, ...items];
+			unreadCount++;
+		});
+		unsubCount = wsStore.on('notification_count', (data: { count: number }) => {
+			unreadCount = data.count;
+		});
+
 		return () => clearInterval(interval);
+	});
+
+	onDestroy(() => {
+		unsubNotif?.();
+		unsubCount?.();
 	});
 
 	async function fetchCount() {

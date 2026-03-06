@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import { goto } from '$app/navigation';
 import { auth, type User, registerUnauthorizedHandler } from '$lib/services/api';
 import { themeStore } from '$lib/stores/theme.svelte';
+import { wsStore } from '$lib/stores/websocket.svelte';
 
 let user = $state<User | null>(null);
 let token = $state<string | null>(null);
@@ -40,6 +41,7 @@ export const userStore = {
 			if (user) {
 				// User is cached — mark as initialized immediately, revalidate in background
 				initialized = true;
+				wsStore.connect(token);
 				// Silently refresh user data + sync theme
 				auth.me().then((fresh) => {
 					user = fresh;
@@ -64,6 +66,7 @@ export const userStore = {
 				user = fresh;
 				persistUser(fresh);
 				initialized = true;
+				wsStore.connect(token!);
 				themeStore.loadFromServer();
 				return;
 			} catch (err) {
@@ -92,6 +95,7 @@ export const userStore = {
 		setToken(res.token);
 		user = res.user;
 		persistUser(res.user);
+		wsStore.connect(res.token);
 		themeStore.loadFromServer();
 	},
 
@@ -121,6 +125,7 @@ export const userStore = {
 		if (loggingOut) return;
 		if (!token && !user) return;
 		loggingOut = true;
+		wsStore.disconnect();
 		user = null;
 		setToken(null);
 		clearPersistedUser();

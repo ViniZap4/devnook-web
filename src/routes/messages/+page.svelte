@@ -1,11 +1,12 @@
 <script lang="ts">
-	import { onMount, tick } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { page } from '$app/stores';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { messages, users } from '$lib/services/api';
 	import type { User } from '$lib/services/api';
 	import type { Conversation, Message } from '$lib/types/message';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
@@ -26,6 +27,7 @@
 	let textareaEl = $state<HTMLElement>();
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let mobileShowChat = $state(false);
+	let unsubscribeWs: (() => void) | null = null;
 
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
@@ -46,6 +48,26 @@
 				handleSearch();
 			}
 		}
+
+		// Listen for real-time messages via WebSocket
+		unsubscribeWs = wsStore.on('chat_message', async (data: Message) => {
+			// If the message is for the active conversation, append it
+			if (activeConvo && data.conversation_id === activeConvo.id) {
+				// Skip if it's our own message (already added optimistically)
+				if (data.sender_username === userStore.user?.username) return;
+				convoMessages = [...convoMessages, data];
+				await tick();
+				scrollToBottom();
+				// Mark as read
+				messages.messages(activeConvo.id, { limit: 1 });
+			}
+			// Refresh conversation list to update last_message and ordering
+			loadConversations();
+		});
+	});
+
+	onDestroy(() => {
+		unsubscribeWs?.();
 	});
 
 	async function loadConversations() {

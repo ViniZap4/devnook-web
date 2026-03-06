@@ -1,12 +1,17 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { userStore } from '$lib/stores/user.svelte';
+	import { messages as messagesApi } from '$lib/services/api';
+	import { wsStore } from '$lib/stores/websocket.svelte';
 	import ThemePicker from './ThemePicker.svelte';
 	import NotificationBell from './NotificationBell.svelte';
 	import CreateDropdown from './CreateDropdown.svelte';
 	import UserDropdown from './UserDropdown.svelte';
-	import { onMount, tick } from 'svelte';
+	import { onMount, onDestroy, tick } from 'svelte';
 	import { afterNavigate } from '$app/navigation';
+
+	let msgUnread = $state(0);
+	let unsubMsg: (() => void) | null = null;
 
 	let navEl = $state<HTMLElement>();
 	let indicatorStyle = $state('opacity: 0;');
@@ -45,10 +50,28 @@
 	onMount(() => {
 		mounted = true;
 		tick().then(updateIndicator);
+
+		// Fetch initial unread message count
+		if (userStore.isLoggedIn) {
+			messagesApi.unreadCount().then(r => { msgUnread = r.count; }).catch(() => {});
+		}
+
+		// Real-time unread message updates via WebSocket
+		unsubMsg = wsStore.on('message_unread', () => {
+			messagesApi.unreadCount().then(r => { msgUnread = r.count; }).catch(() => {});
+		});
+	});
+
+	onDestroy(() => {
+		unsubMsg?.();
 	});
 
 	afterNavigate(() => {
 		tick().then(updateIndicator);
+		// Reset unread when navigating to messages
+		if ($page.url.pathname.startsWith('/messages')) {
+			msgUnread = 0;
+		}
 	});
 
 	$effect(() => {
@@ -106,6 +129,9 @@
 					<svg class="w-4 h-4 shrink-0 transition-transform duration-300 {isActive ? 'scale-110' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path stroke-linecap="round" d="m21 21-4.3-4.3" /></svg>
 				{:else if item.icon === 'messages'}
 					<svg class="w-4 h-4 shrink-0 transition-transform duration-300 {isActive ? 'scale-110' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+					{#if msgUnread > 0}
+						<span class="absolute -top-1 -right-1.5 min-w-3.5 h-3.5 flex items-center justify-center text-[0.5rem] font-bold rounded-full text-white" style="background: var(--color-primary);">{msgUnread > 9 ? '9+' : msgUnread}</span>
+					{/if}
 				{:else if item.icon === 'docs'}
 					<svg class="w-4 h-4 shrink-0 transition-transform duration-300 {isActive ? 'scale-110' : ''}" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
 				{/if}
