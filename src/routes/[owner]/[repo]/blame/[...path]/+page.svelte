@@ -2,27 +2,39 @@
 	import { page } from '$app/stores';
 	import { repos } from '$lib/services/api';
 	import type { BlameLine } from '$lib/types/repository';
-	import { onMount } from 'svelte';
 	import type { Repository } from '$lib/types/repository';
 
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
-	const path = $derived($page.params.path!);
+	const fullPath = $derived($page.params.path!);
+
+	// First segment is the ref, rest is the file path
+	const ref = $derived(fullPath.split('/')[0]);
+	const filePath = $derived(fullPath.split('/').slice(1).join('/'));
 
 	let lines = $state<BlameLine[]>([]);
 	let loading = $state(true);
-	let repoData = $state<Repository | null>(null);
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			repoData = await repos.get(owner, repoName);
-			const ref = repoData?.default_branch || 'HEAD';
-			lines = await repos.blame(owner, repoName, ref, path);
-		} catch {
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const _ref = ref;
+		const _path = filePath;
+		const id = ++fetchId;
+
+		loading = true;
+		lines = [];
+
+		repos.blame(_owner, _repo, _ref, _path).then(data => {
+			if (id !== fetchId) return;
+			lines = data;
+		}).catch(() => {
 			// ignore
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	function isNewGroup(i: number): boolean {
@@ -33,9 +45,9 @@
 
 <div class="flex flex-col gap-4">
 	<div class="flex items-center gap-2 text-sm">
-		<a href="/{owner}/{repoName}/blob/{repoData?.default_branch || 'HEAD'}/{path}" class="hover:underline" style="color: var(--color-primary);">Normal view</a>
+		<a href="/{owner}/{repoName}/blob/{ref}/{filePath}" class="hover:underline" style="color: var(--color-primary);">Normal view</a>
 		<span style="color: var(--color-text-dim);">·</span>
-		<span class="font-medium" style="color: var(--color-text);">Blame: {path}</span>
+		<span class="font-medium" style="color: var(--color-text);">Blame: {filePath}</span>
 	</div>
 
 	{#if loading}

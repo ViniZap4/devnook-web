@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 	import type { Commit } from '$lib/types/repository';
 	import CommitList from '$lib/components/CommitList.svelte';
@@ -12,20 +11,32 @@
 	let commits = $state<Commit[]>([]);
 	let loading = $state(true);
 	let currentPage = $state(1);
+	let fetchId = 0;
 
 	async function loadPage(p: number) {
 		loading = true;
+		const id = ++fetchId;
 		try {
-			commits = await repos.commits(owner, repoName, undefined, p);
+			const data = await repos.commits(owner, repoName, undefined, p);
+			if (id !== fetchId) return;
+			commits = data;
 			currentPage = p;
 		} catch {
 			// keep current state
 		} finally {
+			if (id !== fetchId) return;
 			loading = false;
 		}
 	}
 
-	onMount(() => loadPage(1));
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		// Reset to page 1 when owner/repo changes
+		void _owner; void _repo;
+		currentPage = 1;
+		loadPage(1);
+	});
 </script>
 
 <div class="flex flex-col gap-4">

@@ -5,13 +5,24 @@
 
 	type Mode = 'setup' | 'login' | 'register';
 
-	let mode = $state<Mode>(userStore.needsSetup ? 'setup' : 'login');
+	let mode = $state<Mode>('login');
 	let error = $state('');
 	let submitting = $state(false);
 	let mounted = $state(false);
 	let redirecting = $state(false);
 
-	onMount(() => {
+	// React to needsSetup — covers both initial load and post-logout re-init
+	$effect(() => {
+		if (userStore.needsSetup) {
+			mode = 'setup';
+		}
+	});
+
+	onMount(async () => {
+		// Re-init after logout (initialized was reset)
+		if (!userStore.initialized) {
+			await userStore.init();
+		}
 		if (userStore.isLoggedIn) {
 			redirecting = true;
 			goto('/dashboard');

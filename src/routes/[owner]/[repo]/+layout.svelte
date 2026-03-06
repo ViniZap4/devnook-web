@@ -22,6 +22,7 @@
 	let mouseX = $state(0);
 	let mouseY = $state(0);
 	let showSpotlight = $state(false);
+	let fetchId = 0;
 
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
@@ -36,21 +37,36 @@
 		return seg;
 	});
 
-	onMount(async () => {
+	onMount(() => {
 		if (window.matchMedia('(pointer: fine)').matches) {
 			showSpotlight = true;
 		}
+	});
+
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const id = ++fetchId;
+
 		if (!userStore.isLoggedIn) {
 			goto('/');
 			return;
 		}
-		try {
-			repo = await repos.get(owner, repoName);
-		} catch (err) {
+
+		loading = true;
+		error = '';
+		repo = null;
+
+		repos.get(_owner, _repo).then(data => {
+			if (id !== fetchId) return;
+			repo = data;
+		}).catch(err => {
+			if (id !== fetchId) return;
 			error = err instanceof Error ? err.message : 'Repository not found';
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	function handleMouseMove(e: MouseEvent) {

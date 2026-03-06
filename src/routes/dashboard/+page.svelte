@@ -5,7 +5,6 @@
 	import { shortcutsStore } from '$lib/stores/shortcuts.svelte';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import ShortCutsBox from '$lib/components/ShortCutsBox.svelte';
-	import AppearanceSection from '$lib/components/AppearanceSection.svelte';
 	import ReposSection from '$lib/components/ReposSection.svelte';
 	import OrgsSection from '$lib/components/OrgsSection.svelte';
 	import StatsCards from '$lib/components/StatsCards.svelte';
@@ -84,10 +83,6 @@
 		<div class="lg:col-span-4 flex flex-col gap-6 animate-fade-up stagger-3">
 			<OrgsSection />
 			<ShortCutsBox />
-			<div class="card p-6">
-				<h2 class="section-title mb-4">Appearance</h2>
-				<AppearanceSection />
-			</div>
 		</div>
 	</div>
 </PageShell>

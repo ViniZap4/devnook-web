@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 	import type { BlobContent } from '$lib/types/repository';
 	import BlobViewer from '$lib/components/BlobViewer.svelte';
@@ -15,15 +14,30 @@
 	let blob = $state<BlobContent | null>(null);
 	let loading = $state(true);
 	let error = $state('');
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			blob = await repos.blob(owner, repoName, ref, filePath);
-		} catch (err) {
+	// Re-fetch when file path or ref changes
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const _ref = ref;
+		const _path = filePath;
+		const id = ++fetchId;
+
+		loading = true;
+		error = '';
+		blob = null;
+
+		repos.blob(_owner, _repo, _ref, _path).then(data => {
+			if (id !== fetchId) return;
+			blob = data;
+		}).catch(err => {
+			if (id !== fetchId) return;
 			error = err instanceof Error ? err.message : 'File not found';
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 </script>
 

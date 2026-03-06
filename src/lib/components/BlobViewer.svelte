@@ -3,7 +3,9 @@
 	import { userStore } from '$lib/stores/user.svelte';
 	import { repos } from '$lib/services/api';
 	import { goto } from '$app/navigation';
+	import { copyTextToClipboard } from '$lib/util/copyTextToClipboard';
 	import Breadcrumb from './Breadcrumb.svelte';
+	import { page } from '$app/stores';
 
 	let { blob, owner, repo, ref }: {
 		blob: BlobContent;
@@ -15,11 +17,34 @@
 	const lines = $derived(blob.content ? blob.content.split('\n') : []);
 	const isOwner = $derived(userStore.user?.username === owner);
 	let deleting = $state(false);
+	let copied = $state(false);
+	let selectedLine = $state<number | null>(null);
+
+	// Parse initial line from URL hash
+	$effect(() => {
+		const hash = $page.url.hash;
+		if (hash.startsWith('#L')) {
+			const n = parseInt(hash.slice(2));
+			if (!isNaN(n) && n > 0) selectedLine = n;
+		}
+	});
 
 	function formatSize(bytes: number): string {
 		if (bytes < 1024) return `${bytes} B`;
 		if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
 		return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+	}
+
+	async function handleCopy() {
+		await copyTextToClipboard(blob.content);
+		copied = true;
+		setTimeout(() => { copied = false; }, 2000);
+	}
+
+	function handleLineClick(lineNum: number) {
+		selectedLine = selectedLine === lineNum ? null : lineNum;
+		const hash = selectedLine ? `#L${selectedLine}` : '';
+		history.replaceState(null, '', `${$page.url.pathname}${hash}`);
 	}
 
 	async function handleDelete() {
@@ -46,6 +71,11 @@
 			<div class="flex items-center gap-3">
 				{#if !blob.binary}
 					<button
+						class="text-xs font-medium hover:underline transition-colors"
+						style="color: {copied ? 'var(--color-success)' : 'var(--color-text-dim)'};"
+						onclick={handleCopy}
+					>{copied ? 'Copied!' : 'Copy'}</button>
+					<button
 						class="text-xs font-medium hover:underline"
 						style="color: var(--color-text-dim);"
 						onclick={() => {
@@ -57,7 +87,7 @@
 						}}
 					>Raw</button>
 					<a
-						href="/{owner}/{repo}/blame/{blob.path}"
+						href="/{owner}/{repo}/blame/{ref}/{blob.path}"
 						class="text-xs font-medium hover:underline"
 						style="color: var(--color-primary);"
 					>Blame</a>
@@ -95,9 +125,18 @@
 				<table class="w-full text-xs font-mono">
 					<tbody>
 						{#each lines as line, i}
-							<tr class="hover:bg-[var(--color-surface)]">
-								<td class="px-3 py-0.5 text-right select-none opacity-30 text-[var(--color-text)] w-1 whitespace-nowrap border-r border-[var(--color-border)]">
-									{i + 1}
+							{@const lineNum = i + 1}
+							<tr
+								class="hover:bg-[var(--color-surface)] transition-colors"
+								style="{selectedLine === lineNum ? `background: color-mix(in srgb, var(--color-primary) 8%, transparent);` : ''}"
+							>
+								<td
+									class="px-3 py-0.5 text-right select-none w-1 whitespace-nowrap border-r border-[var(--color-border)] cursor-pointer"
+									style="color: {selectedLine === lineNum ? 'var(--color-primary)' : 'var(--color-text)'}; opacity: {selectedLine === lineNum ? 0.8 : 0.3};"
+									id="L{lineNum}"
+									onclick={() => handleLineClick(lineNum)}
+								>
+									{lineNum}
 								</td>
 								<td class="px-4 py-0.5 whitespace-pre text-[var(--color-text)]">
 									{line}
