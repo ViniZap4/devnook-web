@@ -1,6 +1,5 @@
 <script lang="ts">
 	import type { Snippet } from 'svelte';
-	import { fade, scale } from 'svelte/transition';
 
 	let {
 		open = false,
@@ -32,15 +31,10 @@
 	<!-- svelte-ignore a11y_click_events_have_key_events -->
 	<div
 		bind:this={overlayEl}
-		class="fixed inset-0 z-50 flex items-center justify-center"
+		class="fixed inset-0 z-50 flex items-center justify-center modal-overlay"
 		onclick={handleOverlayClick}
-		transition:fade={{ duration: 150 }}
-		style="background: rgba(0, 0, 0, 0.6); backdrop-filter: blur(4px);"
 	>
-		<div
-			class="modal-card"
-			transition:scale={{ duration: 200, start: 0.95 }}
-		>
+		<div class="modal-card modal-content-enter">
 			<div class="flex items-center justify-between mb-5">
 				<h2 class="text-[var(--color-text)]">{title}</h2>
 				<button
@@ -59,6 +53,16 @@
 {/if}
 
 <style>
+	.modal-overlay {
+		background: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(8px);
+		animation: modal-overlay-in 0.25s ease both;
+	}
+
+	.modal-content-enter {
+		animation: modal-content-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+
 	.modal-card {
 		width: 100%;
 		max-width: 26rem;
@@ -79,10 +83,11 @@
 		border-radius: 0.5rem;
 		color: var(--color-text);
 		opacity: 0.4;
-		transition: opacity 0.15s, background-color 0.15s;
+		transition: opacity 0.15s, background-color 0.15s, transform 0.15s;
 	}
 	.close-btn:hover {
 		opacity: 1;
 		background-color: var(--color-surface-hover);
+		transform: rotate(90deg);
 	}
 </style>

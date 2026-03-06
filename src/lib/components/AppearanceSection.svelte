@@ -10,10 +10,11 @@
 		light: '<circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/>',
 	};
 
-	const bgEffects: BackgroundEffect[] = ['none', 'mesh', 'particles', 'aurora'];
-	const bgLabels: Record<BackgroundEffect, string> = { none: 'None', mesh: 'Gradient', particles: 'Particles', aurora: 'Aurora' };
+	const bgEffects: BackgroundEffect[] = ['none', 'orbs', 'mesh', 'particles', 'aurora'];
+	const bgLabels: Record<BackgroundEffect, string> = { none: 'None', orbs: 'Orbs', mesh: 'Gradient', particles: 'Particles', aurora: 'Aurora' };
 	const bgIcons: Record<BackgroundEffect, string> = {
 		none: '<circle cx="12" cy="12" r="10"/><line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>',
+		orbs: '<circle cx="7" cy="7" r="4" opacity="0.6"/><circle cx="16" cy="10" r="3" opacity="0.4"/><circle cx="10" cy="16" r="3.5" opacity="0.5"/>',
 		mesh: '<rect x="3" y="3" width="18" height="18" rx="2"/><path d="M3 9h18M3 15h18M9 3v18M15 3v18"/>',
 		particles: '<circle cx="12" cy="12" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="19" cy="19" r="1"/><circle cx="12" cy="5" r="0.5"/><circle cx="5" cy="12" r="0.5"/><circle cx="19" cy="12" r="0.5"/><circle cx="12" cy="19" r="0.5"/>',
 		aurora: '<path d="M2 16c2-4 5-8 10-8s8 4 10 8"/><path d="M2 12c3-5 6-7 10-7s7 2 10 7" opacity="0.5"/>',

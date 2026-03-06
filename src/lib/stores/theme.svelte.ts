@@ -12,7 +12,7 @@ import {
 } from '$lib/styles/themes';
 import { users } from '$lib/services/api';
 
-let settings = $state<ThemeSettings>({ mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'mesh' });
+let settings = $state<ThemeSettings>({ mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'orbs' });
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
 if (browser) {
@@ -133,7 +133,7 @@ export const themeStore = {
 			if (s?.lightName && themes[s.lightName]) {
 				settings.lightName = s.lightName;
 			}
-			if (s?.backgroundEffect && ['none', 'mesh', 'particles', 'aurora'].includes(s.backgroundEffect)) {
+			if (s?.backgroundEffect && ['none', 'mesh', 'particles', 'aurora', 'orbs'].includes(s.backgroundEffect)) {
 				settings.backgroundEffect = s.backgroundEffect as BackgroundEffect;
 			}
 			applyTheme(resolveTheme(settings.mode, settings.darkName, settings.lightName));

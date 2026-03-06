@@ -414,6 +414,20 @@ export const issues = {
 		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`)
 };
 
+// Branch Rules
+import type { BranchRule } from '$lib/types/branch_rule';
+
+export const branchRules = {
+	list: (owner: string, repo: string) =>
+		request<BranchRule[]>('GET', `/api/v1/repos/${owner}/${repo}/branch-rules`),
+	create: (owner: string, repo: string, data: Omit<BranchRule, 'id' | 'repo_id' | 'created_at' | 'updated_at'>) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/branch-rules`, data),
+	update: (owner: string, repo: string, id: number, data: Partial<Omit<BranchRule, 'id' | 'repo_id' | 'created_at' | 'updated_at'>>) =>
+		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/branch-rules/${id}`, data),
+	remove: (owner: string, repo: string, id: number) =>
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/branch-rules/${id}`)
+};
+
 // SSH Keys
 import type { SSHKey } from '$lib/types/ssh_key';
 

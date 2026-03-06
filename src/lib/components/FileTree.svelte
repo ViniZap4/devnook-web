@@ -10,24 +10,26 @@
 		currentPath?: string;
 	} = $props();
 
-	// Sort: directories first, then files, alphabetically
 	const sorted = $derived([...entries].sort((a, b) => {
 		if (a.type !== b.type) return a.type === 'tree' ? -1 : 1;
 		return a.name.localeCompare(b.name);
 	}));
 </script>
 
-<div class="rounded-xl border border-[var(--color-border)] overflow-hidden">
-	<!-- Header -->
-	<div class="flex items-center justify-between px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
-		<span class="text-xs text-[var(--color-text)] opacity-40">
-			{sorted.filter(e => e.type === 'tree').length} directories, {sorted.filter(e => e.type === 'blob').length} files
+<div class="card overflow-hidden content-reveal">
+	<div
+		class="flex items-center justify-between px-4 py-2.5 glass-subtle"
+		style="border-bottom: 1px solid var(--color-border);"
+	>
+		<span class="text-xs font-medium" style="color: var(--color-text-dim);">
+			<span style="color: var(--color-primary);">{sorted.filter(e => e.type === 'tree').length}</span> directories,
+			<span style="color: var(--color-secondary);">{sorted.filter(e => e.type === 'blob').length}</span> files
 		</span>
 	</div>
 	<table class="w-full text-sm">
 		<tbody>
-			{#each sorted as entry}
-				<FileTreeRow {entry} {owner} {repo} {ref} />
+			{#each sorted as entry, i}
+				<FileTreeRow {entry} {owner} {repo} {ref} delay={Math.min(i * 0.03, 0.3)} />
 			{/each}
 		</tbody>
 	</table>

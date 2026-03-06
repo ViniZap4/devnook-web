@@ -1,5 +1,5 @@
 export type ThemeMode = 'dark' | 'light' | 'auto';
-export type BackgroundEffect = 'none' | 'mesh' | 'particles' | 'aurora';
+export type BackgroundEffect = 'none' | 'mesh' | 'particles' | 'aurora' | 'orbs';
 
 export interface Theme {
 	name: string;
@@ -426,12 +426,12 @@ export function loadThemeSettings(): ThemeSettings {
 	if (saved) {
 		try {
 			const s = JSON.parse(saved);
-			if (s.mode && s.darkName && s.lightName) return { backgroundEffect: 'mesh', ...s } as ThemeSettings;
+			if (s.mode && s.darkName && s.lightName) return { backgroundEffect: 'orbs', ...s } as ThemeSettings;
 		} catch {
 			// corrupted
 		}
 	}
-	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'mesh' };
+	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'orbs' };
 }
 
 export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'mesh'): void {

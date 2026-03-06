@@ -2,6 +2,7 @@
 	import { reposStore } from '$lib/stores/repos.svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
+	import { toastStore } from '$lib/stores/toast.svelte';
 
 	let name = $state('');
 	let description = $state('');
@@ -16,9 +17,11 @@
 		submitting = true;
 		try {
 			await reposStore.create({ name: name.trim(), description, is_private: isPrivate });
+			toastStore.success('Repository created successfully');
 			goto(`/${userStore.user?.username}/${name.trim()}`);
 		} catch (err) {
 			error = err instanceof Error ? err.message : 'Failed to create repository';
+			toastStore.error(err instanceof Error ? err.message : 'Failed to create repository');
 		} finally {
 			submitting = false;
 		}

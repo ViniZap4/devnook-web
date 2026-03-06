@@ -72,12 +72,12 @@
 <div class="flex flex-col gap-4">
 	<div class="flex items-center justify-between flex-wrap gap-3">
 		<div class="flex items-center gap-2">
-			<div class="flex items-center gap-1 rounded-xl border p-1" style="border-color: var(--color-border);">
+			<div class="flex items-center gap-1 glass-subtle rounded-xl p-1">
 				<button
-					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
+					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-300"
 					style="
 						color: {stateFilter === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};
-						background: {stateFilter === 'open' ? 'var(--color-success)10' : 'transparent'};
+						background: {stateFilter === 'open' ? 'color-mix(in srgb, var(--color-success) 12%, transparent)' : 'transparent'};
 						font-weight: {stateFilter === 'open' ? '600' : '400'};
 					"
 					onclick={() => switchState('open')}
@@ -86,10 +86,10 @@
 					Open
 				</button>
 				<button
-					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
+					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-300"
 					style="
 						color: {stateFilter === 'closed' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {stateFilter === 'closed' ? 'var(--color-primary)10' : 'transparent'};
+						background: {stateFilter === 'closed' ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
 						font-weight: {stateFilter === 'closed' ? '600' : '400'};
 					"
 					onclick={() => switchState('closed')}
@@ -99,29 +99,39 @@
 				</button>
 			</div>
 			<button
-				class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl border transition-colors hover:bg-[var(--color-surface)]"
-				style="border-color: var(--color-border); color: {showFilters ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
+				class="flex items-center gap-1.5 px-3 py-1.5 text-sm rounded-xl glass-subtle transition-all hover:scale-[1.02] active:scale-[0.98]"
+				style="color: {showFilters ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
 				onclick={() => { showFilters = !showFilters; }}
 			>
 				<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" /></svg>
 				Filters
 				{#if hasFilters}
-					<span class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-primary);"></span>
+					<span class="w-1.5 h-1.5 rounded-full live-dot" style="background-color: var(--color-primary);"></span>
 				{/if}
 			</button>
 		</div>
-		<a
-			href="/{owner}/{repoName}/issues/new"
-			class="flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl text-white transition-all hover:brightness-110"
-			style="background-color: var(--color-primary);"
-		>
-			<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
-			New Issue
-		</a>
+		<div class="flex items-center gap-2">
+			<a
+				href="/{owner}/{repoName}/board"
+				class="flex items-center gap-1.5 px-3 py-2 text-xs font-medium rounded-xl glass-subtle transition-all hover:scale-[1.02] active:scale-[0.98]"
+				style="color: var(--color-text-dim);"
+			>
+				<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
+				Board
+			</a>
+			<a
+				href="/{owner}/{repoName}/issues/new"
+				class="btn-glow flex items-center gap-2 px-4 py-2 text-sm font-semibold rounded-xl text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+				style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
+			>
+				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+				New Issue
+			</a>
+		</div>
 	</div>
 
 	{#if showFilters}
-		<div class="rounded-xl border p-4 flex flex-col gap-3" style="border-color: var(--color-border); background-color: var(--color-surface);">
+		<div class="card p-4 flex flex-col gap-3 animate-fade-up-sm">
 			<div class="flex items-center gap-3 flex-wrap">
 				<input
 					type="text"
@@ -177,11 +187,13 @@
 	{#if issuesStore.loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading issues...</div>
 	{:else if issuesStore.issues.length === 0}
-		<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
-			<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-				<circle cx="12" cy="12" r="10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
-			</svg>
-			<p class="text-sm font-medium mb-1" style="color: var(--color-text);">No {stateFilter} issues</p>
+		<div class="card p-16 text-center card-animate">
+			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-success) 8%, transparent);">
+				<svg class="w-8 h-8 opacity-30" style="color: var(--color-success);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
+					<circle cx="12" cy="12" r="10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
+				</svg>
+			</div>
+			<p class="text-sm font-semibold mb-1" style="color: var(--color-text);">No {stateFilter} issues</p>
 			<p class="text-xs" style="color: var(--color-text-dim);">
 				{#if hasFilters}
 					Try adjusting your filters.
