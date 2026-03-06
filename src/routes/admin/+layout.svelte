@@ -3,7 +3,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
-	import Navbar from '$lib/components/Navbar.svelte';
+	import FloatingNav from '$lib/components/FloatingNav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import type { Snippet } from 'svelte';
 
@@ -24,7 +24,7 @@
 </script>
 
 <div class="min-h-screen flex flex-col" style="background-color: var(--color-background);">
-	<Navbar />
+	<FloatingNav />
 	<div class="flex-1 flex">
 		<!-- Sidebar -->
 		<aside class="w-64 shrink-0 border-r hidden lg:flex flex-col" style="border-color: var(--color-border); background-color: var(--color-surface);">

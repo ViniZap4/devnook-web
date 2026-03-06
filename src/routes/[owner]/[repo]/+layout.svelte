@@ -5,7 +5,7 @@
 	import { userStore } from '$lib/stores/user.svelte';
 	import { repos } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
-	import Navbar from '$lib/components/Navbar.svelte';
+	import FloatingNav from '$lib/components/FloatingNav.svelte';
 	import Footer from '$lib/components/Footer.svelte';
 	import BackgroundEffect from '$lib/components/BackgroundEffect.svelte';
 	import RepoHeader from '$lib/components/RepoHeader.svelte';
@@ -27,12 +27,10 @@
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
 
-	// Derive a tab key from the pathname for transition animation
 	const tabKey = $derived(() => {
 		const path = $page.url.pathname;
 		const base = `/${owner}/${repoName}`;
 		const rest = path.slice(base.length);
-		// Extract first path segment as tab key
 		const seg = rest.split('/')[1] || 'code';
 		return seg;
 	});
@@ -83,9 +81,8 @@
 		<div class="spotlight" style="left: {mouseX}px; top: {mouseY}px;"></div>
 	{/if}
 
-	<div class="relative" style="z-index: 1;">
-	<Navbar />
-	<main class="max-w-6xl mx-auto px-4 sm:px-6 py-6 w-full flex-1">
+	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">
+	<main class="max-w-6xl mx-auto px-4 sm:px-6 pt-6 pb-24 w-full flex-1">
 		{#if loading}
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-3">
@@ -121,4 +118,6 @@
 	</main>
 	<Footer />
 	</div>
+
+	<FloatingNav />
 </div>

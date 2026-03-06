@@ -496,3 +496,84 @@ export const admin = {
 	},
 	listOrgs: () => request<import('$lib/types/organization').Organization[]>('GET', '/api/v1/admin/orgs')
 };
+
+// Messages / Chat
+import type { Conversation, Message } from '$lib/types/message';
+
+export const messages = {
+	conversations: () => request<Conversation[]>('GET', '/api/v1/messages/conversations'),
+	getConversation: (id: number) => request<Conversation>('GET', `/api/v1/messages/conversations/${id}`),
+	createConversation: (data: { type: string; name?: string; participants: string[]; repo_owner?: string; repo_name?: string; org_name?: string; issue_number?: number }) =>
+		request<{ id: number }>('POST', '/api/v1/messages/conversations', data),
+	messages: (conversationId: number, opts?: { before?: number; limit?: number }) => {
+		const params = new URLSearchParams();
+		if (opts?.before) params.set('before', String(opts.before));
+		if (opts?.limit) params.set('limit', String(opts.limit));
+		const qs = params.toString();
+		return request<Message[]>('GET', `/api/v1/messages/conversations/${conversationId}/messages${qs ? '?' + qs : ''}`);
+	},
+	send: (conversationId: number, data: { content: string; type?: string; reply_to_id?: number }) =>
+		request<{ id: number }>('POST', `/api/v1/messages/conversations/${conversationId}/messages`, data),
+	edit: (conversationId: number, messageId: number, data: { content: string }) =>
+		request<void>('PUT', `/api/v1/messages/conversations/${conversationId}/messages/${messageId}`, data),
+	remove: (conversationId: number, messageId: number) =>
+		request<void>('DELETE', `/api/v1/messages/conversations/${conversationId}/messages/${messageId}`),
+	react: (conversationId: number, messageId: number, emoji: string) =>
+		request<void>('POST', `/api/v1/messages/conversations/${conversationId}/messages/${messageId}/react`, { emoji }),
+	unreadCount: () => request<{ count: number }>('GET', '/api/v1/messages/unread'),
+};
+
+// Social Posts / Feed
+import type { Post, PostComment } from '$lib/types/post';
+
+export const posts = {
+	feed: (opts?: { page?: number; type?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.page) params.set('page', String(opts.page));
+		if (opts?.type) params.set('type', opts.type);
+		const qs = params.toString();
+		return request<{ posts: Post[]; total_count: number; page: number }>('GET', `/api/v1/posts${qs ? '?' + qs : ''}`);
+	},
+	get: (id: number) => request<Post>('GET', `/api/v1/posts/${id}`),
+	create: (data: { content: string; type?: string; repo_owner?: string; repo_name?: string; commit_hash?: string; issue_number?: number; tags?: string[] }) =>
+		request<{ id: number }>('POST', '/api/v1/posts', data),
+	update: (id: number, data: { content: string; tags?: string[] }) =>
+		request<void>('PUT', `/api/v1/posts/${id}`, data),
+	remove: (id: number) => request<void>('DELETE', `/api/v1/posts/${id}`),
+	like: (id: number) => request<void>('POST', `/api/v1/posts/${id}/like`),
+	unlike: (id: number) => request<void>('DELETE', `/api/v1/posts/${id}/like`),
+	repost: (id: number) => request<void>('POST', `/api/v1/posts/${id}/repost`),
+	comments: (id: number) => request<PostComment[]>('GET', `/api/v1/posts/${id}/comments`),
+	addComment: (id: number, data: { content: string }) =>
+		request<{ id: number }>('POST', `/api/v1/posts/${id}/comments`, data),
+	removeComment: (id: number, commentId: number) =>
+		request<void>('DELETE', `/api/v1/posts/${id}/comments/${commentId}`),
+	userPosts: (username: string, opts?: { page?: number }) => {
+		const qs = opts?.page ? `?page=${opts.page}` : '';
+		return request<{ posts: Post[]; total_count: number }>('GET', `/api/v1/users/${username}/posts${qs}`);
+	},
+};
+
+// Documentation
+import type { DocSpace, DocPage, DocPageVersion } from '$lib/types/doc';
+
+export const docs = {
+	spaces: () => request<DocSpace[]>('GET', '/api/v1/docs/spaces'),
+	getSpace: (slug: string) => request<DocSpace>('GET', `/api/v1/docs/spaces/${slug}`),
+	createSpace: (data: { name: string; description?: string; icon?: string; owner_type: string; repo_owner?: string; repo_name?: string; org_name?: string; is_public?: boolean }) =>
+		request<{ id: number; slug: string }>('POST', '/api/v1/docs/spaces', data),
+	updateSpace: (slug: string, data: { name?: string; description?: string; icon?: string; is_public?: boolean }) =>
+		request<void>('PUT', `/api/v1/docs/spaces/${slug}`, data),
+	removeSpace: (slug: string) => request<void>('DELETE', `/api/v1/docs/spaces/${slug}`),
+
+	pages: (spaceSlug: string) => request<DocPage[]>('GET', `/api/v1/docs/spaces/${spaceSlug}/pages`),
+	getPage: (spaceSlug: string, pageSlug: string) => request<DocPage>('GET', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}`),
+	createPage: (spaceSlug: string, data: { title: string; content?: string; icon?: string; parent_id?: number }) =>
+		request<{ id: number; slug: string }>('POST', `/api/v1/docs/spaces/${spaceSlug}/pages`, data),
+	updatePage: (spaceSlug: string, pageSlug: string, data: { title?: string; content?: string; icon?: string; position?: number; is_published?: boolean }) =>
+		request<void>('PUT', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}`, data),
+	removePage: (spaceSlug: string, pageSlug: string) =>
+		request<void>('DELETE', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}`),
+	pageVersions: (spaceSlug: string, pageSlug: string) =>
+		request<DocPageVersion[]>('GET', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}/versions`),
+};

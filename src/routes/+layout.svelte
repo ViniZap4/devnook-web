@@ -6,6 +6,7 @@
 	import CommandPalette from '$lib/components/CommandPalette.svelte';
 	import Toast from '$lib/components/Toast.svelte';
 	import NavigationProgress from '$lib/components/NavigationProgress.svelte';
+	import VimMotions from '$lib/components/VimMotions.svelte';
 
 	let { children } = $props();
 	let ready = $state(false);
@@ -30,3 +31,4 @@
 
 <CommandPalette />
 <Toast />
+<VimMotions />
