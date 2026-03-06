@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { goto } from '$app/navigation';
 	import { repos } from '$lib/services/api';
 	import type { TreeEntry, Branch } from '$lib/types/repository';
 	import FileTree from '$lib/components/FileTree.svelte';
@@ -18,21 +18,37 @@
 	let entries = $state<TreeEntry[]>([]);
 	let branches = $state<Branch[]>([]);
 	let loading = $state(true);
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			const [tree, branchList] = await Promise.all([
-				repos.tree(owner, repoName, ref, treePath),
-				repos.branches(owner, repoName)
-			]);
+	// Re-fetch when path or ref changes (handles folder navigation)
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const _ref = ref;
+		const _path = treePath;
+		const id = ++fetchId;
+
+		loading = true;
+		entries = [];
+
+		Promise.all([
+			repos.tree(_owner, _repo, _ref, _path),
+			repos.branches(_owner, _repo)
+		]).then(([tree, branchList]) => {
+			if (id !== fetchId) return;
 			entries = tree;
 			branches = branchList;
-		} catch {
+		}).catch(() => {
 			// handled by empty state
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
+
+	function selectBranch(branch: string) {
+		goto(`/${owner}/${repoName}/tree/${branch}/${treePath}`);
+	}
 </script>
 
 {#if loading}
@@ -40,7 +56,7 @@
 {:else}
 	<div class="flex flex-col gap-4">
 		<div class="flex items-center gap-4">
-			<BranchSelector {branches} currentRef={ref} {owner} repo={repoName} />
+			<BranchSelector {branches} currentRef={ref} onselect={selectBranch} />
 			{#if treePath}
 				<Breadcrumb {owner} repo={repoName} path={treePath} {ref} />
 			{/if}

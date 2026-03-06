@@ -1,6 +1,7 @@
 <script lang="ts">
 	import type { Repository } from '$lib/types/repository';
 	import { repos } from '$lib/services/api';
+	import { userStore } from '$lib/stores/user.svelte';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
 	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
 	import CloneUrlBox from './CloneUrlBox.svelte';
@@ -53,7 +54,7 @@
 		forking = true;
 		try {
 			const result = await repos.fork(repo.owner, repo.name);
-			window.location.href = `/${result.name}`;
+			window.location.href = `/${userStore.user?.username}/${result.name}`;
 		} catch {
 			forking = false;
 		}
@@ -72,7 +73,7 @@
 					<RepoIcon size={18} />
 				{/if}
 			</div>
-			<a href="/{repo.owner}" class="text-lg animated-link shrink-0" style="color: var(--color-primary);">
+			<a href="{repo.org_id ? `/orgs/${repo.owner}` : `/${repo.owner}`}" class="text-lg animated-link shrink-0" style="color: var(--color-primary);">
 				{repo.owner}
 			</a>
 			<span class="text-lg opacity-15" style="color: var(--color-text);">/</span>

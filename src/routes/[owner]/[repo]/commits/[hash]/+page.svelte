@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { repos } from '$lib/services/api';
 	import type { CommitDetail } from '$lib/types/repository';
-	import { onMount } from 'svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
 	const owner = $derived($page.params.owner!);
@@ -11,15 +10,26 @@
 
 	let commit = $state<CommitDetail | null>(null);
 	let loading = $state(true);
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			commit = await repos.commitDetail(owner, repo, hash);
-		} catch {
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repo;
+		const _hash = hash;
+		const id = ++fetchId;
+
+		loading = true;
+		commit = null;
+
+		repos.commitDetail(_owner, _repo, _hash).then(data => {
+			if (id !== fetchId) return;
+			commit = data;
+		}).catch(() => {
 			// ignore
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 </script>
 

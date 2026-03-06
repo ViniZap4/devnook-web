@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { users } from '$lib/services/api';
 	import type { User } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
@@ -21,18 +20,32 @@
 	let loading = $state(true);
 	let error = $state('');
 	let tab = $state<'repos' | 'starred' | 'orgs'>('repos');
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			const data = await users.profile(owner);
+	$effect(() => {
+		const _owner = owner;
+		const id = ++fetchId;
+
+		loading = true;
+		error = '';
+		user = null;
+		repos = [];
+		starredRepos = [];
+		orgs = [];
+		tab = 'repos';
+
+		users.profile(_owner).then(data => {
+			if (id !== fetchId) return;
 			user = data.user;
 			repos = data.repos;
 			orgs = data.orgs || [];
-		} catch (err) {
+		}).catch(err => {
+			if (id !== fetchId) return;
 			error = err instanceof Error ? err.message : 'User not found';
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	async function loadStarred() {

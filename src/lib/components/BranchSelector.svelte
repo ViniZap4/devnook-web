@@ -2,12 +2,10 @@
 	import type { Branch } from '$lib/types/repository';
 	import BranchIcon from '$lib/assets/icons/BranchIcon.svelte';
 
-	let { branches, currentRef, owner, repo, basePath = '' }: {
+	let { branches, currentRef, onselect }: {
 		branches: Branch[];
 		currentRef: string;
-		owner: string;
-		repo: string;
-		basePath?: string;
+		onselect: (branch: string) => void;
 	} = $props();
 
 	let open = $state(false);
@@ -34,18 +32,17 @@
 			</div>
 			<div class="max-h-60 overflow-y-auto p-1">
 				{#each branches as branch}
-					<a
-						href="/{owner}/{repo}{basePath ? '/' + basePath + '/' + branch.name : ''}{basePath ? '' : ''}"
-						class="flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors {branch.name === currentRef ? 'bg-[var(--color-surface)] font-medium' : 'hover:bg-[var(--color-surface)]'}"
+					<button
+						class="flex items-center gap-2 px-3 py-2 text-sm rounded-md w-full text-left transition-colors {branch.name === currentRef ? 'bg-[var(--color-surface)] font-medium' : 'hover:bg-[var(--color-surface)]'}"
 						style="color: var(--color-text);"
-						onclick={() => { open = false; }}
+						onclick={() => { onselect(branch.name); open = false; }}
 					>
 						<BranchIcon size={12} />
 						{branch.name}
 						{#if branch.is_default}
 							<span class="text-xs opacity-40 ml-auto">default</span>
 						{/if}
-					</a>
+					</button>
 				{/each}
 			</div>
 		</div>

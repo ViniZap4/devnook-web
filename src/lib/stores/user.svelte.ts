@@ -34,13 +34,12 @@ export const userStore = {
 	 * If user is cached, show immediately and revalidate silently.
 	 */
 	async init() {
-		if (initialized) return;
+		registerUnauthorizedHandler(() => userStore.logout());
 
 		if (token) {
 			if (user) {
 				// User is cached — mark as initialized immediately, revalidate in background
 				initialized = true;
-				registerUnauthorizedHandler(() => userStore.logout());
 				// Silently refresh user data + sync theme
 				auth.me().then((fresh) => {
 					user = fresh;
@@ -64,6 +63,9 @@ export const userStore = {
 				const fresh = await auth.me();
 				user = fresh;
 				persistUser(fresh);
+				initialized = true;
+				themeStore.loadFromServer();
+				return;
 			} catch (err) {
 				// Network error — keep token, will retry on next load
 				if (!(err instanceof TypeError)) {
@@ -75,17 +77,14 @@ export const userStore = {
 		}
 
 		// If not authenticated, check if first-run setup is needed
-		if (!user) {
-			try {
-				const res = await auth.checkSetup();
-				needsSetup = res.needs_setup;
-			} catch {
-				needsSetup = false;
-			}
+		try {
+			const res = await auth.checkSetup();
+			needsSetup = res.needs_setup;
+		} catch {
+			needsSetup = false;
 		}
 
 		initialized = true;
-		registerUnauthorizedHandler(() => userStore.logout());
 	},
 
 	async login(username: string, password: string) {
@@ -125,6 +124,8 @@ export const userStore = {
 		user = null;
 		setToken(null);
 		clearPersistedUser();
+		initialized = false;
+		needsSetup = false;
 		if (browser) {
 			goto('/').finally(() => { loggingOut = false; });
 		} else {

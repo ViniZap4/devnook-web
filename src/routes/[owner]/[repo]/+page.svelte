@@ -27,6 +27,31 @@
 	let loading = $state(true);
 	let empty = $state(false);
 
+	async function loadBranchContent(ref: string) {
+		const [tree, readmeData, commitsData] = await Promise.allSettled([
+			repos.tree(owner, repoName, ref, ''),
+			repos.readme(owner, repoName, ref),
+			repos.commits(owner, repoName, ref)
+		]);
+		if (tree.status === 'fulfilled') { entries = tree.value; empty = false; }
+		else { entries = []; empty = true; }
+		readme = readmeData.status === 'fulfilled' ? readmeData.value : null;
+		latestCommit = (commitsData.status === 'fulfilled' && commitsData.value.length > 0)
+			? commitsData.value[0] : null;
+	}
+
+	async function selectBranch(branch: string) {
+		currentRef = branch;
+		loading = true;
+		try {
+			await loadBranchContent(branch);
+		} catch {
+			empty = true;
+		} finally {
+			loading = false;
+		}
+	}
+
 	onMount(async () => {
 		try {
 			const [branchList, repo, tagList] = await Promise.all([
@@ -44,17 +69,7 @@
 				return;
 			}
 
-			const [tree, readmeData, commitsData] = await Promise.allSettled([
-				repos.tree(owner, repoName, currentRef, ''),
-				repos.readme(owner, repoName, currentRef),
-				repos.commits(owner, repoName, currentRef)
-			]);
-			if (tree.status === 'fulfilled') entries = tree.value;
-			else empty = true;
-			if (readmeData.status === 'fulfilled') readme = readmeData.value;
-			if (commitsData.status === 'fulfilled' && commitsData.value.length > 0) {
-				latestCommit = commitsData.value[0];
-			}
+			await loadBranchContent(currentRef);
 		} catch {
 			empty = true;
 		} finally {
@@ -78,7 +93,7 @@
 		<div class="lg:col-span-3 flex flex-col gap-4">
 			{#if branches.length > 0}
 				<div class="flex items-center justify-between gap-4 page-header">
-					<BranchSelector {branches} {currentRef} {owner} repo={repoName} />
+					<BranchSelector {branches} {currentRef} onselect={selectBranch} />
 					{#if isOwner}
 						<a
 							href="/{owner}/{repoName}/_new/{currentRef}"
