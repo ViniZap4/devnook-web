@@ -1,6 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
+	import { onMount, tick } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { orgs, repos as reposApi } from '$lib/services/api';
@@ -28,10 +28,37 @@
 	let newRepoDesc = $state('');
 	let newRepoPrivate = $state(false);
 	let creatingRepo = $state(false);
-	let createRepoError = $state('');
 
-	// Stats
+	// Invite member
+	let showInvite = $state(false);
+	let inviteUsername = $state('');
+	let inviteRole = $state('member');
+	let inviting = $state(false);
+
+	// Search
+	let repoSearch = $state('');
+
+	// Tab
 	let activeTab = $state<'repos' | 'members'>('repos');
+	let tabContainer = $state<HTMLDivElement>();
+	let tabIndicatorStyle = $state('opacity: 0;');
+	let tabMounted = $state(false);
+
+	const filteredRepos = $derived(
+		repoSearch
+			? repos.filter(r => r.name.toLowerCase().includes(repoSearch.toLowerCase()) || (r.description || '').toLowerCase().includes(repoSearch.toLowerCase()))
+			: repos
+	);
+
+	function updateTabIndicator() {
+		if (!tabContainer || !tabMounted) return;
+		const buttons = tabContainer.querySelectorAll<HTMLButtonElement>('button[data-tab]');
+		const idx = activeTab === 'repos' ? 0 : 1;
+		const btn = buttons[idx];
+		if (btn) {
+			tabIndicatorStyle = `width: ${btn.offsetWidth}px; height: ${btn.offsetHeight}px; left: ${btn.offsetLeft}px; top: ${btn.offsetTop}px; opacity: 1;`;
+		}
+	}
 
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
@@ -49,13 +76,21 @@
 		} finally {
 			loading = false;
 		}
+		tabMounted = true;
+		tick().then(updateTabIndicator);
+	});
+
+	$effect(() => {
+		if (tabMounted && tabContainer) {
+			const _ = activeTab;
+			tick().then(updateTabIndicator);
+		}
 	});
 
 	async function createRepo(e: Event) {
 		e.preventDefault();
 		if (!newRepoName.trim()) return;
 		creatingRepo = true;
-		createRepoError = '';
 		try {
 			const result = await orgs.createRepo(orgName, {
 				name: newRepoName.trim(),
@@ -65,41 +100,74 @@
 			toastStore.success('Repository created successfully');
 			goto(`/${orgName}/${result.name}`);
 		} catch (err) {
-			createRepoError = err instanceof Error ? err.message : 'Failed to create repository';
 			toastStore.error(err instanceof Error ? err.message : 'Failed to create repository');
 		} finally {
 			creatingRepo = false;
 		}
 	}
+
+	async function inviteMember(e: Event) {
+		e.preventDefault();
+		if (!inviteUsername.trim()) return;
+		inviting = true;
+		try {
+			await orgs.addMember(orgName, { username: inviteUsername.trim(), role: inviteRole });
+			members = await orgs.members(orgName);
+			inviteUsername = '';
+			inviteRole = 'member';
+			showInvite = false;
+			toastStore.success('Member added');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to add member');
+		} finally {
+			inviting = false;
+		}
+	}
+
+	async function removeMember(username: string) {
+		if (!confirm(`Remove ${username} from ${orgName}?`)) return;
+		try {
+			await orgs.removeMember(orgName, username);
+			members = members.filter(m => m.username !== username);
+			toastStore.success(`${username} removed`);
+		} catch {
+			toastStore.error('Failed to remove member');
+		}
+	}
 </script>
+
+<svelte:window onresize={updateTabIndicator} />
 
 <PageShell>
 	{#if loading}
 		<div class="flex flex-col gap-6 card-animate">
 			<div class="flex items-center gap-4">
-				<Skeleton width="64px" height="64px" rounded="rounded-xl" />
+				<Skeleton width="56px" height="56px" rounded="rounded-2xl" />
 				<div class="flex flex-col gap-2">
 					<Skeleton width="180px" height="24px" />
 					<Skeleton width="120px" height="14px" />
 				</div>
 			</div>
-			<div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-				<div class="lg:col-span-2 flex flex-col gap-3">
-					{#each Array(3) as _}
-						<Skeleton width="100%" height="72px" rounded="rounded-2xl" />
-					{/each}
-				</div>
-				<Skeleton width="100%" height="200px" rounded="rounded-2xl" />
+			<div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+				{#each Array(4) as _}
+					<Skeleton width="100%" height="72px" rounded="rounded-2xl" />
+				{/each}
+			</div>
+			<Skeleton width="100%" height="40px" rounded="rounded-xl" />
+			<div class="flex flex-col gap-3">
+				{#each Array(3) as _}
+					<Skeleton width="100%" height="72px" rounded="rounded-2xl" />
+				{/each}
 			</div>
 		</div>
 	{:else if org}
 		<div class="flex flex-col gap-8 content-reveal">
 			<!-- Header -->
-			<div class="flex items-start justify-between page-header">
+			<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 page-header">
 				<OrgHeader {org} />
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 shrink-0">
 					<button
-						onclick={() => { showCreateRepo = !showCreateRepo; }}
+						onclick={() => { showCreateRepo = !showCreateRepo; showInvite = false; }}
 						class="btn-glow flex items-center gap-1.5 px-4 py-2 text-xs font-semibold rounded-xl text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
 						style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 					>
@@ -144,12 +212,6 @@
 				<form onsubmit={createRepo} class="card p-6 animate-fade-up-sm">
 					<h3 class="text-sm font-semibold mb-4" style="color: var(--color-text);">Create a new repository</h3>
 
-					{#if createRepoError}
-						<div class="px-4 py-3 mb-4 text-sm rounded-xl animate-pop-in" style="background: color-mix(in srgb, var(--color-error) 8%, transparent); border: 1px solid color-mix(in srgb, var(--color-error) 20%, transparent); color: var(--color-error);">
-							{createRepoError}
-						</div>
-					{/if}
-
 					<div class="flex flex-col gap-4 max-w-lg">
 						<div>
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Repository name</label>
@@ -191,11 +253,11 @@
 							</div>
 							<button
 								type="button"
-								class="relative w-11 h-6 rounded-full transition-colors duration-200 shrink-0"
+								class="relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0"
 								style="background-color: {newRepoPrivate ? 'var(--color-warning)' : 'var(--color-success)'};"
 								onclick={() => { newRepoPrivate = !newRepoPrivate; }}
 							>
-								<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-200" style="transform: translateX({newRepoPrivate ? '20px' : '0'});"></span>
+								<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style="transform: translateX({newRepoPrivate ? '20px' : '0'});"></span>
 							</button>
 						</div>
 
@@ -208,7 +270,7 @@
 							>{creatingRepo ? 'Creating...' : 'Create repository'}</button>
 							<button
 								type="button"
-								onclick={() => { showCreateRepo = false; createRepoError = ''; }}
+								onclick={() => { showCreateRepo = false; }}
 								class="px-4 py-2.5 text-sm rounded-xl glass-subtle transition-all hover:scale-[1.02]"
 								style="color: var(--color-text-dim);"
 							>Cancel</button>
@@ -217,13 +279,20 @@
 				</form>
 			{/if}
 
-			<!-- Tab navigation -->
-			<div class="flex items-center gap-1 glass-subtle rounded-xl p-1 card-animate stagger-2">
+			<!-- Tab navigation with sliding indicator -->
+			<div bind:this={tabContainer} class="flex items-center gap-0.5 glass-subtle rounded-xl p-1 relative card-animate stagger-2">
+				{#if tabMounted}
+					<div
+						class="absolute rounded-lg pointer-events-none z-0"
+						style="{tabIndicatorStyle} background: color-mix(in srgb, var(--color-primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;"
+						aria-hidden="true"
+					></div>
+				{/if}
 				<button
-					class="flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all duration-300"
+					data-tab
+					class="flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-colors duration-200 relative z-10"
 					style="
 						color: {activeTab === 'repos' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {activeTab === 'repos' ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
 						font-weight: {activeTab === 'repos' ? '600' : '400'};
 					"
 					onclick={() => { activeTab = 'repos'; }}
@@ -233,10 +302,10 @@
 					<span class="px-1.5 py-0.5 rounded-md text-[0.625rem] font-mono" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent);">{repos.length}</span>
 				</button>
 				<button
-					class="flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-all duration-300"
+					data-tab
+					class="flex items-center gap-2 px-4 py-2 text-xs rounded-lg transition-colors duration-200 relative z-10"
 					style="
-						color: {activeTab === 'members' ? 'var(--color-secondary)' : 'var(--color-text-dim)'};
-						background: {activeTab === 'members' ? 'color-mix(in srgb, var(--color-secondary) 12%, transparent)' : 'transparent'};
+						color: {activeTab === 'members' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
 						font-weight: {activeTab === 'members' ? '600' : '400'};
 					"
 					onclick={() => { activeTab = 'members'; }}
@@ -248,8 +317,25 @@
 			</div>
 
 			<!-- Tab content -->
-			{#if activeTab === 'repos'}
-				<div class="content-reveal">
+			{#key activeTab}
+			<div class="content-reveal">
+				{#if activeTab === 'repos'}
+					<!-- Search bar -->
+					{#if repos.length > 0}
+						<div class="mb-4">
+							<div class="relative max-w-sm">
+								<svg class="absolute left-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8" /><path stroke-linecap="round" d="m21 21-4.3-4.3" /></svg>
+								<input
+									type="text"
+									bind:value={repoSearch}
+									placeholder="Find a repository..."
+									class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
+									style="border-color: var(--color-border); color: var(--color-text);"
+								/>
+							</div>
+						</div>
+					{/if}
+
 					{#if repos.length === 0}
 						<div class="card p-12 text-center card-animate">
 							<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent);">
@@ -266,13 +352,17 @@
 								Create your first repo
 							</button>
 						</div>
+					{:else if filteredRepos.length === 0}
+						<div class="card p-8 text-center">
+							<p class="text-sm" style="color: var(--color-text-dim);">No repositories match "{repoSearch}"</p>
+						</div>
 					{:else}
 						<div class="flex flex-col gap-3">
-							{#each repos as repo, i}
+							{#each filteredRepos as repo, i}
 								<a
 									href="/{orgName}/{repo.name}"
-									class="card-hover p-5 group card-animate hover-lift"
-									style="animation-delay: {0.05 + i * 0.05}s;"
+									class="card-hover p-5 group hover-lift"
+									style="animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 40}ms;"
 								>
 									<div class="flex items-center justify-between gap-4">
 										<div class="flex items-center gap-3 min-w-0">
@@ -311,12 +401,42 @@
 							{/each}
 						</div>
 					{/if}
-				</div>
-			{:else}
-				<div class="content-reveal">
-					<OrgMemberList {members} />
-				</div>
-			{/if}
+				{:else}
+					<!-- Invite member -->
+					<div class="flex items-center justify-between mb-4">
+						<p class="text-xs font-medium" style="color: var(--color-text-dim);">{members.length} member{members.length !== 1 ? 's' : ''}</p>
+						<button
+							class="btn-glow flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-xl text-white transition-all hover:scale-[1.02] active:scale-[0.98]"
+							style="background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));"
+							onclick={() => { showInvite = !showInvite; }}
+						>
+							<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+							{showInvite ? 'Cancel' : 'Invite'}
+						</button>
+					</div>
+
+					{#if showInvite}
+						<form onsubmit={inviteMember} class="flex items-end gap-3 mb-4 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+							<div class="flex-1">
+								<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Username</label>
+								<input type="text" bind:value={inviteUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+							</div>
+							<div>
+								<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Role</label>
+								<select bind:value={inviteRole} class="px-3 py-2 text-sm rounded-xl border bg-transparent" style="border-color: var(--color-border); color: var(--color-text);">
+									<option value="member">Member</option>
+									<option value="admin">Admin</option>
+									<option value="owner">Owner</option>
+								</select>
+							</div>
+							<button type="submit" disabled={inviting || !inviteUsername.trim()} class="btn-glow px-4 py-2 text-sm font-medium rounded-xl text-white disabled:opacity-40" style="background: linear-gradient(135deg, var(--color-secondary), var(--color-primary));">{inviting ? 'Adding...' : 'Add'}</button>
+						</form>
+					{/if}
+
+					<OrgMemberList {members} onRemove={removeMember} />
+				{/if}
+			</div>
+			{/key}
 		</div>
 	{:else}
 		<div class="flex flex-col items-center justify-center py-20 gap-4 card-animate">

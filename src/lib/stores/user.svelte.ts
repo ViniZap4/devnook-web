@@ -45,8 +45,15 @@ export const userStore = {
 				auth.me().then((fresh) => {
 					user = fresh;
 					persistUser(fresh);
-				}).catch(() => {
-					// Token expired — force logout
+				}).catch((err) => {
+					// Only logout on auth errors (401), not network failures
+					// The request() function already triggers onUnauthorized for 401s,
+					// so network errors (TypeError) should keep the session alive.
+					if (err instanceof TypeError) {
+						// Network error — server unreachable, keep cached session
+						return;
+					}
+					// Explicit auth error — force logout
 					userStore.logout();
 				});
 				themeStore.loadFromServer();
@@ -57,10 +64,13 @@ export const userStore = {
 				const fresh = await auth.me();
 				user = fresh;
 				persistUser(fresh);
-			} catch {
-				setToken(null);
-				user = null;
-				clearPersistedUser();
+			} catch (err) {
+				// Network error — keep token, will retry on next load
+				if (!(err instanceof TypeError)) {
+					setToken(null);
+					user = null;
+					clearPersistedUser();
+				}
 			}
 		}
 
