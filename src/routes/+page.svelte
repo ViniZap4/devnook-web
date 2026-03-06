@@ -9,9 +9,11 @@
 	let error = $state('');
 	let submitting = $state(false);
 	let mounted = $state(false);
+	let redirecting = $state(false);
 
 	onMount(() => {
 		if (userStore.isLoggedIn) {
+			redirecting = true;
 			goto('/dashboard');
 			return;
 		}
@@ -85,6 +87,11 @@
 	}
 </script>
 
+{#if redirecting}
+	<div class="min-h-screen flex items-center justify-center" style="background-color: var(--color-background);">
+		<div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+	</div>
+{:else}
 <div class="min-h-screen flex relative overflow-hidden" style="background-color: var(--color-background);">
 	<!-- Organic floating background orbs -->
 	<div class="bg-orb bg-orb-1" style="position: absolute;"></div>
@@ -213,6 +220,7 @@
 		</div>
 	</div>
 </div>
+{/if}
 
 <style>
 	.auth-label {
