@@ -152,7 +152,7 @@
 <style>
 	.vim-hint {
 		position: fixed;
-		bottom: 80px;
+		top: 64px;
 		left: 50%;
 		transform: translateX(-50%);
 		z-index: 60;
@@ -184,7 +184,7 @@
 	}
 
 	@keyframes vim-hint-in {
-		0% { opacity: 0; transform: translateX(-50%) translateY(8px); }
+		0% { opacity: 0; transform: translateX(-50%) translateY(-8px); }
 		100% { opacity: 1; transform: translateX(-50%) translateY(0); }
 	}
 </style>

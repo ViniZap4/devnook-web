@@ -33,7 +33,7 @@
 	{/if}
 
 	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">
-		<main class="{maxWidth} mx-auto px-4 sm:px-6 pt-8 pb-24 w-full flex-1">
+		<main class="{maxWidth} mx-auto px-4 sm:px-6 pt-20 pb-8 w-full flex-1">
 			{@render children()}
 		</main>
 		<Footer />

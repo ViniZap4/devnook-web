@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
+	import { userStore } from '$lib/stores/user.svelte';
 	import { users } from '$lib/services/api';
 	import type { User } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
@@ -12,6 +13,7 @@
 	import Skeleton from '$lib/components/Skeleton.svelte';
 
 	const owner = $derived($page.params.owner!);
+	const isSelf = $derived(userStore.user?.username === owner);
 
 	let user = $state<User | null>(null);
 	let repos = $state<Repository[]>([]);
@@ -20,6 +22,8 @@
 	let loading = $state(true);
 	let error = $state('');
 	let tab = $state<'repos' | 'starred' | 'orgs'>('repos');
+	let following = $state(false);
+	let followLoading = $state(false);
 	let fetchId = 0;
 
 	$effect(() => {
@@ -33,6 +37,7 @@
 		starredRepos = [];
 		orgs = [];
 		tab = 'repos';
+		following = false;
 
 		users.profile(_owner).then(data => {
 			if (id !== fetchId) return;
@@ -46,7 +51,33 @@
 			if (id !== fetchId) return;
 			loading = false;
 		});
+
+		// Check follow status
+		if (userStore.isLoggedIn && _owner !== userStore.user?.username) {
+			users.isFollowing(_owner).then(res => {
+				if (id !== fetchId) return;
+				following = res.following;
+			}).catch(() => {});
+		}
 	});
+
+	async function toggleFollow() {
+		if (followLoading || !user) return;
+		followLoading = true;
+		try {
+			if (following) {
+				await users.unfollow(owner);
+				following = false;
+			} else {
+				await users.follow(owner);
+				following = true;
+			}
+		} catch {
+			// ignore
+		} finally {
+			followLoading = false;
+		}
+	}
 
 	async function loadStarred() {
 		if (starredRepos.length > 0) return;
@@ -97,6 +128,32 @@
 						<p class="text-sm" style="color: var(--color-text-dim);">@{user.username}</p>
 					</div>
 				</div>
+
+				{#if !isSelf}
+					<div class="flex items-center gap-2 w-full">
+						<button
+							class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50"
+							style="background: {following ? 'var(--color-surface)' : 'var(--color-primary)'}; color: {following ? 'var(--color-text)' : 'white'}; border: 1px solid {following ? 'var(--color-border)' : 'transparent'};"
+							onclick={toggleFollow}
+							disabled={followLoading}
+						>
+							{#if following}
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+								Following
+							{:else}
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
+								Follow
+							{/if}
+						</button>
+						<a
+							href="/messages?user={user.username}"
+							class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-[1.02]"
+							style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-dim);"
+						>
+							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+						</a>
+					</div>
+				{/if}
 
 				{#if user.bio}
 					<p class="text-sm" style="color: var(--color-text);">{user.bio}</p>
