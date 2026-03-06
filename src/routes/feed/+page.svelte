@@ -4,7 +4,7 @@
 	import { userStore } from '$lib/stores/user.svelte';
 	import { users, posts } from '$lib/services/api';
 	import type { ActivityItem } from '$lib/services/api';
-	import type { Post } from '$lib/types/post';
+	import type { Post, PostComment } from '$lib/types/post';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
@@ -21,6 +21,13 @@
 	let postType = $state<'text' | 'code'>('text');
 	let posting = $state(false);
 	let repoRef = $state('');
+
+	// Comments
+	let expandedComments = $state<Record<number, boolean>>({});
+	let postComments = $state<Record<number, PostComment[]>>({});
+	let commentInputs = $state<Record<number, string>>({});
+	let loadingComments = $state<Record<number, boolean>>({});
+	let sendingComment = $state<Record<number, boolean>>({});
 
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
@@ -83,6 +90,49 @@
 				post.liked = true;
 				post.likes_count++;
 			}
+		} catch { /* ignore */ }
+	}
+
+	async function toggleComments(post: Post) {
+		if (expandedComments[post.id]) {
+			expandedComments[post.id] = false;
+			return;
+		}
+		expandedComments[post.id] = true;
+		if (!postComments[post.id]) {
+			await loadComments(post.id);
+		}
+	}
+
+	async function loadComments(postId: number) {
+		loadingComments[postId] = true;
+		try {
+			postComments[postId] = await posts.comments(postId);
+		} catch {
+			postComments[postId] = [];
+		} finally {
+			loadingComments[postId] = false;
+		}
+	}
+
+	async function submitComment(post: Post) {
+		const content = (commentInputs[post.id] || '').trim();
+		if (!content || sendingComment[post.id]) return;
+		sendingComment[post.id] = true;
+		try {
+			await posts.addComment(post.id, { content });
+			commentInputs[post.id] = '';
+			post.comments_count++;
+			await loadComments(post.id);
+		} catch { /* ignore */ }
+		finally { sendingComment[post.id] = false; }
+	}
+
+	async function deleteComment(post: Post, commentId: number) {
+		try {
+			await posts.removeComment(post.id, commentId);
+			post.comments_count = Math.max(0, post.comments_count - 1);
+			postComments[post.id] = (postComments[post.id] || []).filter(c => c.id !== commentId);
 		} catch { /* ignore */ }
 	}
 
@@ -193,58 +243,122 @@
 				<div class="flex flex-col gap-4">
 					{#each feedPosts as post, i}
 						<div
-							class="card p-4 transition-all duration-300"
+							class="card overflow-hidden transition-all duration-300"
 							style="opacity: {visible ? 1 : 0}; transform: {visible ? 'translateY(0)' : 'translateY(16px)'}; transition-delay: {i * 60}ms;"
 						>
-							<div class="flex items-start gap-3">
-								<a href="/{post.author_username}">
-									<Avatar username={post.author_username} size={36} />
-								</a>
-								<div class="flex-1 min-w-0">
-									<div class="flex items-center gap-2">
-										<a href="/{post.author_username}" class="text-sm font-semibold animated-link" style="color: var(--color-text);">{post.author_full_name || post.author_username}</a>
-										<span class="text-xs" style="color: var(--color-text-dim);">@{post.author_username}</span>
-										<span class="text-xs ml-auto" style="color: var(--color-text-dim); opacity: 0.5;"><RelativeTime date={post.created_at} /></span>
-									</div>
-
-									{#if post.type === 'code'}
-										<pre class="mt-2 p-3 rounded-lg text-xs font-mono overflow-x-auto" style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text);">{post.content}</pre>
-									{:else}
-										<p class="mt-1.5 text-sm leading-relaxed" style="color: var(--color-text);">{post.content}</p>
-									{/if}
-
-									{#if post.repo_owner && post.repo_name}
-										<a href="/{post.repo_owner}/{post.repo_name}" class="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg text-xs" style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-primary);">
-											<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
-											{post.repo_owner}/{post.repo_name}
-										</a>
-									{/if}
-
-									{#if post.tags && post.tags.length > 0}
-										<div class="flex flex-wrap gap-1 mt-2">
-											{#each post.tags as tag}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-primary)10; color: var(--color-primary);">#{tag}</span>
-											{/each}
+							<div class="p-4">
+								<div class="flex items-start gap-3">
+									<a href="/{post.author_username}">
+										<Avatar username={post.author_username} size={36} />
+									</a>
+									<div class="flex-1 min-w-0">
+										<div class="flex items-center gap-2">
+											<a href="/{post.author_username}" class="text-sm font-semibold animated-link" style="color: var(--color-text);">{post.author_full_name || post.author_username}</a>
+											<span class="text-xs" style="color: var(--color-text-dim);">@{post.author_username}</span>
+											<span class="text-xs ml-auto" style="color: var(--color-text-dim); opacity: 0.5;"><RelativeTime date={post.created_at} /></span>
 										</div>
-									{/if}
 
-									<!-- Actions -->
-									<div class="flex items-center gap-4 mt-3 pt-2 border-t" style="border-color: var(--color-separator);">
-										<button class="flex items-center gap-1.5 text-xs transition-colors" style="color: {post.liked ? 'var(--color-error)' : 'var(--color-text-dim)'};" onclick={() => toggleLike(post)}>
-											<svg class="w-3.5 h-3.5" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
-											{post.likes_count || ''}
-										</button>
-										<button class="flex items-center gap-1.5 text-xs" style="color: var(--color-text-dim);">
-											<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
-											{post.comments_count || ''}
-										</button>
-										<button class="flex items-center gap-1.5 text-xs" style="color: {post.reposted ? 'var(--color-success)' : 'var(--color-text-dim)'};">
-											<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-											{post.reposts_count || ''}
-										</button>
+										{#if post.type === 'code'}
+											<pre class="mt-2 p-3 rounded-lg text-xs font-mono overflow-x-auto" style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text);">{post.content}</pre>
+										{:else}
+											<p class="mt-1.5 text-sm leading-relaxed" style="color: var(--color-text);">{post.content}</p>
+										{/if}
+
+										{#if post.repo_owner && post.repo_name}
+											<a href="/{post.repo_owner}/{post.repo_name}" class="inline-flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg text-xs" style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-primary);">
+												<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
+												{post.repo_owner}/{post.repo_name}
+											</a>
+										{/if}
+
+										{#if post.tags && post.tags.length > 0}
+											<div class="flex flex-wrap gap-1 mt-2">
+												{#each post.tags as tag}
+													<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-primary)10; color: var(--color-primary);">#{tag}</span>
+												{/each}
+											</div>
+										{/if}
+
+										<!-- Actions -->
+										<div class="flex items-center gap-4 mt-3 pt-2 border-t" style="border-color: var(--color-separator);">
+											<button class="flex items-center gap-1.5 text-xs transition-colors" style="color: {post.liked ? 'var(--color-error)' : 'var(--color-text-dim)'};" onclick={() => toggleLike(post)}>
+												<svg class="w-3.5 h-3.5" fill={post.liked ? 'currentColor' : 'none'} viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" /></svg>
+												{post.likes_count || ''}
+											</button>
+											<button
+												class="flex items-center gap-1.5 text-xs transition-colors"
+												style="color: {expandedComments[post.id] ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
+												onclick={() => toggleComments(post)}
+											>
+												<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
+												{post.comments_count || ''}
+											</button>
+											<button class="flex items-center gap-1.5 text-xs" style="color: {post.reposted ? 'var(--color-success)' : 'var(--color-text-dim)'};">
+												<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
+												{post.reposts_count || ''}
+											</button>
+										</div>
 									</div>
 								</div>
 							</div>
+
+							<!-- Comments section -->
+							{#if expandedComments[post.id]}
+								<div class="border-t px-4 py-3 flex flex-col gap-3" style="border-color: var(--color-separator); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+									{#if loadingComments[post.id]}
+										<div class="py-3 text-center">
+											<div class="w-4 h-4 border-2 rounded-full animate-spin mx-auto" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+										</div>
+									{:else}
+										{#if (postComments[post.id] || []).length > 0}
+											<div class="flex flex-col gap-2.5">
+												{#each postComments[post.id] as comment}
+													<div class="flex items-start gap-2.5">
+														<a href="/{comment.author_username}">
+															<Avatar username={comment.author_username} size={24} />
+														</a>
+														<div class="flex-1 min-w-0">
+															<div class="flex items-center gap-2">
+																<a href="/{comment.author_username}" class="text-xs font-semibold animated-link" style="color: var(--color-text);">{comment.author_full_name || comment.author_username}</a>
+																<span class="text-[0.625rem]" style="color: var(--color-text-dim); opacity: 0.5;"><RelativeTime date={comment.created_at} /></span>
+																{#if comment.author_username === userStore.user?.username}
+																	<button
+																		class="ml-auto text-[0.625rem] opacity-0 group-hover:opacity-100 transition-opacity"
+																		style="color: var(--color-error);"
+																		onclick={() => deleteComment(post, comment.id)}
+																	>Delete</button>
+																{/if}
+															</div>
+															<p class="text-xs mt-0.5 leading-relaxed" style="color: var(--color-text);">{comment.content}</p>
+														</div>
+													</div>
+												{/each}
+											</div>
+										{/if}
+
+										<!-- Comment input -->
+										<div class="flex items-center gap-2">
+											<Avatar username={userStore.user?.username ?? '?'} size={24} />
+											<div class="flex-1 relative">
+												<input
+													type="text"
+													bind:value={commentInputs[post.id]}
+													placeholder="Write a comment..."
+													class="w-full px-3 py-1.5 text-xs rounded-lg border bg-transparent transition-colors focus:border-[var(--color-primary)]"
+													style="border-color: var(--color-border); color: var(--color-text);"
+													onkeydown={(e) => { if (e.key === 'Enter') submitComment(post); }}
+												/>
+											</div>
+											<button
+												class="shrink-0 px-3 py-1.5 text-xs font-medium rounded-lg text-white disabled:opacity-30 transition-opacity"
+												style="background: var(--color-primary);"
+												disabled={!(commentInputs[post.id] || '').trim() || sendingComment[post.id]}
+												onclick={() => submitComment(post)}
+											>{sendingComment[post.id] ? '...' : 'Send'}</button>
+										</div>
+									{/if}
+								</div>
+							{/if}
 						</div>
 					{/each}
 				</div>
