@@ -8,6 +8,7 @@
 	import type { IssueComment as IssueCommentType } from '$lib/types/issue';
 	import IssueComment from '$lib/components/IssueComment.svelte';
 	import CommentForm from '$lib/components/CommentForm.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
 	import { toastStore } from '$lib/stores/toast.svelte';
@@ -186,7 +187,7 @@
 {#if loading}
 	<div class="py-16 text-center card-animate">
 		<div class="inline-flex flex-col items-center gap-3">
-			<div class="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style="border-color: var(--color-primary); border-top-color: transparent;"></div>
+			<Spinner size="lg" />
 			<span class="text-sm" style="color: var(--color-text-dim);">Loading issue...</span>
 		</div>
 	</div>

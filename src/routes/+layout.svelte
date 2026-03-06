@@ -7,6 +7,7 @@
 	import Toast from '$lib/components/Toast.svelte';
 	import NavigationProgress from '$lib/components/NavigationProgress.svelte';
 	import VimMotions from '$lib/components/VimMotions.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	let { children } = $props();
 	let ready = $state(false);
@@ -24,7 +25,7 @@
 		{@render children()}
 	{:else}
 		<div class="min-h-screen flex items-center justify-center">
-			<div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+			<Spinner size="lg" />
 		</div>
 	{/if}
 </div>

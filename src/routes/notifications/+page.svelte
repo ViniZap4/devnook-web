@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { notifications } from '$lib/services/api';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import type { Notification } from '$lib/types/notification';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
@@ -105,7 +106,7 @@
 
 		{#if loading}
 			<div class="py-12 flex flex-col items-center gap-3">
-				<div class="w-6 h-6 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+				<Spinner size="md" />
 				<span class="text-xs" style="color: var(--color-text-dim);">Loading notifications...</span>
 			</div>
 		{:else if items.length === 0}

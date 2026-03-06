@@ -8,6 +8,7 @@
 	import type { Conversation, Message } from '$lib/types/message';
 	import { wsStore } from '$lib/stores/websocket.svelte';
 	import PageShell from '$lib/components/PageShell.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
@@ -265,7 +266,7 @@
 						/>
 						{#if searching}
 							<div class="absolute right-3 top-1/2 -translate-y-1/2">
-								<div class="w-4 h-4 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+								<Spinner size="xs" />
 							</div>
 						{/if}
 					</div>
@@ -326,7 +327,7 @@
 				<div class="flex-1 overflow-y-auto">
 					{#if loading}
 						<div class="p-8 text-center">
-							<div class="w-5 h-5 border-2 rounded-full animate-spin mx-auto" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+							<div class="mx-auto w-fit"><Spinner size="sm" /></div>
 						</div>
 					{:else if filteredConversations.length === 0}
 						<div class="p-8 text-center flex flex-col items-center gap-3">
@@ -471,7 +472,7 @@
 					<div bind:this={chatAreaEl} class="flex-1 overflow-y-auto p-4 flex flex-col gap-1 chat-messages">
 						{#if msgLoading}
 							<div class="flex-1 flex items-center justify-center">
-								<div class="w-5 h-5 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+								<Spinner size="sm" />
 							</div>
 						{:else if convoMessages.length === 0}
 							<div class="flex-1 flex items-center justify-center">

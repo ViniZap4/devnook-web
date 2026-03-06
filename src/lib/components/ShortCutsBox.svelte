@@ -3,11 +3,18 @@
 	import ShortCut from './ShortCut.svelte';
 	import NewShortCut from './NewShortCut.svelte';
 	import EditShortcutMenuContext from './EditShortcutMenuContext.svelte';
-	import CreateShortcutModal from './CreateShortcutModal.svelte';
-	import EditShortcutModal from './EditShortcutModal.svelte';
+	import ShortcutModal from './ShortcutModal.svelte';
 
-	let createModalOpen = $state(false);
-	let editModalOpen = $state(false);
+	let modalOpen = $state(false);
+
+	function openCreate() {
+		shortcutsStore.editShortcut = null;
+		modalOpen = true;
+	}
+
+	function openEdit() {
+		modalOpen = true;
+	}
 </script>
 
 <section class="card p-6 animate-pop-in">
@@ -20,15 +27,14 @@
 	<div class="grid grid-cols-[repeat(auto-fill,5.5rem)] gap-1">
 		{#each shortcutsStore.shortcuts as shortcut, i (shortcut.id)}
 			<div style="animation: pop-in 0.3s cubic-bezier(0.34, 1.56, 0.64, 1) both; animation-delay: {i * 50}ms;">
-				<ShortCut id={shortcut.id} link={shortcut.link} name={shortcut.name} />
+				<ShortCut id={shortcut.id} title={shortcut.title} url={shortcut.url} />
 			</div>
 		{/each}
-		<NewShortCut oncreate={() => { createModalOpen = true; }} />
+		<NewShortCut oncreate={openCreate} />
 	</div>
 	{#if shortcutsStore.contextMenu}
-		<EditShortcutMenuContext onedit={() => { editModalOpen = true; }} />
+		<EditShortcutMenuContext onedit={openEdit} />
 	{/if}
 </section>
 
-<CreateShortcutModal open={createModalOpen} onclose={() => { createModalOpen = false; }} />
-<EditShortcutModal open={editModalOpen} onclose={() => { editModalOpen = false; }} />
+<ShortcutModal open={modalOpen} onclose={() => { modalOpen = false; }} />

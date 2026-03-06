@@ -2,6 +2,7 @@
 	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
 
 	type Mode = 'setup' | 'login' | 'register';
 
@@ -100,7 +101,7 @@
 
 {#if redirecting}
 	<div class="min-h-screen flex items-center justify-center" style="background-color: var(--color-background);">
-		<div class="w-8 h-8 rounded-full border-2 animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+		<Spinner size="lg" />
 	</div>
 {:else}
 <div class="min-h-screen flex relative overflow-hidden" style="background-color: var(--color-background);">

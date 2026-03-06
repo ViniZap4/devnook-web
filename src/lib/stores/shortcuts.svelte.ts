@@ -1,26 +1,25 @@
-import type { ShortCutProps } from '$lib/types/shortcuts';
+import type { Shortcut } from '$lib/types/shortcuts';
 import { shortcuts as api } from '$lib/services/api';
+import { toastStore } from '$lib/stores/toast.svelte';
 
 interface ContextMenuData {
 	x: number;
 	y: number;
-	id: number;
-	name: string;
-	link: string;
+	shortcut: Shortcut;
 }
 
-let shortcutsList = $state<ShortCutProps[]>([]);
-let editShortcutInfo = $state<ShortCutProps>({ id: 0, link: '', name: '' });
+let shortcutsList = $state<Shortcut[]>([]);
+let editShortcut = $state<Shortcut | null>(null);
 let contextMenu = $state<ContextMenuData | null>(null);
 let loading = $state(false);
 
 export const shortcutsStore = {
 	get shortcuts() { return shortcutsList; },
-	set shortcuts(v: ShortCutProps[]) { shortcutsList = v; },
+	set shortcuts(v: Shortcut[]) { shortcutsList = v; },
 	get loading() { return loading; },
 
-	get editShortcutInfo() { return editShortcutInfo; },
-	set editShortcutInfo(v: ShortCutProps) { editShortcutInfo = v; },
+	get editShortcut() { return editShortcut; },
+	set editShortcut(v: Shortcut | null) { editShortcut = v; },
 
 	get contextMenu() { return contextMenu; },
 	set contextMenu(v: ContextMenuData | null) { contextMenu = v; },
@@ -28,8 +27,7 @@ export const shortcutsStore = {
 	async load() {
 		loading = true;
 		try {
-			const list = await api.list();
-			shortcutsList = list.map((s) => ({ id: s.id, name: s.title, link: s.url }));
+			shortcutsList = await api.list();
 		} catch {
 			// keep current state
 		} finally {
@@ -37,20 +35,38 @@ export const shortcutsStore = {
 		}
 	},
 
-	async create(name: string, link: string) {
-		const res = await api.create({ title: name, url: link });
-		shortcutsList = [...shortcutsList, { id: res.id, name, link }];
+	async create(title: string, url: string) {
+		try {
+			const res = await api.create({ title, url });
+			shortcutsList = [...shortcutsList, { id: res.id, title, url }];
+			toastStore.success('Shortcut created');
+		} catch (e) {
+			toastStore.error(e instanceof Error ? e.message : 'Failed to create shortcut');
+			throw e;
+		}
 	},
 
-	async update(id: number, name: string, link: string) {
-		await api.update(id, { title: name, url: link });
-		shortcutsList = shortcutsList.map((s) =>
-			s.id === id ? { ...s, name, link } : s
-		);
+	async update(id: number, title: string, url: string) {
+		try {
+			await api.update(id, { title, url });
+			shortcutsList = shortcutsList.map((s) =>
+				s.id === id ? { ...s, title, url } : s
+			);
+			toastStore.success('Shortcut updated');
+		} catch (e) {
+			toastStore.error(e instanceof Error ? e.message : 'Failed to update shortcut');
+			throw e;
+		}
 	},
 
 	async remove(id: number) {
-		await api.remove(id);
-		shortcutsList = shortcutsList.filter((s) => s.id !== id);
+		try {
+			await api.remove(id);
+			shortcutsList = shortcutsList.filter((s) => s.id !== id);
+			toastStore.success('Shortcut deleted');
+		} catch (e) {
+			toastStore.error(e instanceof Error ? e.message : 'Failed to delete shortcut');
+			throw e;
+		}
 	}
 };

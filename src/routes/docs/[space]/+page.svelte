@@ -3,6 +3,7 @@
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { docs } from '$lib/services/api';
+	import Spinner from '$lib/components/Spinner.svelte';
 	import type { DocSpace, DocPage } from '$lib/types/doc';
 	import PageShell from '$lib/components/PageShell.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
@@ -80,7 +81,7 @@
 <PageShell maxWidth="max-w-6xl">
 	{#if loading}
 		<div class="py-16 flex flex-col items-center gap-3">
-			<div class="w-6 h-6 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+			<Spinner size="md" />
 		</div>
 	{:else if space}
 		<div class="flex flex-col gap-6">

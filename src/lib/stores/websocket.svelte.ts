@@ -8,9 +8,10 @@ let reconnectTimer: ReturnType<typeof setTimeout> | null = null;
 const listeners = new Map<string, Set<EventHandler>>();
 let currentToken: string | null = null;
 
+import { BASE_URL } from '$lib/config';
+
 function getWsUrl(token: string): string {
-	const base = import.meta.env.VITE_DEVNOOK_SERVER_URL || 'http://localhost:8080';
-	const wsBase = base.replace(/^http/, 'ws');
+	const wsBase = BASE_URL.replace(/^http/, 'ws');
 	return `${wsBase}/ws?token=${encodeURIComponent(token)}`;
 }
 

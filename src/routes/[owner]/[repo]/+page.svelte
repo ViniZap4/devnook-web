@@ -11,10 +11,11 @@
 	import LanguageBar from '$lib/components/LanguageBar.svelte';
 	import ContributorsList from '$lib/components/ContributorsList.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
+	import Spinner from '$lib/components/Spinner.svelte';
+	import { BASE_URL } from '$lib/config';
 
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
-	const BASE_URL = import.meta.env.VITE_DEVNOOK_SERVER_URL || 'http://localhost:8080';
 	const isOwner = $derived(userStore.user?.username === owner);
 
 	let repoData = $state<Repository | null>(null);
@@ -81,7 +82,7 @@
 {#if loading}
 	<div class="py-16 text-center card-animate">
 		<div class="inline-flex flex-col items-center gap-3">
-			<div class="w-8 h-8 rounded-full border-2 border-t-transparent animate-spin" style="border-color: var(--color-primary); border-top-color: transparent;"></div>
+			<Spinner size="lg" />
 			<span class="text-sm" style="color: var(--color-text-dim);">Loading repository...</span>
 		</div>
 	</div>

@@ -1,5 +1,5 @@
-export type ShortCutProps = {
+export type Shortcut = {
 	id: number;
-	name: string;
-	link: string;
+	title: string;
+	url: string;
 };

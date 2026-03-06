@@ -7,9 +7,9 @@
 	import CloneUrlBox from './CloneUrlBox.svelte';
 	import { onMount } from 'svelte';
 
-	let { repo }: { repo: Repository } = $props();
+	import { BASE_URL } from '$lib/config';
 
-	const BASE_URL = import.meta.env.VITE_DEVNOOK_SERVER_URL || 'http://localhost:8080';
+	let { repo }: { repo: Repository } = $props();
 	const cloneUrl = $derived(`${BASE_URL}/${repo.owner}/${repo.name}.git`);
 
 	let showClone = $state(false);

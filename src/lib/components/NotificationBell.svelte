@@ -4,6 +4,7 @@
 	import { onMount, onDestroy } from 'svelte';
 	import { wsStore } from '$lib/stores/websocket.svelte';
 	import RelativeTime from './RelativeTime.svelte';
+	import Spinner from './Spinner.svelte';
 
 	let unreadCount = $state(0);
 	let items = $state<Notification[]>([]);
@@ -125,7 +126,7 @@
 
 			{#if loading}
 				<div class="px-4 py-6 flex flex-col items-center gap-2">
-					<div class="w-4 h-4 border-2 rounded-full animate-spin" style="border-color: var(--color-border); border-top-color: var(--color-primary);"></div>
+					<Spinner size="xs" />
 					<span class="text-xs" style="color: var(--color-text-dim);">Loading...</span>
 				</div>
 			{:else if items.length === 0}
