@@ -22,29 +22,45 @@
 		await shortcutsStore.load();
 		ready = true;
 	});
+
+	function getGreeting(): string {
+		const hour = new Date().getHours();
+		if (hour < 12) return 'Good morning';
+		if (hour < 18) return 'Good afternoon';
+		return 'Good evening';
+	}
 </script>
 
 {#if ready}
-<PageShell maxWidth="max-w-6xl">
+<PageShell maxWidth="max-w-7xl">
 	<!-- Welcome header -->
-	<div class="flex items-center justify-between mb-8 pb-6 border-b animate-fade-up" style="border-color: var(--color-separator);">
-		<div class="flex items-center gap-4">
-			<div class="transition-transform duration-300 hover:scale-105">
-				<Avatar username={userStore.user?.username ?? '?'} size={52} />
+	<div class="flex items-center justify-between mb-10 pb-8 border-b animate-fade-up" style="border-color: var(--color-separator);">
+		<div class="flex items-center gap-5">
+			<div class="relative group">
+				<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--color-primary)30, var(--color-secondary)20); filter: blur(8px);"></div>
+				<div class="relative transition-transform duration-300 group-hover:scale-105">
+					<Avatar username={userStore.user?.username ?? '?'} size={56} />
+				</div>
 			</div>
 			<div>
-				<h1 class="text-xl font-bold" style="color: var(--color-text);">
+				<h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text);">
 					{#if userStore.user?.full_name}
-						Welcome back, {userStore.user.full_name.split(' ')[0]}
+						{getGreeting()}, {userStore.user.full_name.split(' ')[0]}
 					{:else}
-						Welcome back
+						{getGreeting()}
 					{/if}
 				</h1>
-				<p class="text-sm mt-0.5" style="color: var(--color-text-dim);">@{userStore.user?.username}</p>
+				<p class="text-sm mt-1" style="color: var(--color-text-dim);">
+					@{userStore.user?.username}
+					<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background: var(--color-primary)10; color: var(--color-primary);">
+						<span class="w-1.5 h-1.5 rounded-full live-dot" style="background: var(--color-success);"></span>
+						Online
+					</span>
+				</p>
 			</div>
 		</div>
-		<div class="hidden sm:flex items-center gap-2">
-			<a href="/new" class="btn-glow flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:brightness-110 hover:scale-[1.02] active:scale-[0.98]" style="background-color: var(--color-primary); color: white;">
+		<div class="hidden sm:flex items-center gap-3">
+			<a href="/new" class="btn-glow flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); color: white;">
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
 				New Repository
 			</a>
@@ -52,24 +68,24 @@
 	</div>
 
 	<!-- Stats -->
-	<div class="mb-8 animate-fade-up stagger-1">
+	<div class="mb-10 animate-fade-up stagger-1">
 		<StatsCards />
 	</div>
 
-	<!-- Two column layout -->
-	<div class="grid grid-cols-1 lg:grid-cols-3 gap-8">
+	<!-- Main grid -->
+	<div class="grid grid-cols-1 lg:grid-cols-12 gap-8">
 		<!-- Main column -->
-		<div class="lg:col-span-2 flex flex-col gap-8 animate-fade-up stagger-2">
+		<div class="lg:col-span-8 flex flex-col gap-8 animate-fade-up stagger-2">
 			<ReposSection />
 			<ActivityFeed />
 		</div>
 
 		<!-- Sidebar -->
-		<div class="flex flex-col gap-6 animate-fade-up stagger-3">
+		<div class="lg:col-span-4 flex flex-col gap-6 animate-fade-up stagger-3">
 			<OrgsSection />
 			<ShortCutsBox />
 			<div class="card p-6">
-				<h2 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--color-text-dim);">Appearance</h2>
+				<h2 class="section-title mb-4">Appearance</h2>
 				<AppearanceSection />
 			</div>
 		</div>

@@ -58,16 +58,16 @@
 
 <svelte:window onresize={updateIndicator} />
 
-<nav class="sticky top-0 z-40 border-b transition-colors" style="border-color: var(--color-border); background-color: var(--color-background)e6; backdrop-filter: blur(20px) saturate(1.3);">
+<nav class="sticky top-0 z-40 glass-strong">
 	<div class="max-w-7xl mx-auto px-6 flex items-center justify-between h-14">
 		<!-- Left -->
 		<div class="flex items-center gap-6">
-			<a href="/dashboard" class="flex items-center gap-2 shrink-0 group">
+			<a href="/dashboard" class="flex items-center gap-2.5 shrink-0 group">
 				<div class="relative">
-					<div class="w-2.5 h-2.5 rounded-full transition-transform duration-300 group-hover:scale-125" style="background-color: var(--color-primary);"></div>
+					<div class="w-2.5 h-2.5 rounded-full transition-all duration-300 group-hover:scale-125 group-hover:shadow-[0_0_12px_var(--color-primary)]" style="background-color: var(--color-primary);"></div>
 					<div class="absolute inset-0 w-2.5 h-2.5 rounded-full live-dot" style="background-color: var(--color-primary); opacity: 0.4;"></div>
 				</div>
-				<span style="color: var(--color-text);" class="font-bold tracking-tight text-sm">Dev Nook</span>
+				<span class="font-bold tracking-tight text-sm gradient-text">Dev Nook</span>
 			</a>
 
 			<!-- Nav links with sliding indicator -->
@@ -75,17 +75,15 @@
 				{#if mounted}
 					<div
 						class="absolute top-0 bottom-0 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
-						style="{indicatorStyle} background: var(--color-primary)15;"
-					>
-						<div class="absolute inset-0 border rounded-xl" style="border-color: var(--color-primary)30;"></div>
-					</div>
+						style="{indicatorStyle} background: var(--color-primary)10; border: 1px solid var(--color-primary)20;"
+					></div>
 				{/if}
 				{#each navItems as item, i}
 					{@const isActive = activeIndex === i}
 					<a
 						href={item.to}
 						data-nav-link
-						class="relative px-4 py-2 rounded-xl text-sm font-medium transition-colors z-10"
+						class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 z-10"
 						style="color: {isActive ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
 						onmouseenter={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--color-text)'; }}
 						onmouseleave={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--color-text-dim)'; }}
@@ -98,25 +96,25 @@
 
 		<!-- Center: search trigger -->
 		<button
-			class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl border text-xs transition-colors"
-			style="border-color: var(--color-border); color: var(--color-text-dim); background: var(--color-surface);"
+			class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-200 glass-subtle"
+			style="color: var(--color-text-dim);"
 			onclick={() => { document.dispatchEvent(new CustomEvent('open-command-palette')); }}
-			onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-			onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+			onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)40'; }}
+			onmouseleave={(e) => { e.currentTarget.style.borderColor = ''; }}
 		>
 			<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 				<circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
 			</svg>
 			<span>Search...</span>
-			<kbd class="ml-4 px-1.5 py-0.5 rounded border text-[10px] font-mono" style="border-color: var(--color-border); color: var(--color-text-dim);">
+			<kbd class="ml-4 px-1.5 py-0.5 rounded-md border text-[10px] font-mono" style="border-color: var(--color-border); color: var(--color-text-dim);">
 				{navigator?.platform?.includes('Mac') ? '\u2318' : 'Ctrl+'}K
 			</kbd>
 		</button>
 
 		<!-- Right -->
-		<div class="flex items-center gap-3">
+		<div class="flex items-center gap-2">
 			<ThemePicker />
-			<div class="w-px h-5" style="background: var(--color-border);"></div>
+			<div class="w-px h-4 mx-1" style="background: var(--color-border);"></div>
 			<NotificationBell />
 			<CreateDropdown />
 			<UserDropdown />

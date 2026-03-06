@@ -5,48 +5,70 @@
 
 	let stats = $state<DashboardStats | null>(null);
 	let visible = $state(false);
+	let counters = $state<number[]>([0, 0, 0, 0]);
 
 	onMount(async () => {
 		try {
 			stats = await users.dashboardStats();
-			// Small delay for entrance animation
-			requestAnimationFrame(() => { visible = true; });
+			requestAnimationFrame(() => {
+				visible = true;
+				// Animate counters
+				if (stats) {
+					const targets = [stats.total_repos, stats.total_orgs, stats.open_issues, stats.total_commits ?? 0];
+					const duration = 800;
+					const start = performance.now();
+					function tick(now: number) {
+						const t = Math.min((now - start) / duration, 1);
+						const ease = 1 - Math.pow(1 - t, 3); // easeOutCubic
+						counters = targets.map(target => Math.round(target * ease));
+						if (t < 1) requestAnimationFrame(tick);
+					}
+					requestAnimationFrame(tick);
+				}
+			});
 		} catch {
 			// ignore
 		}
 	});
 
 	const cards = $derived(stats ? [
-		{ value: stats.total_repos, label: 'Repositories', color: 'var(--color-info)', icon: 'repo' },
-		{ value: stats.total_orgs, label: 'Organizations', color: 'var(--color-warning)', icon: 'org' },
-		{ value: stats.open_issues, label: 'Open Issues', color: 'var(--color-success)', icon: 'issue' },
-		{ value: stats.total_commits ?? 0, label: 'Total Commits', color: 'var(--color-primary)', icon: 'commit' },
+		{ value: counters[0], label: 'Repositories', color: 'var(--color-info)', icon: 'repo' },
+		{ value: counters[1], label: 'Organizations', color: 'var(--color-warning)', icon: 'org' },
+		{ value: counters[2], label: 'Open Issues', color: 'var(--color-success)', icon: 'issue' },
+		{ value: counters[3], label: 'Total Commits', color: 'var(--color-primary)', icon: 'commit' },
 	] : []);
 </script>
 
 {#if stats}
-<div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
 	{#each cards as card, i}
 		<div
-			class="group relative rounded-xl border p-4 overflow-hidden transition-all duration-300"
+			class="group relative rounded-2xl border p-5 overflow-hidden transition-all duration-500"
 			style="
 				border-color: var(--color-border);
-				background-color: var(--color-surface);
+				background: color-mix(in srgb, var(--color-surface) 60%, transparent);
+				backdrop-filter: blur(12px);
 				opacity: {visible ? 1 : 0};
-				transform: {visible ? 'translateY(0)' : 'translateY(12px)'};
-				transition-delay: {i * 80}ms;
+				transform: {visible ? 'translateY(0) scale(1)' : 'translateY(16px) scale(0.95)'};
+				transition-delay: {i * 100}ms;
 			"
 		>
 			<!-- Glow background on hover -->
 			<div
-				class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500"
+				class="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-700"
 				style="background: radial-gradient(circle at 50% 50%, {card.color}08 0%, transparent 70%);"
 			></div>
 
-			<div class="relative flex items-center gap-3">
+			<!-- Top accent gradient -->
+			<div
+				class="absolute top-0 left-0 right-0 h-px transition-opacity duration-500 opacity-0 group-hover:opacity-100"
+				style="background: linear-gradient(90deg, transparent, {card.color}60, transparent);"
+			></div>
+
+			<div class="relative flex flex-col gap-3">
 				<div
-					class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110"
-					style="background-color: {card.color}12;"
+					class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-all duration-300 group-hover:scale-110 group-hover:shadow-lg"
+					style="background-color: {card.color}10; box-shadow: 0 0 0 1px {card.color}15;"
 				>
 					{#if card.icon === 'repo'}
 						<svg class="w-[18px] h-[18px]" style="color: {card.color};" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
@@ -70,17 +92,17 @@
 				</div>
 				<div>
 					<p
-						class="text-xl font-bold transition-colors duration-300"
+						class="text-2xl font-bold tabular-nums tracking-tight transition-colors duration-300"
 						style="color: var(--color-text);"
 					>{card.value}</p>
-					<p class="text-[0.6875rem]" style="color: var(--color-text-dim);">{card.label}</p>
+					<p class="text-[0.6875rem] mt-0.5 font-medium" style="color: var(--color-text-dim);">{card.label}</p>
 				</div>
 			</div>
 
 			<!-- Bottom accent line -->
 			<div
-				class="absolute bottom-0 left-0 h-0.5 transition-all duration-500 group-hover:w-full"
-				style="background: {card.color}; width: 0%;"
+				class="absolute bottom-0 left-0 h-0.5 transition-all duration-700 group-hover:w-full"
+				style="background: linear-gradient(90deg, {card.color}, {card.color}40); width: 0%;"
 			></div>
 		</div>
 	{/each}

@@ -79,22 +79,27 @@
 <PageShell maxWidth="max-w-4xl">
 	<div class="flex flex-col gap-8">
 		<!-- Header -->
-		<div class="flex items-center justify-between pb-6 border-b" style="border-color: var(--color-separator);">
+		<div class="flex items-center justify-between pb-6 border-b animate-fade-up" style="border-color: var(--color-separator);">
 			<div>
-				<h1 class="text-2xl font-bold" style="color: var(--color-text);">Settings</h1>
+				<h1 class="text-2xl font-bold gradient-text">Settings</h1>
 				<p class="text-sm mt-1" style="color: var(--color-text-dim);">Manage your account and preferences</p>
 			</div>
 		</div>
 
 		<!-- Profile Section -->
-		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
+		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 animate-fade-up stagger-1">
 			<div>
 				<h2 class="text-sm font-semibold" style="color: var(--color-text);">Public Profile</h2>
 				<p class="text-xs mt-1" style="color: var(--color-text-dim);">Your profile information visible to others</p>
 			</div>
-			<div class="rounded-xl border p-6" style="border-color: var(--color-border); background-color: var(--color-surface);">
+			<div class="card p-6">
 				<div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color: var(--color-border);">
-					<Avatar username={userStore.user?.username ?? '?'} size={56} />
+					<div class="relative group">
+						<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--color-primary)30, var(--color-secondary)20); filter: blur(8px);"></div>
+						<div class="relative">
+							<Avatar username={userStore.user?.username ?? '?'} size={56} />
+						</div>
+					</div>
 					<div>
 						<p class="font-semibold text-sm" style="color: var(--color-text);">@{userStore.user?.username}</p>
 						<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">
@@ -110,8 +115,8 @@
 								id="full-name"
 								type="text"
 								bind:value={fullName}
-								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
-								style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+								style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
 							/>
 						</div>
 						<div>
@@ -120,8 +125,8 @@
 								id="email"
 								type="email"
 								bind:value={email}
-								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
-								style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+								style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
 							/>
 						</div>
 					</div>
@@ -132,8 +137,8 @@
 							bind:value={bio}
 							rows={3}
 							placeholder="Tell us about yourself..."
-							class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)] resize-y"
-							style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+							class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)] resize-y"
+							style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
 						></textarea>
 					</div>
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -144,8 +149,8 @@
 								type="text"
 								bind:value={location}
 								placeholder="City, Country"
-								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
-								style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+								style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
 							/>
 						</div>
 						<div>
@@ -155,8 +160,8 @@
 								type="url"
 								bind:value={website}
 								placeholder="https://..."
-								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
-								style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);"
+								class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+								style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
 							/>
 						</div>
 					</div>
@@ -164,8 +169,8 @@
 						<button
 							type="submit"
 							disabled={saving}
-							class="px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all disabled:opacity-40 hover:brightness-110"
-							style="background-color: var(--color-primary);"
+							class="btn-glow px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all duration-200 disabled:opacity-40 hover:scale-[1.02] active:scale-[0.98]"
+							style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 						>
 							{saving ? 'Saving...' : 'Save changes'}
 						</button>
@@ -178,30 +183,35 @@
 		</section>
 
 		<!-- Password Section -->
-		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
+		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 animate-fade-up stagger-2">
 			<div>
 				<h2 class="text-sm font-semibold" style="color: var(--color-text);">Password</h2>
 				<p class="text-xs mt-1" style="color: var(--color-text-dim);">Update your account password</p>
 			</div>
-			<div class="rounded-xl border p-6" style="border-color: var(--color-border); background-color: var(--color-surface);">
+			<div class="card p-6">
 				<form onsubmit={handlePasswordChange} class="flex flex-col gap-4 max-w-sm">
 					<div>
 						<label for="old-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Current password</label>
-						<input id="old-pass" type="password" bind:value={oldPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+						<input id="old-pass" type="password" bind:value={oldPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
 					</div>
 					<div>
 						<label for="new-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">New password</label>
-						<input id="new-pass" type="password" bind:value={newPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+						<input id="new-pass" type="password" bind:value={newPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
 					</div>
 					<div>
 						<label for="confirm-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Confirm new password</label>
-						<input id="confirm-pass" type="password" bind:value={confirmPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background-color: var(--color-background); color: var(--color-text);" />
+						<input id="confirm-pass" type="password" bind:value={confirmPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
 					</div>
 					{#if passwordError}
-						<p class="text-xs" style="color: var(--color-error);">{passwordError}</p>
+						<p class="text-xs animate-fade-in" style="color: var(--color-error);">{passwordError}</p>
 					{/if}
 					<div class="flex items-center gap-3">
-						<button type="submit" disabled={changingPassword || !oldPassword || !newPassword || !confirmPassword} class="px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all disabled:opacity-40 hover:brightness-110" style="background-color: var(--color-primary);">{changingPassword ? 'Changing...' : 'Change password'}</button>
+						<button
+							type="submit"
+							disabled={changingPassword || !oldPassword || !newPassword || !confirmPassword}
+							class="btn-glow px-5 py-2.5 text-sm font-medium rounded-xl text-white transition-all duration-200 disabled:opacity-40 hover:scale-[1.02] active:scale-[0.98]"
+							style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
+						>{changingPassword ? 'Changing...' : 'Change password'}</button>
 						{#if passwordChanged}
 							<span class="text-sm font-medium animate-fade-in" style="color: var(--color-success);">Password updated!</span>
 						{/if}
@@ -211,12 +221,12 @@
 		</section>
 
 		<!-- SSH Keys Section -->
-		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
+		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 animate-fade-up stagger-3">
 			<div>
 				<h2 class="text-sm font-semibold" style="color: var(--color-text);">SSH Keys</h2>
 				<p class="text-xs mt-1" style="color: var(--color-text-dim);">Authentication keys for git over SSH</p>
 			</div>
-			<div class="rounded-xl border p-6" style="border-color: var(--color-border); background-color: var(--color-surface);">
+			<div class="card p-6">
 				<div class="flex items-center justify-between">
 					<div>
 						<p class="text-sm" style="color: var(--color-text);">Manage your SSH keys for secure git access.</p>
@@ -224,8 +234,10 @@
 					</div>
 					<a
 						href="/settings/keys"
-						class="shrink-0 px-4 py-2 text-sm font-medium rounded-xl border transition-colors hover:bg-[var(--color-surface-hover)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="shrink-0 px-4 py-2 text-sm font-medium rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
+						style="border-color: var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-surface) 60%, transparent);"
+						onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
+						onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
 					>
 						Manage Keys
 					</a>
@@ -234,12 +246,12 @@
 		</section>
 
 		<!-- Appearance Section -->
-		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
+		<section class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8 animate-fade-up stagger-4">
 			<div>
 				<h2 class="text-sm font-semibold" style="color: var(--color-text);">Appearance</h2>
 				<p class="text-xs mt-1" style="color: var(--color-text-dim);">Theme and visual customization</p>
 			</div>
-			<div class="rounded-xl border p-6" style="border-color: var(--color-border); background-color: var(--color-surface);">
+			<div class="card p-6">
 				<AppearanceSection />
 			</div>
 		</section>

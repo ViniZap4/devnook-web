@@ -57,7 +57,7 @@
 		<!-- Header -->
 		<div class="flex items-center justify-between animate-fade-up">
 			<div>
-				<h1 class="text-2xl font-bold" style="color: var(--color-text);">Explore</h1>
+				<h1 class="text-2xl font-bold gradient-text">Explore</h1>
 				<p class="text-sm mt-1" style="color: var(--color-text-dim);">Discover public repositories</p>
 			</div>
 			{#if !loading}
@@ -82,10 +82,10 @@
 					oninput={onSearchInput}
 					placeholder="Search repositories..."
 					class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-surface) 70%, transparent); backdrop-filter: blur(12px); color: var(--color-text);"
 				/>
 			</div>
-			<div class="flex items-center gap-1 rounded-xl border p-1" style="border-color: var(--color-border);">
+			<div class="flex items-center gap-1 rounded-xl p-1 glass-subtle">
 				{#each [['updated', 'Recent'], ['created', 'Newest'], ['name', 'Name']] as [val, label]}
 					<button
 						class="px-3 py-1.5 text-xs rounded-lg transition-all duration-200"

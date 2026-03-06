@@ -2,6 +2,7 @@ import { browser } from '$app/environment';
 import {
 	type ThemeMode,
 	type ThemeSettings,
+	type BackgroundEffect,
 	themes,
 	applyTheme,
 	resolveTheme,
@@ -11,7 +12,7 @@ import {
 } from '$lib/styles/themes';
 import { users } from '$lib/services/api';
 
-let settings = $state<ThemeSettings>({ mode: 'dark', darkName: 'default-dark', lightName: 'default-light' });
+let settings = $state<ThemeSettings>({ mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'mesh' });
 let syncTimeout: ReturnType<typeof setTimeout> | null = null;
 
 if (browser) {
@@ -45,6 +46,7 @@ function syncToServer() {
 			settings: {
 				darkName: settings.darkName,
 				lightName: settings.lightName,
+				backgroundEffect: settings.backgroundEffect,
 			}
 		}).catch(() => {
 			// server sync is best-effort
@@ -60,7 +62,7 @@ export const themeStore = {
 		settings.mode = m;
 		if (browser) {
 			applyTheme(resolveTheme(m, settings.darkName, settings.lightName));
-			saveThemeSettings(m, settings.darkName, settings.lightName);
+			saveThemeSettings(m, settings.darkName, settings.lightName, settings.backgroundEffect);
 			syncToServer();
 		}
 	},
@@ -80,6 +82,17 @@ export const themeStore = {
 		return currentThemeName();
 	},
 
+	get backgroundEffect(): BackgroundEffect {
+		return settings.backgroundEffect;
+	},
+	set backgroundEffect(effect: BackgroundEffect) {
+		settings.backgroundEffect = effect;
+		if (browser) {
+			saveThemeSettings(settings.mode, settings.darkName, settings.lightName, effect);
+			syncToServer();
+		}
+	},
+
 	selectTheme(name: string) {
 		const t = themes[name];
 		if (!t) return;
@@ -90,7 +103,7 @@ export const themeStore = {
 		}
 		if (browser) {
 			applyTheme(resolveTheme(settings.mode, settings.darkName, settings.lightName));
-			saveThemeSettings(settings.mode, settings.darkName, settings.lightName);
+			saveThemeSettings(settings.mode, settings.darkName, settings.lightName, settings.backgroundEffect);
 			syncToServer();
 		}
 	},
@@ -120,8 +133,11 @@ export const themeStore = {
 			if (s?.lightName && themes[s.lightName]) {
 				settings.lightName = s.lightName;
 			}
+			if (s?.backgroundEffect && ['none', 'mesh', 'particles', 'aurora'].includes(s.backgroundEffect)) {
+				settings.backgroundEffect = s.backgroundEffect as BackgroundEffect;
+			}
 			applyTheme(resolveTheme(settings.mode, settings.darkName, settings.lightName));
-			saveThemeSettings(settings.mode, settings.darkName, settings.lightName);
+			saveThemeSettings(settings.mode, settings.darkName, settings.lightName, settings.backgroundEffect);
 		} catch {
 			// best-effort — keep local settings
 		}
