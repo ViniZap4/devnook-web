@@ -19,7 +19,7 @@
 	let repoMilestones = $state<Milestone[]>([]);
 	let showFilters = $state(false);
 
-	let fetchId = $state(0);
+	let fetchId = 0;
 
 	$effect(() => {
 		const _owner = owner;
