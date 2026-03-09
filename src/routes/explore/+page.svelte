@@ -91,7 +91,7 @@
 						class="px-3 py-1.5 text-xs rounded-lg transition-all duration-200"
 						style="
 							color: {sort === val ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-							background: {sort === val ? 'var(--color-primary)10' : 'transparent'};
+							background: {sort === val ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
 							font-weight: {sort === val ? '600' : '400'};
 						"
 						onclick={() => changeSort(val)}
@@ -162,7 +162,7 @@
 							{#if repo.topics && repo.topics.length > 0}
 								<div class="flex flex-wrap gap-1.5 mt-2">
 									{#each repo.topics.slice(0, 5) as topic}
-										<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium transition-colors duration-200" style="background-color: var(--color-primary)12; color: var(--color-primary);">{topic}</span>
+										<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium transition-colors duration-200" style="background-color: color-mix(in srgb, var(--color-primary) 7%, transparent); color: var(--color-primary);">{topic}</span>
 									{/each}
 								</div>
 							{/if}
@@ -195,7 +195,7 @@
 			{#if totalPages > 1}
 				<div class="flex items-center justify-center gap-3 mt-2">
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)30] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
 						style="border-color: var(--color-border); color: var(--color-text);"
 						disabled={currentPage <= 1}
 						onclick={() => { currentPage--; loadRepos(); }}
@@ -206,7 +206,7 @@
 						{currentPage} / {totalPages}
 					</span>
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)30] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
 						style="border-color: var(--color-border); color: var(--color-text);"
 						disabled={currentPage >= totalPages}
 						onclick={() => { currentPage++; loadRepos(); }}

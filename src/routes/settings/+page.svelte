@@ -180,12 +180,7 @@
 				{#if activeSection === 'profile'}
 					<div class="card p-6 animate-fade-up">
 						<div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color: var(--color-border);">
-							<div class="relative group">
-								<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--color-primary)30, var(--color-secondary)20); filter: blur(8px);"></div>
-								<div class="relative">
-									<Avatar username={userStore.user?.username ?? '?'} size={56} />
-								</div>
-							</div>
+							<Avatar username={userStore.user?.username ?? '?'} size={56} />
 							<div>
 								<p class="font-semibold text-sm" style="color: var(--color-text);">@{userStore.user?.username}</p>
 								<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">

@@ -308,7 +308,7 @@
 				<div class="flex items-center gap-1 mb-5 pb-4 border-b rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'repos' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'repos' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('repos')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
@@ -317,7 +317,7 @@
 					</button>
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'starred' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'starred' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('starred')}
 					>
 						<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
@@ -326,7 +326,7 @@
 					{#if orgs.length > 0}
 						<button
 							class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-							style="{tab === 'orgs' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+							style="{tab === 'orgs' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 							onclick={() => switchTab('orgs')}
 						>
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
@@ -336,7 +336,7 @@
 					{/if}
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'followers' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'followers' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('followers')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -345,7 +345,7 @@
 					</button>
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'following' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'following' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('following')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
@@ -387,7 +387,7 @@
 						{#each orgs as org}
 							<a href="/orgs/{org.name}" class="card p-4 hover:bg-[var(--color-surface)] transition-colors">
 								<div class="flex items-center gap-3">
-									<div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">
+									<div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">
 										{org.name.charAt(0).toUpperCase()}
 									</div>
 									<div class="min-w-0">

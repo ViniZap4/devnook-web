@@ -20,7 +20,7 @@
 <section>
 	<div class="flex items-center justify-between mb-4">
 		<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">Organizations</h2>
-		<a href="/orgs/new" class="text-xs font-medium rounded-lg px-2.5 py-1 border border-[var(--color-border)] text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)] hover:border-[var(--color-primary)30] transition-all duration-200">
+		<a href="/orgs/new" class="text-xs font-medium rounded-lg px-2.5 py-1 border border-[var(--color-border)] text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] transition-all duration-200">
 			+ New
 		</a>
 	</div>

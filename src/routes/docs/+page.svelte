@@ -59,7 +59,7 @@
 	<div class="flex flex-col gap-6">
 		<div class="flex items-center justify-between page-header">
 			<div class="flex items-center gap-3">
-				<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--color-primary)10;">
+				<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 6%, transparent);">
 					<svg class="w-5 h-5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
 				</div>
 				<div>
@@ -125,7 +125,7 @@
 						style="animation: card-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: {i * 60}ms;"
 					>
 						<div class="flex items-start gap-3">
-							<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110" style="background: var(--color-primary)10;">
+							<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110" style="background: color-mix(in srgb, var(--color-primary) 6%, transparent);">
 								{#if space.icon}
 									<span class="text-lg">{space.icon}</span>
 								{:else}
@@ -139,9 +139,9 @@
 								{/if}
 								<div class="flex items-center gap-2 mt-2">
 									{#if space.repo_owner}
-										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-info)10; color: var(--color-info);">{space.repo_owner}/{space.repo_name}</span>
+										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-info) 6%, transparent); color: var(--color-info);">{space.repo_owner}/{space.repo_name}</span>
 									{:else if space.org_name}
-										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-warning)10; color: var(--color-warning);">{space.org_name}</span>
+										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-warning) 6%, transparent); color: var(--color-warning);">{space.org_name}</span>
 									{:else}
 										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-surface); color: var(--color-text-dim);">{space.owner_name}</span>
 									{/if}

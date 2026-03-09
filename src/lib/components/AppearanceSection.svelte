@@ -31,8 +31,8 @@
 					class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 border"
 					style="
 						color: {themeStore.mode === m ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {themeStore.mode === m ? 'var(--color-primary)10' : 'transparent'};
-						border-color: {themeStore.mode === m ? 'var(--color-primary)30' : 'var(--color-border)'};
+						background: {themeStore.mode === m ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
+						border-color: {themeStore.mode === m ? 'color-mix(in srgb, var(--color-primary) 19%, transparent)' : 'var(--color-border)'};
 						transform: {themeStore.mode === m ? 'scale(1.02)' : 'scale(1)'};
 					"
 					onclick={() => { themeStore.mode = m; }}
@@ -55,8 +55,8 @@
 					class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 border"
 					style="
 						color: {themeStore.backgroundEffect === bg ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {themeStore.backgroundEffect === bg ? 'var(--color-primary)10' : 'transparent'};
-						border-color: {themeStore.backgroundEffect === bg ? 'var(--color-primary)30' : 'var(--color-border)'};
+						background: {themeStore.backgroundEffect === bg ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
+						border-color: {themeStore.backgroundEffect === bg ? 'color-mix(in srgb, var(--color-primary) 19%, transparent)' : 'var(--color-border)'};
 						transform: {themeStore.backgroundEffect === bg ? 'scale(1.02)' : 'scale(1)'};
 						animation: fade-slide-in-sm 0.3s ease both;
 						animation-delay: {i * 40}ms;

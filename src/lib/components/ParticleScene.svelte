@@ -8,27 +8,29 @@
 	const { renderer } = useThrelte();
 	renderer.setClearColor(0x000000, 0);
 
-	const count = 150;
+	const count = 80;
 	const dummy = new THREE.Object3D();
 
-	const geometry = new THREE.SphereGeometry(1, 8, 6);
+	const geometry = new THREE.CircleGeometry(1, 16);
 	const material = new THREE.MeshBasicMaterial({
 		transparent: true,
-		opacity: 0.15,
+		opacity: 0.4,
 		depthWrite: false,
 		vertexColors: true,
+		side: THREE.DoubleSide,
 	});
 	const mesh = new THREE.InstancedMesh(geometry, material, count);
 	mesh.frustumCulled = false;
 
 	const particles = Array.from({ length: count }, () => ({
-		x: (Math.random() - 0.5) * 30,
-		y: (Math.random() - 0.5) * 30,
-		z: -Math.random() * 15 - 2,
-		speed: 0.002 + Math.random() * 0.006,
-		size: 0.02 + Math.random() * 0.07,
+		x: (Math.random() - 0.5) * 24,
+		y: (Math.random() - 0.5) * 20,
+		z: -Math.random() * 8 - 1,
+		speed: 0.003 + Math.random() * 0.008,
+		size: 0.06 + Math.random() * 0.18,
 		phase: Math.random() * Math.PI * 2,
-		drift: (Math.random() - 0.5) * 0.4,
+		drift: (Math.random() - 0.5) * 0.3,
+		alpha: 0.2 + Math.random() * 0.4,
 	}));
 
 	function updateColors() {
@@ -70,15 +72,15 @@
 		for (let i = 0; i < count; i++) {
 			const p = particles[i];
 			p.y += p.speed;
-			if (p.y > 15) {
-				p.y = -15;
-				p.x = (Math.random() - 0.5) * 30;
+			if (p.y > 12) {
+				p.y = -12;
+				p.x = (Math.random() - 0.5) * 24;
 			}
-			const depth = (p.z + 17) / 17;
+			const depth = (p.z + 9) / 9;
 			dummy.position.set(
-				p.x + Math.sin(time * 0.5 + p.phase) * p.drift - mx * depth * 0.8,
-				p.y + Math.cos(time * 0.3 + p.phase) * 0.1,
-				p.z - my * depth * 0.5
+				p.x + Math.sin(time * 0.3 + p.phase) * p.drift - mx * depth * 0.6,
+				p.y + Math.cos(time * 0.2 + p.phase) * 0.08,
+				p.z - my * depth * 0.4
 			);
 			dummy.scale.setScalar(p.size);
 			dummy.updateMatrix();
@@ -95,5 +97,5 @@
 	});
 </script>
 
-<T.PerspectiveCamera makeDefault position={[0, 0, 10]} fov={60} />
+<T.PerspectiveCamera makeDefault position={[0, 0, 8]} fov={50} />
 <T is={mesh} />

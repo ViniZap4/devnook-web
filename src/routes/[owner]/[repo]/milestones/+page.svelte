@@ -173,7 +173,7 @@
 								<div class="flex items-center gap-2">
 									<h3 class="font-semibold text-sm" style="color: var(--color-text);">{milestone.title}</h3>
 									{#if milestone.state === 'closed'}
-										<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background-color: var(--color-error)15; color: var(--color-error);">Closed</span>
+										<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background-color: color-mix(in srgb, var(--color-error) 8%, transparent); color: var(--color-error);">Closed</span>
 									{/if}
 								</div>
 								{#if milestone.description}

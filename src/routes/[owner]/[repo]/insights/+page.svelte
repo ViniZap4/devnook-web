@@ -177,7 +177,7 @@
 					<div class="card p-4 card-animate stagger-{Math.min(i + 1, 8)}">
 						<div class="flex items-center gap-3">
 							<span class="text-[11px] font-mono w-7 text-right font-bold" style="color: {i < 3 ? 'var(--color-primary)' : 'var(--color-text-dim)'};">#{i + 1}</span>
-							<div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0" style="background: linear-gradient(135deg, var(--color-primary)20, var(--color-accent)20); color: var(--color-primary);">
+							<div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 12%, transparent)); color: var(--color-primary);">
 								{contributor.name[0].toUpperCase()}
 							</div>
 							<div class="flex-1 min-w-0">
