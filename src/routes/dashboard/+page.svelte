@@ -35,12 +35,7 @@
 	<!-- Welcome header -->
 	<div class="flex items-center justify-between mb-10 pb-8 border-b animate-fade-up" style="border-color: var(--color-separator);">
 		<div class="flex items-center gap-5">
-			<div class="relative group">
-				<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 19%, transparent), color-mix(in srgb, var(--color-secondary) 12%, transparent)); filter: blur(8px);"></div>
-				<div class="relative transition-transform duration-300 group-hover:scale-105">
-					<Avatar username={userStore.user?.username ?? '?'} size={56} />
-				</div>
-			</div>
+			<Avatar username={userStore.user?.username ?? '?'} size={56} />
 			<div>
 				<h1 class="text-2xl font-bold tracking-tight" style="color: var(--color-text);">
 					{#if userStore.user?.full_name}
@@ -59,7 +54,7 @@
 			</div>
 		</div>
 		<div class="hidden sm:flex items-center gap-3">
-			<a href="/new" class="btn-glow flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent)); color: white;">
+			<a href="/new" class="flex items-center gap-2 px-5 py-2.5 text-sm font-medium rounded-xl transition-all duration-200 hover:brightness-110 active:scale-[0.98]" style="background: var(--color-primary); color: white;">
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
 				New Repository
 			</a>

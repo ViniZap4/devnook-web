@@ -142,8 +142,11 @@
 						</div>
 						<div class="min-w-0 flex-1">
 							<a href={item.link} class="text-sm font-medium block animated-link" style="color: var(--color-text);">{item.title}</a>
+							{#if item.body}
+								<p class="text-xs mt-0.5 leading-relaxed" style="color: var(--color-text-dim);">{item.body}</p>
+							{/if}
 							<div class="flex items-center gap-1.5 mt-0.5">
-								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: {meta.color}12; color: {meta.color};">{meta.label}</span>
+								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: color-mix(in srgb, {meta.color} 12%, transparent); color: {meta.color};">{meta.label}</span>
 								{#if item.created_at}
 									<span class="text-xs" style="color: var(--color-text-dim);"><RelativeTime date={item.created_at} /></span>
 								{/if}

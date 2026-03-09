@@ -42,10 +42,11 @@ function connect(token: string) {
 	ws.onclose = () => {
 		connected = false;
 		socket = null;
-		// Reconnect after 3 seconds
-		if (currentToken) {
+		// Reconnect after 3 seconds if still authenticated
+		const tokenAtClose = currentToken;
+		if (tokenAtClose) {
 			reconnectTimer = setTimeout(() => {
-				if (currentToken) connect(currentToken);
+				if (currentToken === tokenAtClose) connect(tokenAtClose);
 			}, 3000);
 		}
 	};

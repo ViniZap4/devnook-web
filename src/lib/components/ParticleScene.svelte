@@ -89,6 +89,7 @@
 
 	onDestroy(() => {
 		observer.disconnect();
+		mesh.dispose();
 		geometry.dispose();
 		material.dispose();
 	});
