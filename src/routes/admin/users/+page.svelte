@@ -119,7 +119,7 @@
 					</div>
 					<div class="w-16 text-center">
 						{#if user.is_admin}
-							<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background-color: var(--color-primary)15; color: var(--color-primary);">Admin</span>
+							<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">Admin</span>
 						{:else}
 							<span class="text-[0.625rem]" style="color: var(--color-text-dim);">User</span>
 						{/if}

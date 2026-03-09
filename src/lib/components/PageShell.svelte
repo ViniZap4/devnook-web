@@ -29,7 +29,7 @@
 	<BackgroundEffect {mouseX} {mouseY} />
 
 	{#if showSpotlight && browser}
-		<div class="spotlight" style="left: {mouseX}px; top: {mouseY}px;"></div>
+		<div class="spotlight" style="transform: translate(calc({mouseX}px - 50%), calc({mouseY}px - 50%));"></div>
 	{/if}
 
 	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">

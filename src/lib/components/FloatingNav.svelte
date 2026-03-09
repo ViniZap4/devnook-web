@@ -97,7 +97,7 @@
 		{#if mounted}
 			<div
 				class="absolute top-1.5 bottom-1.5 rounded-xl pointer-events-none z-0 indicator-glow"
-				style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); transition: transform 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.3s ease, opacity 0.2s ease;"
+				style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, opacity 0.2s ease;"
 				aria-hidden="true"
 			></div>
 		{/if}
@@ -117,8 +117,8 @@
 			<a
 				href={item.to}
 				data-nav-item
-				class="dock-item relative z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-all duration-300"
-				style="color: {isActive ? 'var(--color-primary)' : 'var(--color-text-dim)'}; animation: item-pop-in 0.4s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: {0.1 + i * 0.04}s;"
+				class="dock-item relative z-10 flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl transition-colors duration-200"
+				style="color: {isActive ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
 				data-tooltip={item.label}
 			>
 				{#if item.icon === 'dashboard'}
@@ -154,7 +154,7 @@
 	</nav>
 
 	<!-- Right utilities dock -->
-	<div class="flex items-center gap-0.5 px-2 py-1.5 rounded-2xl floating-dock" style="animation-delay: 0.3s;">
+	<div class="flex items-center gap-0.5 px-2 py-1.5 rounded-2xl floating-dock">
 		<ThemePicker />
 		<NotificationBell />
 		<CreateDropdown />
@@ -164,24 +164,19 @@
 
 <style>
 	.floating-dock {
-		backdrop-filter: blur(20px) saturate(1.8);
-		background: color-mix(in srgb, var(--color-surface) 70%, transparent);
+		backdrop-filter: blur(20px) saturate(1.6);
+		background: color-mix(in srgb, var(--color-surface) 75%, transparent);
 		border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
 		box-shadow:
-			0 4px 24px rgba(0, 0, 0, 0.15),
-			0 1px 4px rgba(0, 0, 0, 0.1),
+			0 4px 24px rgba(0, 0, 0, 0.12),
+			0 1px 3px rgba(0, 0, 0, 0.08),
 			inset 0 0 0 1px rgba(255, 255, 255, 0.03);
-		animation: dock-drop 0.5s cubic-bezier(0.16, 1, 0.3, 1) both;
+		animation: dock-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
 
-	@keyframes dock-drop {
-		0% { opacity: 0; transform: translateY(-16px) scale(0.95); }
-		100% { opacity: 1; transform: translateY(0) scale(1); }
-	}
-
-	@keyframes item-pop-in {
-		0% { opacity: 0; transform: scale(0.8) translateY(-4px); }
-		100% { opacity: 1; transform: scale(1) translateY(0); }
+	@keyframes dock-enter {
+		0% { opacity: 0; transform: translateY(-8px); }
+		100% { opacity: 1; transform: translateY(0); }
 	}
 
 	.dock-item {
@@ -190,20 +185,16 @@
 
 	.dock-item:hover {
 		color: var(--color-text) !important;
-		background: color-mix(in srgb, var(--color-text) 6%, transparent);
-	}
-
-	.dock-item:hover :global(svg) {
-		transform: scale(1.15) translateY(-1px);
+		background: color-mix(in srgb, var(--color-text) 5%, transparent);
 	}
 
 	.dock-item:active {
-		transform: scale(0.92);
-		transition-duration: 0.1s;
+		transform: scale(0.96);
+		transition: transform 0.1s ease;
 	}
 
 	.indicator-glow {
-		box-shadow: 0 0 12px color-mix(in srgb, var(--color-primary) 15%, transparent);
+		box-shadow: 0 0 8px color-mix(in srgb, var(--color-primary) 10%, transparent);
 	}
 
 	/* Tooltip below for top nav */

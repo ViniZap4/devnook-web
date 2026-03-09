@@ -335,7 +335,7 @@
 							<p class="text-xs" style="color: var(--color-text-dim);">No conversations yet</p>
 							<button
 								class="text-xs font-medium px-3 py-1.5 rounded-lg transition-colors"
-								style="color: var(--color-primary); background: var(--color-primary)10;"
+								style="color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent);"
 								onclick={() => { showNewChat = true; }}
 							>Start a conversation</button>
 						</div>
@@ -358,7 +358,7 @@
 									{#if convo.type === 'direct'}
 										<Avatar username={getConvoAvatar(convo)} size={36} />
 									{:else}
-										<div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">
+										<div class="w-9 h-9 rounded-full flex items-center justify-center text-sm font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">
 											{#if convo.type === 'repo'}
 												<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
 											{:else if convo.type === 'org'}
@@ -412,7 +412,7 @@
 					<!-- Empty state -->
 					<div class="flex-1 flex items-center justify-center">
 						<div class="text-center max-w-xs">
-							<div class="w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background: var(--color-primary)08;">
+							<div class="w-16 h-16 mx-auto mb-5 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 3%, transparent);">
 								<svg class="w-8 h-8" style="color: var(--color-primary); opacity: 0.4;" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
 							</div>
 							<p class="text-sm font-medium" style="color: var(--color-text);">Start a conversation</p>
@@ -442,7 +442,7 @@
 							{#if activeConvo.type === 'direct'}
 								<Avatar username={getConvoAvatar(activeConvo)} size={32} />
 							{:else}
-								<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">
+								<div class="w-8 h-8 rounded-full flex items-center justify-center text-xs font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">
 									{#if activeConvo.type === 'repo'}
 										<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
 									{:else}#
@@ -460,7 +460,7 @@
 						</div>
 						<div class="flex items-center gap-2">
 							{#if activeConvo.type === 'repo'}
-								<a href="/{activeConvo.repo_owner}/{activeConvo.repo_name}" class="text-xs hover:underline px-2.5 py-1 rounded-lg transition-colors" style="color: var(--color-primary); background: var(--color-primary)08;">View repo</a>
+								<a href="/{activeConvo.repo_owner}/{activeConvo.repo_name}" class="text-xs hover:underline px-2.5 py-1 rounded-lg transition-colors" style="color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 3%, transparent);">View repo</a>
 							{/if}
 							{#if activeConvo.type === 'direct'}
 								<a href="/{getConvoUsername(activeConvo)}" class="text-xs hover:underline px-2.5 py-1 rounded-lg transition-colors" style="color: var(--color-text-dim); background: var(--color-surface);">Profile</a>
