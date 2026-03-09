@@ -23,7 +23,7 @@
 >
 	<!-- svelte-ignore a11y_missing_attribute -->
 	<object class="shortcut-icon" data={urlIcon} type="image/png" aria-label="{title} icon">
-		<span class="shortcut-fallback" style="background: linear-gradient(135deg, var(--color-primary)40, var(--color-secondary)40); color: var(--color-primary);">
+		<span class="shortcut-fallback" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 25%, transparent), color-mix(in srgb, var(--color-secondary) 25%, transparent)); color: var(--color-primary);">
 			{title[0].toUpperCase()}{title.length > 1 ? title[1].toLowerCase() : ''}
 		</span>
 	</object>

@@ -155,7 +155,7 @@
 							</div>
 						</div>
 						{#if !p.is_published}
-							<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full shrink-0" style="background: var(--color-warning)10; color: var(--color-warning);">Draft</span>
+							<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full shrink-0" style="background: color-mix(in srgb, var(--color-warning) 6%, transparent); color: var(--color-warning);">Draft</span>
 						{/if}
 					</a>
 					{#if p.children && p.children.length > 0}

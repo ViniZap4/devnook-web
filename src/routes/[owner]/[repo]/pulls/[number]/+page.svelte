@@ -244,12 +244,12 @@
 		<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="{activeTab === 'conversation' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{activeTab === 'conversation' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => { activeTab = 'conversation'; }}
 			>Conversation</button>
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="{activeTab === 'diff' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{activeTab === 'diff' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => { activeTab = 'diff'; }}
 			>
 				Files changed
@@ -309,7 +309,7 @@
 								<div class="flex items-center gap-2 text-sm mb-1">
 									<span class="font-medium" style="color: var(--color-text);">{review.author}</span>
 									<span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
-										style="background: {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'}15; color: {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'};"
+										style="background: color-mix(in srgb, {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'} 8%, transparent); color: {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'};"
 									>
 										{review.state === 'approved' ? 'Approved' : review.state === 'changes_requested' ? 'Changes requested' : 'Commented'}
 									</span>
@@ -389,7 +389,7 @@
 				<div class="flex items-center gap-3">
 					<button
 						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: var(--color-success)30; color: var(--color-success);"
+						style="border-color: color-mix(in srgb, var(--color-success) 19%, transparent); color: var(--color-success);"
 						onclick={reopenPR}
 					>Reopen pull request</button>
 				</div>
@@ -466,11 +466,11 @@
 							<div class="px-4 py-2 text-xs font-mono font-medium border-b flex items-center justify-between" style="background: var(--color-surface); border-color: var(--color-border); color: var(--color-text);">
 								<span>{fileName}</span>
 								{#if inlineComments.filter(c => c.path === fileName).length > 0}
-									<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-primary)15; color: var(--color-primary);">{inlineComments.filter(c => c.path === fileName).length} comment{inlineComments.filter(c => c.path === fileName).length > 1 ? 's' : ''}</span>
+									<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{inlineComments.filter(c => c.path === fileName).length} comment{inlineComments.filter(c => c.path === fileName).length > 1 ? 's' : ''}</span>
 								{/if}
 							</div>
 							{#each file.hunks as hunk}
-								<div class="text-xs font-mono px-4 py-1 border-b" style="background: var(--color-primary)08; border-color: var(--color-border); color: var(--color-primary);">
+								<div class="text-xs font-mono px-4 py-1 border-b" style="background: color-mix(in srgb, var(--color-primary) 3%, transparent); border-color: var(--color-border); color: var(--color-primary);">
 									{hunk.header}
 								</div>
 								<div class="overflow-x-auto">
@@ -479,7 +479,7 @@
 										{@const lineNum = parseDiffLineNumber(hunk.header, line, lineIdx, hunk.lines)}
 										<div
 											class="group flex"
-											style="background: {type === 'add' ? 'var(--color-success)10' : type === 'del' ? 'var(--color-error)10' : 'transparent'};"
+											style="background: {type === 'add' ? 'color-mix(in srgb, var(--color-success) 6%, transparent)' : type === 'del' ? 'color-mix(in srgb, var(--color-error) 6%, transparent)' : 'transparent'};"
 										>
 											<!-- Line number + comment button -->
 											<div class="shrink-0 w-10 text-right pr-2 select-none relative" style="color: var(--color-text-dim); opacity: 0.4;">
@@ -504,7 +504,7 @@
 										{#if lineNum}
 											{@const lineComments = getInlineCommentsForLine(fileName, lineNum)}
 											{#each lineComments as lc}
-												<div class="border-y px-4 py-3 flex flex-col gap-1" style="border-color: var(--color-border); background: var(--color-primary)05;">
+												<div class="border-y px-4 py-3 flex flex-col gap-1" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-primary) 3%, transparent);">
 													<div class="flex items-center gap-2 text-xs">
 														<span class="font-medium" style="color: var(--color-text);">{lc.author}</span>
 														<span style="color: var(--color-text-dim);"><RelativeTime date={lc.created_at} /></span>
@@ -517,7 +517,7 @@
 
 											<!-- Inline comment form -->
 											{#if inlineCommentFile === fileName && inlineCommentLine === lineNum}
-												<div class="border-y px-4 py-3 flex flex-col gap-2" style="border-color: var(--color-primary)30; background: var(--color-primary)08;">
+												<div class="border-y px-4 py-3 flex flex-col gap-2" style="border-color: color-mix(in srgb, var(--color-primary) 19%, transparent); background: color-mix(in srgb, var(--color-primary) 3%, transparent);">
 													<textarea
 														bind:value={inlineCommentBody}
 														placeholder="Write a comment..."

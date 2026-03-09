@@ -433,7 +433,7 @@
 				{#if issue.assignee}
 					<div class="flex items-center justify-between">
 						<a href="/{issue.assignee}" class="flex items-center gap-2 text-sm font-medium animated-link" style="color: var(--color-primary);">
-							<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold" style="background: var(--color-primary)15; color: var(--color-primary);">{issue.assignee.charAt(0).toUpperCase()}</div>
+							<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{issue.assignee.charAt(0).toUpperCase()}</div>
 							{issue.assignee}
 						</a>
 						{#if isOwner}
@@ -454,7 +454,7 @@
 									onmouseleave={(e) => { e.currentTarget.style.background = issue?.assignee === collab.username ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'; }}
 									onclick={() => setAssignee(collab.id)}
 								>
-									<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold shrink-0" style="background: var(--color-primary)15; color: var(--color-primary);">{collab.username.charAt(0).toUpperCase()}</div>
+									<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold shrink-0" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{collab.username.charAt(0).toUpperCase()}</div>
 									<span class="truncate">{collab.username}</span>
 									{#if issue.assignee === collab.username}
 										<svg class="w-3 h-3 ml-auto shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>

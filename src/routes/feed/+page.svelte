@@ -148,20 +148,20 @@
 	}
 </script>
 
-<PageShell maxWidth="max-w-3xl">
-	<div class="flex flex-col gap-6">
-		<div class="flex items-center justify-between page-header">
-			<h1 class="text-xl font-bold" style="color: var(--color-text);">Feed</h1>
+<PageShell maxWidth="max-w-2xl">
+	<div class="flex flex-col gap-5">
+		<div class="flex items-center justify-between">
+			<h1 class="text-lg font-semibold" style="color: var(--color-text);">Feed</h1>
 		</div>
 
 		<!-- Tabs -->
-		<div class="flex items-center gap-1 glass-subtle rounded-xl p-1 self-start">
+		<div class="flex items-center gap-0.5 rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
 			{#each [['feed', 'For You'], ['posts', 'Posts'], ['activity', 'Activity']] as [val, label]}
 				<button
-					class="px-4 py-2 text-xs rounded-lg transition-all duration-200 font-medium"
+					class="px-4 py-1.5 text-xs rounded-lg transition-all duration-200 font-medium"
 					style="
 						color: {tab === val ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {tab === val ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+						background: {tab === val ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'};
 					"
 					onclick={() => { tab = val as typeof tab; }}
 				>{label}</button>
@@ -170,7 +170,7 @@
 
 		<!-- Post Composer -->
 		{#if tab !== 'activity'}
-			<div class="card overflow-hidden animate-fade-up-sm">
+			<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border); background: var(--color-surface);">
 				{#if !composerOpen}
 					<button
 						class="w-full flex items-center gap-3 px-4 py-3 text-left transition-colors"
@@ -187,15 +187,15 @@
 						<div class="flex items-center gap-3">
 							<Avatar username={userStore.user?.username ?? '?'} size={32} />
 							<span class="text-sm font-medium" style="color: var(--color-text);">@{userStore.user?.username}</span>
-							<div class="flex items-center gap-1 ml-auto glass-subtle rounded-lg p-0.5">
+							<div class="flex items-center gap-0.5 ml-auto rounded-lg border p-0.5" style="border-color: var(--color-border);">
 								<button
 									class="px-2 py-1 text-[0.625rem] rounded-md transition-colors"
-									style="color: {postType === 'text' ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {postType === 'text' ? 'var(--color-primary)15' : 'transparent'};"
+									style="color: {postType === 'text' ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {postType === 'text' ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'};"
 									onclick={() => { postType = 'text'; }}
 								>Text</button>
 								<button
 									class="px-2 py-1 text-[0.625rem] rounded-md transition-colors font-mono"
-									style="color: {postType === 'code' ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {postType === 'code' ? 'var(--color-primary)15' : 'transparent'};"
+									style="color: {postType === 'code' ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {postType === 'code' ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'};"
 									onclick={() => { postType = 'code'; }}
 								>Code</button>
 							</div>
@@ -244,8 +244,8 @@
 				<div class="flex flex-col gap-4">
 					{#each feedPosts as post, i}
 						<div
-							class="card overflow-hidden transition-all duration-300"
-							style="opacity: {visible ? 1 : 0}; transform: {visible ? 'translateY(0)' : 'translateY(16px)'}; transition-delay: {i * 60}ms;"
+							class="rounded-xl border overflow-hidden transition-all duration-300"
+							style="border-color: var(--color-border); background: var(--color-surface); opacity: {visible ? 1 : 0}; transform: {visible ? 'translateY(0)' : 'translateY(8px)'}; transition-delay: {i * 40}ms;"
 						>
 							<div class="p-4">
 								<div class="flex items-start gap-3">
@@ -275,7 +275,7 @@
 										{#if post.tags && post.tags.length > 0}
 											<div class="flex flex-wrap gap-1 mt-2">
 												{#each post.tags as tag}
-													<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-primary)10; color: var(--color-primary);">#{tag}</span>
+													<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">#{tag}</span>
 												{/each}
 											</div>
 										{/if}
@@ -384,10 +384,10 @@
 					{#each items.slice(0, tab === 'feed' ? 10 : undefined) as item, i}
 						{@const meta = icon(item.type)}
 						<div
-							class="card p-3 flex items-center gap-3 transition-all duration-200"
-							style="opacity: {visible ? 1 : 0}; transform: {visible ? 'translateX(0)' : 'translateX(12px)'}; transition-delay: {(feedPosts.length + i) * 40}ms;"
+							class="rounded-xl border p-3 flex items-center gap-3 transition-all duration-200"
+							style="border-color: var(--color-border); background: var(--color-surface); opacity: {visible ? 1 : 0}; transform: {visible ? 'translateY(0)' : 'translateY(6px)'}; transition-delay: {(feedPosts.length + i) * 30}ms;"
 						>
-							<div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background: {meta.color}10;">
+							<div class="w-7 h-7 rounded-lg flex items-center justify-center shrink-0" style="background: color-mix(in srgb, {meta.color} 10%, transparent);">
 								<svg class="w-3.5 h-3.5" style="color: {meta.color};" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">{@html meta.svg}</svg>
 							</div>
 							<div class="flex-1 min-w-0">
