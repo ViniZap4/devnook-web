@@ -106,7 +106,7 @@
 
 		<!-- Main content -->
 		<main class="flex-1 min-w-0 p-6 lg:p-8">
-			<div class="max-w-6xl mx-auto">
+			<div class="max-w-[1400px] mx-auto">
 				{@render children()}
 			</div>
 		</main>

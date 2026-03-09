@@ -62,7 +62,7 @@
 <svelte:window onresize={updateIndicator} />
 
 <nav class="sticky top-0 z-40 glass-strong">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
+	<div class="max-w-[1600px] mx-auto px-4 sm:px-6 flex items-center justify-between h-14">
 		<!-- Left -->
 		<div class="flex items-center gap-4 sm:gap-6">
 			<a href="/dashboard" class="flex items-center gap-2.5 shrink-0 group">
@@ -86,10 +86,9 @@
 					<a
 						href={item.to}
 						data-nav-link
+						data-active={isActive ? '' : undefined}
 						class="relative px-4 py-2 rounded-xl text-sm font-medium transition-all duration-200 z-10"
 						style="color: {isActive ? 'var(--color-primary)' : 'var(--color-text-dim)'};"
-						onmouseenter={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--color-text)'; }}
-						onmouseleave={(e) => { if (!isActive) e.currentTarget.style.color = 'var(--color-text-dim)'; }}
 					>
 						{item.label}
 					</a>
@@ -99,11 +98,9 @@
 
 		<!-- Center: search trigger — desktop -->
 		<button
-			class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-200 glass-subtle"
+			class="hidden md:flex items-center gap-2 px-3 py-1.5 rounded-xl text-xs transition-all duration-200 glass-subtle search-trigger"
 			style="color: var(--color-text-dim);"
 			onclick={() => { document.dispatchEvent(new CustomEvent('open-command-palette')); }}
-			onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)40'; }}
-			onmouseleave={(e) => { e.currentTarget.style.borderColor = ''; }}
 		>
 			<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 				<circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />

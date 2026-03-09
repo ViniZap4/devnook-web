@@ -142,34 +142,34 @@
 		<div class="flex flex-col gap-5">
 			<!-- Quick stats -->
 			<div class="card p-4 flex flex-col gap-2.5 sidebar-animate" style="animation-delay: 0.1s;">
-				<a href="/{owner}/{repoName}/branches" class="flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);" onmouseenter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 5%, transparent)'; }} onmouseleave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; e.currentTarget.style.background = 'transparent'; }}>
+				<a href="/{owner}/{repoName}/branches" class="repo-stat-link flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);">
 					<span class="flex items-center gap-1.5">
 						<svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
 						Branches
 					</span>
 					<span class="font-mono text-[0.625rem] px-1.5 py-0.5 rounded-md" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{branches.length}</span>
 				</a>
-				<a href="/{owner}/{repoName}/tags" class="flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);" onmouseenter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 5%, transparent)'; }} onmouseleave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; e.currentTarget.style.background = 'transparent'; }}>
+				<a href="/{owner}/{repoName}/tags" class="repo-stat-link flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);">
 					<span class="flex items-center gap-1.5">
 						<svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z" /></svg>
 						Tags
 					</span>
 					<span class="font-mono text-[0.625rem] px-1.5 py-0.5 rounded-md" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{tags.length}</span>
 				</a>
-				<a href="/{owner}/{repoName}/releases" class="flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);" onmouseenter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 5%, transparent)'; }} onmouseleave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; e.currentTarget.style.background = 'transparent'; }}>
+				<a href="/{owner}/{repoName}/releases" class="repo-stat-link flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);">
 					<span class="flex items-center gap-1.5">
 						<svg class="w-3.5 h-3.5 opacity-60" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" /></svg>
 						Releases
 					</span>
 				</a>
-				<a href="/{owner}/{repoName}/stargazers" class="flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);" onmouseenter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 5%, transparent)'; }} onmouseleave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; e.currentTarget.style.background = 'transparent'; }}>
+				<a href="/{owner}/{repoName}/stargazers" class="repo-stat-link flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);">
 					<span class="flex items-center gap-1.5">
 						<svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
 						Stargazers
 					</span>
 					<span class="font-mono text-[0.625rem] px-1.5 py-0.5 rounded-md" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{repoData?.stars_count ?? 0}</span>
 				</a>
-				<a href="/{owner}/{repoName}/forks" class="flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);" onmouseenter={(e) => { e.currentTarget.style.color = 'var(--color-primary)'; e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 5%, transparent)'; }} onmouseleave={(e) => { e.currentTarget.style.color = 'var(--color-text-dim)'; e.currentTarget.style.background = 'transparent'; }}>
+				<a href="/{owner}/{repoName}/forks" class="repo-stat-link flex items-center justify-between text-xs hover-slide transition-all duration-200 py-1 rounded-lg px-1 -mx-1" style="color: var(--color-text-dim);">
 					<span class="flex items-center gap-1.5">
 						<svg class="w-3.5 h-3.5 opacity-60" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
 						Forks

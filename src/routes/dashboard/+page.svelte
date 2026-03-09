@@ -31,7 +31,7 @@
 </script>
 
 {#if ready}
-<PageShell maxWidth="max-w-7xl">
+<PageShell maxWidth="max-w-[1600px]">
 	<!-- Welcome header -->
 	<div class="flex items-center justify-between mb-10 pb-8 border-b animate-fade-up" style="border-color: var(--color-separator);">
 		<div class="flex items-center gap-5">

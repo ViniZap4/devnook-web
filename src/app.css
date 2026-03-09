@@ -74,12 +74,12 @@
 
 	/* Smooth focus rings */
 	input:focus-visible, textarea:focus-visible, select:focus-visible {
-		box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px var(--color-primary)60;
+		box-shadow: 0 0 0 2px var(--color-background), 0 0 0 4px color-mix(in srgb, var(--color-primary) 38%, transparent);
 		transition: box-shadow 0.2s ease;
 	}
 
 	button:focus-visible {
-		outline: 2px solid var(--color-primary)80;
+		outline: 2px solid color-mix(in srgb, var(--color-primary) 50%, transparent);
 		outline-offset: 2px;
 	}
 
@@ -89,7 +89,7 @@
 	::-webkit-scrollbar-thumb:hover { background: var(--color-text-dim); }
 
 	::selection {
-		background-color: var(--color-primary)80;
+		background-color: color-mix(in srgb, var(--color-primary) 50%, transparent);
 		color: white;
 	}
 }
@@ -186,7 +186,7 @@
 
 @keyframes border-glow {
 	0%, 100% { border-color: var(--color-border); }
-	50% { border-color: var(--color-primary)50; }
+	50% { border-color: color-mix(in srgb, var(--color-primary) 31%, transparent); }
 }
 
 @keyframes ripple {
@@ -344,11 +344,11 @@
 }
 
 @utility noise-bg-strong {
-	background-image: linear-gradient(360deg, var(--color-background)d9, var(--color-background)99), url('/noise.svg');
+	background-image: linear-gradient(360deg, color-mix(in srgb, var(--color-background) 85%, transparent), color-mix(in srgb, var(--color-background) 60%, transparent)), url('/noise.svg');
 }
 
 @utility noise-bg-medium {
-	background-image: linear-gradient(360deg, var(--color-background)99, var(--color-background)72), url('/noise.svg');
+	background-image: linear-gradient(360deg, color-mix(in srgb, var(--color-background) 60%, transparent), color-mix(in srgb, var(--color-background) 45%, transparent)), url('/noise.svg');
 }
 
 @utility card {
@@ -448,6 +448,22 @@
 .card:active, .card-hover:active {
 	transform: translateY(0) scale(0.99);
 	transition-duration: 0.1s;
+}
+
+/* Nav link hover — non-active links brighten on hover */
+a[data-nav-link]:not([data-active]):hover {
+	color: var(--color-text) !important;
+}
+
+/* Search trigger hover — subtle primary border */
+.search-trigger:hover {
+	border-color: color-mix(in srgb, var(--color-primary) 25%, transparent) !important;
+}
+
+/* Repo sidebar stat hover — primary color + subtle background */
+.repo-stat-link:hover {
+	color: var(--color-primary) !important;
+	background: color-mix(in srgb, var(--color-primary) 5%, transparent) !important;
 }
 
 /* Animated link underlines */

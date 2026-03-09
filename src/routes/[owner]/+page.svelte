@@ -160,7 +160,7 @@
 	const displayedRepos = $derived(tab === 'repos' ? repos : starredRepos);
 </script>
 
-<PageShell maxWidth="max-w-6xl">
+<PageShell>
 	{#if loading}
 		<div class="flex flex-col gap-6">
 			<div class="flex items-center gap-4">

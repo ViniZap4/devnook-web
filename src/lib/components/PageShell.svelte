@@ -6,7 +6,7 @@
 	import { onMount } from 'svelte';
 	import { browser } from '$app/environment';
 
-	let { children, maxWidth = 'max-w-6xl' }: { children: Snippet; maxWidth?: string } = $props();
+	let { children, maxWidth = 'max-w-[1400px]' }: { children: Snippet; maxWidth?: string } = $props();
 
 	let mouseX = $state(0);
 	let mouseY = $state(0);

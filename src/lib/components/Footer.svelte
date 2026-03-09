@@ -1,5 +1,5 @@
 <footer class="border-t mt-auto" style="border-color: var(--color-separator);">
-	<div class="max-w-7xl mx-auto px-4 sm:px-6 py-6">
+	<div class="max-w-[1600px] mx-auto px-4 sm:px-6 py-6">
 		<div class="flex flex-col sm:flex-row items-center justify-between gap-4">
 			<div class="flex items-center gap-3">
 				<div class="relative">
