@@ -59,11 +59,21 @@
 				convoMessages = [...convoMessages, data];
 				await tick();
 				scrollToBottom();
-				// Mark as read
-				messages.messages(activeConvo.id, { limit: 1 });
 			}
-			// Refresh conversation list to update last_message and ordering
-			loadConversations();
+			// Update conversation list — move affected convo to top with new last_message
+			const convoIdx = conversations.findIndex(c => c.id === data.conversation_id);
+			if (convoIdx >= 0) {
+				const updated = { ...conversations[convoIdx] };
+				updated.last_message = data;
+				updated.updated_at = data.created_at;
+				if (!(activeConvo && data.conversation_id === activeConvo.id)) {
+					updated.unread_count = (updated.unread_count || 0) + 1;
+				}
+				conversations = [updated, ...conversations.filter(c => c.id !== data.conversation_id)];
+			} else {
+				// New conversation — reload list
+				loadConversations();
+			}
 		});
 	});
 
@@ -129,10 +139,9 @@
 		scrollToBottom();
 
 		try {
-			await messages.send(activeConvo.id, { content });
-			convoMessages = await messages.messages(activeConvo.id);
-			await tick();
-			scrollToBottom();
+			const { id } = await messages.send(activeConvo.id, { content });
+			// Update optimistic message with real ID
+			convoMessages = convoMessages.map(m => m.id === optimistic.id ? { ...m, id } : m);
 		} catch {
 			// Remove optimistic message on failure
 			convoMessages = convoMessages.filter(m => m.id !== optimistic.id);

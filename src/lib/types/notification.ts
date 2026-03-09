@@ -3,6 +3,7 @@ export interface Notification {
 	user_id: number;
 	type: string;
 	title: string;
+	body?: string;
 	link: string;
 	read: boolean;
 	created_at: string;

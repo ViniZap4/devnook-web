@@ -105,6 +105,8 @@ export const userStore = {
 		user = res.user;
 		persistUser(res.user);
 		needsSetup = false;
+		wsStore.connect(res.token);
+		themeStore.loadFromServer();
 	},
 
 	async register(data: { username: string; email: string; password: string; full_name: string }) {
@@ -112,6 +114,8 @@ export const userStore = {
 		setToken(res.token);
 		user = res.user;
 		persistUser(res.user);
+		wsStore.connect(res.token);
+		themeStore.loadFromServer();
 	},
 
 	async fetchUser() {
