@@ -78,7 +78,7 @@
 	const pageTree = $derived(buildTree(pages));
 </script>
 
-<PageShell maxWidth="max-w-6xl">
+<PageShell>
 	{#if loading}
 		<div class="py-16 flex flex-col items-center gap-3">
 			<Spinner size="md" />

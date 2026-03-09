@@ -82,7 +82,7 @@
 	{/if}
 
 	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">
-	<main class="max-w-6xl mx-auto px-4 sm:px-6 pt-20 pb-8 w-full flex-1">
+	<main class="max-w-[1400px] mx-auto px-4 sm:px-6 pt-20 pb-8 w-full flex-1">
 		{#if loading}
 			<div class="flex flex-col gap-6">
 				<div class="flex flex-col gap-3">

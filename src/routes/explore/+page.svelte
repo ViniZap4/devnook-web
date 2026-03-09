@@ -52,7 +52,7 @@
 	onMount(loadRepos);
 </script>
 
-<PageShell maxWidth="max-w-6xl">
+<PageShell>
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
 		<div class="flex items-center justify-between animate-fade-up">

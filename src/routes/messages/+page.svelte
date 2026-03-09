@@ -230,7 +230,7 @@
 	const filteredConversations = $derived(conversations.filter(convoFilter));
 </script>
 
-<PageShell maxWidth="max-w-7xl">
+<PageShell maxWidth="max-w-[1600px]">
 	<div class="flex flex-col gap-4">
 		<!-- Header -->
 		<div class="flex items-center justify-between page-header">

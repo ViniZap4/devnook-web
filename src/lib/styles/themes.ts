@@ -61,7 +61,7 @@ export const themes: Record<string, Theme> = {
 		background: '#0a0a0f',
 		surface: '#12121a',
 		surfaceHover: '#1a1a25',
-		overlay: '#08080d',
+		overlay: '#060609',
 		text: '#e8ecf4',
 		textDim: '#8890a0',
 		border: '#1e1e2e',
@@ -128,8 +128,8 @@ export const themes: Record<string, Theme> = {
 		surface: '#d5d6db',
 		surfaceHover: '#c4c8da',
 		overlay: '#e9e9ec',
-		text: '#3760bf',
-		textDim: '#6172b0',
+		text: '#343b58',
+		textDim: '#6e7191',
 		border: '#a8aecb',
 		separator: '#c4c8da',
 		error: '#f52a65',
@@ -167,7 +167,7 @@ export const themes: Record<string, Theme> = {
 		primary: '#8839ef',
 		secondary: '#1e66f5',
 		accent: '#ea76cb',
-		muted: '#9ca0b0',
+		muted: '#8c8fa1',
 		background: '#eff1f5',
 		surface: '#e6e9ef',
 		surfaceHover: '#ccd0da',
@@ -217,7 +217,7 @@ export const themes: Record<string, Theme> = {
 		surfaceHover: '#434c5e',
 		overlay: '#272c36',
 		text: '#eceff4',
-		textDim: '#a0aec0',
+		textDim: '#b0bec5',
 		border: '#434c5e',
 		separator: '#3b4252',
 		error: '#bf616a',
@@ -238,8 +238,8 @@ export const themes: Record<string, Theme> = {
 		surface: '#073642',
 		surfaceHover: '#0d4a59',
 		overlay: '#001e26',
-		text: '#93a1a1',
-		textDim: '#839496',
+		text: '#c5d0d0',
+		textDim: '#93a1a1',
 		border: '#0d4a59',
 		separator: '#073642',
 		error: '#dc322f',
@@ -296,8 +296,8 @@ export const themes: Record<string, Theme> = {
 		name: 'trans-light',
 		label: 'Trans Light',
 		isDark: false,
-		primary: '#5bcefa',
-		secondary: '#f5a9b8',
+		primary: '#1a9bcf',
+		secondary: '#d4657a',
 		accent: '#333333',
 		muted: '#8d99ae',
 		background: '#f5f5ff',
@@ -332,8 +332,8 @@ export const themes: Record<string, Theme> = {
 		separator: '#2e2238',
 		error: '#ff6b8a',
 		warning: '#ffd6a5',
-		success: '#87ceeb',
-		info: '#c9b1e8',
+		success: '#a6e3a1',
+		info: '#87ceeb',
 		previewColors: ['#f4a7b9', '#c9b1e8', '#87ceeb', '#f0e6f6'],
 	},
 	'transmasc': {
@@ -354,8 +354,8 @@ export const themes: Record<string, Theme> = {
 		separator: '#1c2e3f',
 		error: '#ff7096',
 		warning: '#ffd6a5',
-		success: '#5ba3d9',
-		info: '#d8eaf8',
+		success: '#8fc98a',
+		info: '#7dcfff',
 		previewColors: ['#5ba3d9', '#d8eaf8', '#f4a7b9', '#ddeeff'],
 	},
 	'obsidian': {
@@ -434,7 +434,7 @@ export function loadThemeSettings(): ThemeSettings {
 	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'orbs' };
 }
 
-export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'mesh'): void {
+export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'orbs'): void {
 	localStorage.setItem(SETTINGS_KEY, JSON.stringify({ mode, darkName, lightName, backgroundEffect }));
 }
 
