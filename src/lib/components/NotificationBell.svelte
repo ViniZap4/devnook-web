@@ -13,12 +13,12 @@
 	let unsubNotif: (() => void) | null = null;
 	let unsubCount: (() => void) | null = null;
 
+	let interval: ReturnType<typeof setInterval>;
+
 	onMount(() => {
 		fetchCount();
-		// Keep polling as fallback but less frequently
-		const interval = setInterval(fetchCount, 60000);
+		interval = setInterval(fetchCount, 60000);
 
-		// Real-time via WebSocket
 		unsubNotif = wsStore.on('notification', (data: Notification) => {
 			items = [data, ...items];
 			unreadCount++;
@@ -26,11 +26,10 @@
 		unsubCount = wsStore.on('notification_count', (data: { count: number }) => {
 			unreadCount = data.count;
 		});
-
-		return () => clearInterval(interval);
 	});
 
 	onDestroy(() => {
+		clearInterval(interval);
 		unsubNotif?.();
 		unsubCount?.();
 	});
@@ -139,10 +138,8 @@
 			{:else}
 				{#each items as item, i}
 					<div
-						class="flex items-start gap-3 px-4 py-3 border-b transition-all duration-200 group"
+						class="flex items-start gap-3 px-4 py-3 border-b transition-all duration-200 group hover:bg-[var(--color-background)]"
 						style="border-color: var(--color-border); animation: fade-slide-in-sm 0.2s ease both; animation-delay: {i * 30}ms;"
-						onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-background)'; }}
-						onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
 					>
 						<div class="w-1.5 h-1.5 rounded-full mt-2 shrink-0" style="background-color: {typeColor(item.type)};"></div>
 						<div class="flex-1 min-w-0">

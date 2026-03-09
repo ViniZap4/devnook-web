@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 	import { userStore } from '$lib/stores/user.svelte';
 	import type { Branch } from '$lib/types/repository';
@@ -18,8 +17,10 @@
 	let creating = $state(false);
 	let error = $state('');
 
-	onMount(async () => {
-		await loadBranches();
+	$effect(() => {
+		void owner;
+		void repoName;
+		loadBranches();
 	});
 
 	async function loadBranches() {

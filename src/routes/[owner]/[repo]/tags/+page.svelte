@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { repos } from '$lib/services/api';
 	import type { Tag } from '$lib/types/repository';
-	import { onMount } from 'svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
 	const owner = $derived($page.params.owner!);
@@ -11,14 +10,17 @@
 	let tags = $state<Tag[]>([]);
 	let loading = $state(true);
 
-	onMount(async () => {
-		try {
-			tags = await repos.tags(owner, repo);
-		} catch {
+	$effect(() => {
+		void owner;
+		void repo;
+		loading = true;
+		repos.tags(owner, repo).then(t => {
+			tags = t;
+		}).catch(() => {
 			tags = [];
-		} finally {
+		}).finally(() => {
 			loading = false;
-		}
+		});
 	});
 </script>
 
