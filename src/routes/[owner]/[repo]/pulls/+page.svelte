@@ -2,7 +2,6 @@
 	import { page } from '$app/stores';
 	import { pulls } from '$lib/services/api';
 	import type { PullRequest } from '$lib/types/pull_request';
-	import { onMount } from 'svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
 	const owner = $derived($page.params.owner!);
@@ -12,7 +11,11 @@
 	let loading = $state(true);
 	let stateFilter = $state<'open' | 'closed'>('open');
 
-	onMount(() => fetchPRs());
+	$effect(() => {
+		void owner;
+		void repo;
+		fetchPRs();
+	});
 
 	async function fetchPRs() {
 		loading = true;

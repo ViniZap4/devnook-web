@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { issuesStore } from '$lib/stores/issues.svelte';
 	import { labels as labelsApi, milestones as milestonesApi } from '$lib/services/api';
 	import type { Label, Milestone } from '$lib/types/issue';
@@ -20,18 +19,24 @@
 	let repoMilestones = $state<Milestone[]>([]);
 	let showFilters = $state(false);
 
-	onMount(async () => {
-		await loadIssues();
-		try {
-			const [l, m] = await Promise.all([
-				labelsApi.list(owner, repoName),
-				milestonesApi.list(owner, repoName)
-			]);
-			repoLabels = l;
-			repoMilestones = m;
-		} catch {
-			// ignore
-		}
+	let fetchId = $state(0);
+
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const id = ++fetchId;
+
+		loadIssues().then(() => {
+			if (id !== fetchId) return;
+			Promise.all([
+				labelsApi.list(_owner, _repo),
+				milestonesApi.list(_owner, _repo)
+			]).then(([l, m]) => {
+				if (id !== fetchId) return;
+				repoLabels = l;
+				repoMilestones = m;
+			}).catch(() => {});
+		});
 	});
 
 	function loadIssues() {
