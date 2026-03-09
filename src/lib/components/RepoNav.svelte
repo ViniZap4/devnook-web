@@ -64,7 +64,7 @@
 	{#if mounted}
 		<div
 			class="absolute rounded-lg pointer-events-none z-0"
-			style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), top 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), height 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;"
+			style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent); transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, height 0.25s ease, opacity 0.2s ease;"
 			aria-hidden="true"
 		></div>
 	{/if}

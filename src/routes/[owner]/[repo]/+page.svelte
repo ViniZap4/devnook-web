@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 	import { userStore } from '$lib/stores/user.svelte';
 	import type { Repository, TreeEntry, Branch, ReadmeContent, Tag, Commit } from '$lib/types/repository';
@@ -27,13 +26,15 @@
 	let currentRef = $state('main');
 	let loading = $state(true);
 	let empty = $state(false);
+	let fetchId = 0;
 
-	async function loadBranchContent(ref: string) {
+	async function loadBranchContent(ref: string, id: number) {
 		const [tree, readmeData, commitsData] = await Promise.allSettled([
 			repos.tree(owner, repoName, ref, ''),
 			repos.readme(owner, repoName, ref),
 			repos.commits(owner, repoName, ref)
 		]);
+		if (id !== fetchId) return;
 		if (tree.status === 'fulfilled') { entries = tree.value; empty = false; }
 		else { entries = []; empty = true; }
 		readme = readmeData.status === 'fulfilled' ? readmeData.value : null;
@@ -44,38 +45,57 @@
 	async function selectBranch(branch: string) {
 		currentRef = branch;
 		loading = true;
+		const id = ++fetchId;
 		try {
-			await loadBranchContent(branch);
+			await loadBranchContent(branch, id);
 		} catch {
-			empty = true;
+			if (id === fetchId) empty = true;
 		} finally {
-			loading = false;
+			if (id === fetchId) loading = false;
 		}
 	}
 
-	onMount(async () => {
-		try {
-			const [branchList, repo, tagList] = await Promise.all([
-				repos.branches(owner, repoName),
-				repos.get(owner, repoName),
-				repos.tags(owner, repoName).catch(() => [] as Tag[])
-			]);
-			branches = branchList;
-			repoData = repo;
-			tags = tagList;
-			currentRef = repo.default_branch || 'main';
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const id = ++fetchId;
 
-			if (branches.length === 0) {
+		loading = true;
+		empty = false;
+		repoData = null;
+		entries = [];
+		branches = [];
+		tags = [];
+		readme = null;
+		latestCommit = null;
+
+		(async () => {
+			try {
+				const [branchList, repo, tagList] = await Promise.all([
+					repos.branches(_owner, _repo),
+					repos.get(_owner, _repo),
+					repos.tags(_owner, _repo).catch(() => [] as Tag[])
+				]);
+				if (id !== fetchId) return;
+				branches = branchList;
+				repoData = repo;
+				tags = tagList;
+				currentRef = repo.default_branch || 'main';
+
+				if (branches.length === 0) {
+					empty = true;
+					return;
+				}
+
+				await loadBranchContent(currentRef, id);
+			} catch {
+				if (id !== fetchId) return;
 				empty = true;
-				return;
+			} finally {
+				if (id !== fetchId) return;
+				loading = false;
 			}
-
-			await loadBranchContent(currentRef);
-		} catch {
-			empty = true;
-		} finally {
-			loading = false;
-		}
+		})();
 	});
 </script>
 

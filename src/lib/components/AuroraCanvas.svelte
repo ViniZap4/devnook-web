@@ -3,6 +3,7 @@
 
 	let canvas: HTMLCanvasElement;
 	let animId: number;
+	let observer: MutationObserver | null = null;
 
 	const bands = [
 		{ baseY: 0.22, amp: 0.07, freq: 1.5, speed: 0.15, width: 0.18, colorVar: '--color-primary' },
@@ -10,8 +11,14 @@
 		{ baseY: 0.28, amp: 0.05, freq: 2.0, speed: 0.20, width: 0.14, colorVar: '--color-secondary' },
 	];
 
-	function getColor(varName: string): string {
-		return getComputedStyle(document.documentElement).getPropertyValue(varName).trim() || '#6366f1';
+	// Cache colors to avoid getComputedStyle() per frame
+	let cachedColors: Record<string, string> = {};
+
+	function refreshColors() {
+		const style = getComputedStyle(document.documentElement);
+		for (const band of bands) {
+			cachedColors[band.colorVar] = style.getPropertyValue(band.colorVar).trim() || '#6366f1';
+		}
 	}
 
 	function hexToRgba(hex: string, alpha: number): string {
@@ -27,7 +34,7 @@
 		ctx.clearRect(0, 0, w, h);
 
 		for (const band of bands) {
-			const color = getColor(band.colorVar);
+			const color = cachedColors[band.colorVar] || '#6366f1';
 			const grad = ctx.createLinearGradient(0, 0, w, 0);
 			grad.addColorStop(0, hexToRgba(color, 0));
 			grad.addColorStop(0.15, hexToRgba(color, 0.06));
@@ -67,6 +74,12 @@
 		const ctx = canvas.getContext('2d');
 		if (!ctx) return;
 
+		refreshColors();
+
+		// Watch for theme changes to refresh cached colors
+		observer = new MutationObserver(() => refreshColors());
+		observer.observe(document.documentElement, { attributes: true, attributeFilter: ['style'] });
+
 		function resize() {
 			const dpr = Math.min(window.devicePixelRatio, 2);
 			canvas.width = window.innerWidth * dpr;
@@ -91,6 +104,7 @@
 
 	onDestroy(() => {
 		if (animId) cancelAnimationFrame(animId);
+		observer?.disconnect();
 	});
 </script>
 
