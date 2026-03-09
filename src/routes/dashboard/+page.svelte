@@ -36,7 +36,7 @@
 	<div class="flex items-center justify-between mb-10 pb-8 border-b animate-fade-up" style="border-color: var(--color-separator);">
 		<div class="flex items-center gap-5">
 			<div class="relative group">
-				<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, var(--color-primary)30, var(--color-secondary)20); filter: blur(8px);"></div>
+				<div class="absolute -inset-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-500" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 19%, transparent), color-mix(in srgb, var(--color-secondary) 12%, transparent)); filter: blur(8px);"></div>
 				<div class="relative transition-transform duration-300 group-hover:scale-105">
 					<Avatar username={userStore.user?.username ?? '?'} size={56} />
 				</div>
@@ -51,7 +51,7 @@
 				</h1>
 				<p class="text-sm mt-1" style="color: var(--color-text-dim);">
 					@{userStore.user?.username}
-					<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background: var(--color-primary)10; color: var(--color-primary);">
+					<span class="inline-flex items-center gap-1 ml-2 px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">
 						<span class="w-1.5 h-1.5 rounded-full live-dot" style="background: var(--color-success);"></span>
 						Online
 					</span>

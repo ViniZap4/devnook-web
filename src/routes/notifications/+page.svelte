@@ -94,12 +94,12 @@
 		<div class="flex items-center gap-1 rounded-xl border p-1 self-start animate-fade-up stagger-1" style="border-color: var(--color-border);">
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200"
-				style="{filter === 'unread' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{filter === 'unread' ? 'background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => switchFilter('unread')}
 			>Unread</button>
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200"
-				style="{filter === 'all' ? 'background-color: var(--color-primary)10; color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{filter === 'all' ? 'background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => switchFilter('all')}
 			>All</button>
 		</div>
@@ -151,7 +151,7 @@
 						</div>
 						{#if filter === 'unread'}
 							<button
-								class="text-xs shrink-0 px-2.5 py-1 rounded-lg border transition-all duration-200 hover:bg-[var(--color-surface-hover)] hover:border-[var(--color-primary)30] active:scale-[0.95] opacity-0 group-hover:opacity-100"
+								class="text-xs shrink-0 px-2.5 py-1 rounded-lg border transition-all duration-200 hover:bg-[var(--color-surface-hover)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] active:scale-[0.95] opacity-0 group-hover:opacity-100"
 								style="border-color: var(--color-border); color: var(--color-text-dim);"
 								onclick={() => markRead(item.id)}
 							>Done</button>

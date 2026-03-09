@@ -77,8 +77,8 @@
 			<div bind:this={navContainer} class="hidden sm:flex items-center gap-1 relative">
 				{#if mounted}
 					<div
-						class="absolute top-0 bottom-0 rounded-xl transition-all duration-500 ease-[cubic-bezier(0.34,1.56,0.64,1)] pointer-events-none"
-						style="{indicatorStyle} background: var(--color-primary)10; border: 1px solid var(--color-primary)20;"
+						class="absolute top-0 bottom-0 rounded-xl pointer-events-none"
+						style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 8%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent); transition: transform 0.35s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, opacity 0.2s ease;"
 					></div>
 				{/if}
 				{#each navItems as item, i}
@@ -162,7 +162,7 @@
 						class="flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-medium transition-all duration-200"
 						style="
 							color: {isActive ? 'var(--color-primary)' : 'var(--color-text)'};
-							background: {isActive ? 'var(--color-primary)10' : 'transparent'};
+							background: {isActive ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};
 						"
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">

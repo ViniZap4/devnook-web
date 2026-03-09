@@ -113,8 +113,8 @@
 /* ─── Keyframes ─── */
 
 @keyframes slide-in-blurred-top {
-	0% { transform: translateY(-40px); opacity: 0; filter: blur(8px); }
-	100% { transform: translateY(0); opacity: 1; filter: blur(0); }
+	0% { transform: translateY(-40px); opacity: 0; }
+	100% { transform: translateY(0); opacity: 1; }
 }
 
 @keyframes scale-in-center {
@@ -148,8 +148,8 @@
 }
 
 @keyframes glow-pulse {
-	0%, 100% { box-shadow: 0 0 10px var(--color-glow)15, 0 0 30px var(--color-glow)08; }
-	50% { box-shadow: 0 0 20px var(--color-glow)35, 0 0 50px var(--color-glow)12; }
+	0%, 100% { box-shadow: 0 0 10px color-mix(in srgb, var(--color-glow) 8%, transparent), 0 0 30px color-mix(in srgb, var(--color-glow) 3%, transparent); }
+	50% { box-shadow: 0 0 20px color-mix(in srgb, var(--color-glow) 20%, transparent), 0 0 50px color-mix(in srgb, var(--color-glow) 7%, transparent); }
 }
 
 @keyframes float {
@@ -216,15 +216,13 @@
 }
 
 @keyframes slide-up-fade {
-	0% { opacity: 0; transform: translateY(20px) scale(0.98); filter: blur(4px); }
-	60% { filter: blur(0); }
-	100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+	0% { opacity: 0; transform: translateY(12px) scale(0.98); }
+	100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes card-entrance {
-	0% { opacity: 0; transform: translateY(24px) scale(0.96); filter: blur(6px); }
-	60% { filter: blur(0); }
-	100% { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+	0% { opacity: 0; transform: translateY(12px) scale(0.97); }
+	100% { opacity: 1; transform: translateY(0) scale(1); }
 }
 
 @keyframes glow-line {
@@ -263,14 +261,13 @@
 
 /* Modal backdrop — faster and more elegant */
 @keyframes modal-overlay-in {
-	0% { opacity: 0; backdrop-filter: blur(0px); }
-	100% { opacity: 1; backdrop-filter: blur(8px); }
+	0% { opacity: 0; }
+	100% { opacity: 1; }
 }
 
 @keyframes modal-content-in {
-	0% { opacity: 0; transform: scale(0.92) translateY(12px); filter: blur(4px); }
-	60% { filter: blur(0); }
-	100% { opacity: 1; transform: scale(1) translateY(0); filter: blur(0); }
+	0% { opacity: 0; transform: scale(0.95) translateY(8px); }
+	100% { opacity: 1; transform: scale(1) translateY(0); }
 }
 
 @keyframes modal-content-out {
@@ -366,7 +363,7 @@
 
 @utility card-glow {
 	@apply card;
-	box-shadow: 0 0 0 1px var(--color-border), 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 40px var(--color-primary)06;
+	box-shadow: 0 0 0 1px var(--color-border), 0 4px 24px rgba(0, 0, 0, 0.15), 0 0 40px color-mix(in srgb, var(--color-primary) 2%, transparent);
 }
 
 @utility section-title {
@@ -400,7 +397,7 @@
 }
 
 @utility card-animate {
-	animation: card-entrance 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+	animation: card-entrance 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 	opacity: 0;
 }
 
@@ -433,14 +430,14 @@
 	left: 0;
 	width: 40%;
 	height: 1px;
-	background: linear-gradient(90deg, transparent, var(--color-primary)60, transparent);
+	background: linear-gradient(90deg, transparent, color-mix(in srgb, var(--color-primary) 38%, transparent), transparent);
 	animation: glow-line 3s ease-in-out infinite;
 }
 
 /* Smooth hover lift for cards */
 .card:hover, .card-hover:hover {
 	border-color: color-mix(in srgb, var(--color-primary) 25%, transparent);
-	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent), 0 0 40px var(--color-primary)06;
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12), 0 0 0 1px color-mix(in srgb, var(--color-primary) 8%, transparent), 0 0 40px color-mix(in srgb, var(--color-primary) 2%, transparent);
 	transform: translateY(-2px);
 }
 
@@ -522,13 +519,13 @@ a[data-nav-link]:not([data-active]):hover {
 	transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
 }
 .btn-glow:hover {
-	box-shadow: 0 0 24px var(--color-primary)30, 0 4px 16px var(--color-primary)15;
+	box-shadow: 0 0 24px color-mix(in srgb, var(--color-primary) 19%, transparent), 0 4px 16px color-mix(in srgb, var(--color-primary) 8%, transparent);
 }
 .btn-glow::before {
 	content: '';
 	position: absolute;
 	inset: -2px;
-	background: linear-gradient(45deg, var(--color-primary)20, transparent, var(--color-secondary)20);
+	background: linear-gradient(45deg, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent, color-mix(in srgb, var(--color-secondary) 12%, transparent));
 	border-radius: inherit;
 	opacity: 0;
 	transition: opacity 0.3s ease;
@@ -548,7 +545,7 @@ a[data-nav-link]:not([data-active]):hover {
 	inset: 0;
 	border-radius: inherit;
 	padding: 1px;
-	background: linear-gradient(135deg, var(--color-primary)40, var(--color-secondary)20, var(--color-accent)40);
+	background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 25%, transparent), color-mix(in srgb, var(--color-secondary) 12%, transparent), color-mix(in srgb, var(--color-accent) 25%, transparent));
 	mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
 	mask-composite: exclude;
 	-webkit-mask-composite: xor;
@@ -583,10 +580,7 @@ a[data-nav-link]:not([data-active]):hover {
 	box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
 }
 
-/* Smooth page entrance */
-main {
-	animation: page-enter 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
-}
+/* Page entrance — applied via class, not globally, to avoid replaying on every navigation */
 
 /* Tab transitions */
 .tab-content-enter {
@@ -616,26 +610,26 @@ main {
 	opacity: 0.15;
 	animation: morph 8s ease-in-out infinite, float 6s ease-in-out infinite;
 	pointer-events: none;
-	will-change: transform, border-radius;
+	will-change: transform;
 }
 
-/* Spotlight follow cursor — large, soft, theme-aware */
+/* Spotlight follow cursor — soft, theme-aware */
 .spotlight {
 	position: fixed;
-	width: 900px;
-	height: 900px;
+	width: 600px;
+	height: 600px;
+	left: 0;
+	top: 0;
 	border-radius: 50%;
 	pointer-events: none;
 	background: radial-gradient(
 		circle,
-		var(--color-primary)12 0%,
-		color-mix(in srgb, var(--color-secondary) 6%, transparent) 25%,
+		color-mix(in srgb, var(--color-primary) 7%, transparent) 0%,
+		color-mix(in srgb, var(--color-secondary) 3%, transparent) 30%,
 		transparent 60%
 	);
-	transform: translate(-50%, -50%);
 	z-index: 0;
-	will-change: left, top;
-	transition: left 0.6s cubic-bezier(0.16, 1, 0.3, 1), top 0.6s cubic-bezier(0.16, 1, 0.3, 1);
+	will-change: transform;
 }
 
 /* Shimmer text effect */
@@ -671,7 +665,7 @@ main {
 	height: 600px;
 	top: -10%;
 	left: -5%;
-	background: radial-gradient(circle, var(--color-primary)20, transparent 70%);
+	background: radial-gradient(circle, color-mix(in srgb, var(--color-primary) 12%, transparent), transparent 70%);
 	animation: orb-drift-1 20s ease-in-out infinite;
 }
 
@@ -680,7 +674,7 @@ main {
 	height: 500px;
 	top: 30%;
 	right: -10%;
-	background: radial-gradient(circle, var(--color-secondary)18, transparent 70%);
+	background: radial-gradient(circle, color-mix(in srgb, var(--color-secondary) 10%, transparent), transparent 70%);
 	animation: orb-drift-2 25s ease-in-out infinite;
 }
 
@@ -689,7 +683,7 @@ main {
 	height: 450px;
 	bottom: -5%;
 	left: 20%;
-	background: radial-gradient(circle, var(--color-accent)15, transparent 70%);
+	background: radial-gradient(circle, color-mix(in srgb, var(--color-accent) 8%, transparent), transparent 70%);
 	animation: orb-drift-3 22s ease-in-out infinite;
 }
 
@@ -698,33 +692,33 @@ main {
 	height: 350px;
 	top: 60%;
 	left: 50%;
-	background: radial-gradient(circle, var(--color-info)10, transparent 70%);
+	background: radial-gradient(circle, color-mix(in srgb, var(--color-info) 6%, transparent), transparent 70%);
 	animation: orb-drift-1 28s ease-in-out infinite reverse;
 }
 
 /* Mesh gradient — kept as alternative */
 .mesh-gradient {
 	background:
-		radial-gradient(ellipse 90% 70% at 35% 15%, var(--color-primary)22 0px, transparent 65%),
-		radial-gradient(ellipse 70% 90% at 80% 8%, var(--color-secondary)1a 0px, transparent 55%),
-		radial-gradient(ellipse 80% 60% at 5% 50%, var(--color-accent)18 0px, transparent 55%),
-		radial-gradient(ellipse 60% 80% at 70% 55%, var(--color-info)14 0px, transparent 50%),
-		radial-gradient(ellipse 90% 50% at 10% 85%, var(--color-primary)1c 0px, transparent 55%),
-		radial-gradient(ellipse 50% 50% at 55% 80%, var(--color-secondary)16 0px, transparent 45%),
-		radial-gradient(ellipse 40% 40% at 50% 50%, var(--color-accent)10 0px, transparent 40%);
+		radial-gradient(ellipse 90% 70% at 35% 15%, color-mix(in srgb, var(--color-primary) 13%, transparent) 0px, transparent 65%),
+		radial-gradient(ellipse 70% 90% at 80% 8%, color-mix(in srgb, var(--color-secondary) 10%, transparent) 0px, transparent 55%),
+		radial-gradient(ellipse 80% 60% at 5% 50%, color-mix(in srgb, var(--color-accent) 9%, transparent) 0px, transparent 55%),
+		radial-gradient(ellipse 60% 80% at 70% 55%, color-mix(in srgb, var(--color-info) 8%, transparent) 0px, transparent 50%),
+		radial-gradient(ellipse 90% 50% at 10% 85%, color-mix(in srgb, var(--color-primary) 11%, transparent) 0px, transparent 55%),
+		radial-gradient(ellipse 50% 50% at 55% 80%, color-mix(in srgb, var(--color-secondary) 9%, transparent) 0px, transparent 45%),
+		radial-gradient(ellipse 40% 40% at 50% 50%, color-mix(in srgb, var(--color-accent) 6%, transparent) 0px, transparent 40%);
 	animation: mesh-drift 25s ease-in-out infinite alternate;
 }
 
 @keyframes mesh-drift {
-	0% { filter: hue-rotate(0deg) brightness(1); transform: scale(1); }
-	33% { filter: hue-rotate(8deg) brightness(1.08); transform: scale(1.02); }
-	66% { filter: hue-rotate(-5deg) brightness(1.04); transform: scale(0.99); }
-	100% { filter: hue-rotate(3deg) brightness(1); transform: scale(1.01); }
+	0% { transform: scale(1); opacity: 1; }
+	33% { transform: scale(1.02); opacity: 0.95; }
+	66% { transform: scale(0.99); opacity: 1; }
+	100% { transform: scale(1.01); opacity: 0.97; }
 }
 
 /* Breathing glow ring */
 .glow-ring {
-	box-shadow: 0 0 0 1px var(--color-border), 0 0 20px var(--color-primary)10;
+	box-shadow: 0 0 0 1px var(--color-border), 0 0 20px color-mix(in srgb, var(--color-primary) 6%, transparent);
 	animation: breathe 3s ease-in-out infinite;
 }
 

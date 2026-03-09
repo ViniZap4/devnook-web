@@ -50,7 +50,7 @@
 						class="flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
 						style="
 							color: {active ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-							background: {active ? 'var(--color-primary)10' : 'transparent'};
+							background: {active ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};
 							font-weight: {active ? '600' : '400'};
 						"
 						onmouseenter={(e) => { if (!active) e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
@@ -97,7 +97,7 @@
 				<a
 					href={item.href}
 					class="px-3 py-2 rounded-lg text-xs font-medium whitespace-nowrap transition-colors"
-					style="color: {active ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {active ? 'var(--color-primary)10' : 'transparent'};"
+					style="color: {active ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {active ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};"
 				>
 					{item.label}
 				</a>
