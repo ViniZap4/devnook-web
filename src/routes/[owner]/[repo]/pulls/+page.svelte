@@ -10,27 +10,28 @@
 	let prs = $state<PullRequest[]>([]);
 	let loading = $state(true);
 	let stateFilter = $state<'open' | 'closed'>('open');
+	let fetchId = 0;
 
 	$effect(() => {
-		void owner;
-		void repo;
-		fetchPRs();
-	});
+		const _owner = owner;
+		const _repo = repo;
+		const id = ++fetchId;
 
-	async function fetchPRs() {
 		loading = true;
-		try {
-			prs = await pulls.list(owner, repo, stateFilter);
-		} catch {
+		pulls.list(_owner, _repo, stateFilter).then(data => {
+			if (id !== fetchId) return;
+			prs = data;
+		}).catch(() => {
+			if (id !== fetchId) return;
 			prs = [];
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
-	}
+		});
+	});
 
 	function switchState(s: 'open' | 'closed') {
 		stateFilter = s;
-		fetchPRs();
 	}
 </script>
 
@@ -41,7 +42,7 @@
 				class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
 				style="
 					color: {stateFilter === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};
-					background: {stateFilter === 'open' ? 'var(--color-success)10' : 'transparent'};
+					background: {stateFilter === 'open' ? 'color-mix(in srgb, var(--color-success) 8%, transparent)' : 'transparent'};
 					font-weight: {stateFilter === 'open' ? '600' : '400'};
 				"
 				onclick={() => switchState('open')}
@@ -53,7 +54,7 @@
 				class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
 				style="
 					color: {stateFilter === 'closed' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-					background: {stateFilter === 'closed' ? 'var(--color-primary)10' : 'transparent'};
+					background: {stateFilter === 'closed' ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};
 					font-weight: {stateFilter === 'closed' ? '600' : '400'};
 				"
 				onclick={() => switchState('closed')}

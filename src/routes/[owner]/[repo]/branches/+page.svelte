@@ -16,11 +16,25 @@
 	let fromBranch = $state('');
 	let creating = $state(false);
 	let error = $state('');
+	let fetchId = 0;
 
 	$effect(() => {
-		void owner;
-		void repoName;
-		loadBranches();
+		const _owner = owner;
+		const _repo = repoName;
+		const id = ++fetchId;
+
+		loading = true;
+		repos.branches(_owner, _repo).then(data => {
+			if (id !== fetchId) return;
+			branches = data;
+			const def = data.find(b => b.is_default);
+			if (def && !fromBranch) fromBranch = def.name;
+		}).catch(() => {
+			if (id !== fetchId) return;
+		}).finally(() => {
+			if (id !== fetchId) return;
+			loading = false;
+		});
 	});
 
 	async function loadBranches() {
@@ -70,7 +84,7 @@
 			<a
 				href="/{owner}/{repoName}/branches"
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="background-color: var(--color-primary)10; color: var(--color-primary);"
+				style="background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);"
 			>
 				<span class="flex items-center gap-2">
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
@@ -162,7 +176,7 @@
 						<svg class="w-4 h-4 shrink-0" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
 						<span class="text-sm font-medium" style="color: var(--color-text);">{branch.name}</span>
 						{#if branch.is_default}
-							<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: var(--color-success)20; color: var(--color-success);">default</span>
+							<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: color-mix(in srgb, var(--color-success) 12%, transparent); color: var(--color-success);">default</span>
 						{/if}
 					</div>
 					{#if isOwner && !branch.is_default}

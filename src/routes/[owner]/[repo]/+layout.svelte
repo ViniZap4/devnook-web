@@ -27,11 +27,16 @@
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
 
-	const tabKey = $derived(() => {
+	const tabKey = $derived.by(() => {
 		const path = $page.url.pathname;
 		const base = `/${owner}/${repoName}`;
 		const rest = path.slice(base.length);
-		const seg = rest.split('/')[1] || 'code';
+		const seg = rest.split('/')[1] || '';
+
+		// Group sub-routes under their parent tab to avoid unnecessary remounts
+		if (!seg || seg === 'tree' || seg === 'blob' || seg === 'blame' || seg === '_new') return 'code';
+		if (seg === 'labels' || seg === 'milestones' || seg === 'board') return 'issues';
+		if (seg === 'tags') return 'branches';
 		return seg;
 	});
 
@@ -78,7 +83,7 @@
 	<BackgroundEffect {mouseX} {mouseY} />
 
 	{#if showSpotlight && browser}
-		<div class="spotlight" style="left: {mouseX}px; top: {mouseY}px;"></div>
+		<div class="spotlight" style="transform: translate(calc({mouseX}px - 50%), calc({mouseY}px - 50%));"></div>
 	{/if}
 
 	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">
@@ -108,7 +113,7 @@
 			<div class="flex flex-col gap-6">
 				<RepoHeader {repo} />
 				<RepoNav owner={owner} repo={repoName} />
-				{#key tabKey()}
+				{#key tabKey}
 					<div class="content-reveal">
 						{@render children()}
 					</div>
