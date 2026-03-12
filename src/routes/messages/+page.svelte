@@ -15,6 +15,16 @@
 
 	marked.setOptions({ breaks: true, gfm: true });
 
+	// --- Markdown cache ---
+	const mdCache = new Map<string, string>();
+	function renderMd(content: string): string {
+		if (mdCache.has(content)) return mdCache.get(content)!;
+		const result = marked.parse(content, { async: false }) as string;
+		mdCache.set(content, result);
+		return result;
+	}
+
+	// --- State ---
 	let conversations = $state<Conversation[]>([]);
 	let activeConvo = $state<Conversation | null>(null);
 	let convoMessages = $state<Message[]>([]);
@@ -28,13 +38,18 @@
 	let searching = $state(false);
 	let showNewChat = $state(false);
 	let chatAreaEl = $state<HTMLElement>();
-	let textareaEl = $state<HTMLElement>();
+	let textareaEl = $state<HTMLTextAreaElement>();
+	let fileInputEl = $state<HTMLInputElement>();
 	let searchTimeout: ReturnType<typeof setTimeout>;
 	let mobileShowChat = $state(false);
-	let unsubscribeWs: (() => void) | null = null;
 	let showProfilePanel = $state(true);
+	let unsubscribeWs: (() => void) | null = null;
 
-	// Channel creation modal state
+	// --- Seen message IDs for animation guard ---
+	// Messages in this set are "old" and should NOT animate
+	let seenMessageIds = new Set<number>();
+
+	// --- Channel creation modal ---
 	let showCreateChannel = $state(false);
 	let channelName = $state('');
 	let channelDescription = $state('');
@@ -42,24 +57,30 @@
 	let creatingChannel = $state(false);
 	let channelError = $state('');
 
-	// Channel search state
+	// --- Channel search ---
 	let channelSearchQuery = $state('');
 
-	// Message actions state
+	// --- Message actions ---
 	let editingMessageId = $state<number | null>(null);
 	let editContent = $state('');
 	let replyToMessage = $state<Message | null>(null);
-	let hoveredMessageId = $state<number | null>(null);
 	let deletingMessageId = $state<number | null>(null);
 
-	// Audio recording state
+	// --- Markdown preview ---
+	let showMdPreview = $state(false);
+	const mdPreview = $derived(showMdPreview && newMessage.trim() ? renderMd(newMessage) : '');
+
+	// --- Audio recording ---
 	let isRecording = $state(false);
 	let mediaRecorder: MediaRecorder | null = null;
 	let audioChunks: Blob[] = [];
 	let recordingTime = $state(0);
 	let recordingInterval: ReturnType<typeof setInterval> | null = null;
 
-	// Chat background state
+	// --- File/image attachment ---
+	let attachPreview = $state<{ dataUrl: string; type: 'image' | 'video'; name: string } | null>(null);
+
+	// --- Chat background ---
 	const chatBgOptions = [
 		{ id: 'default', label: 'Default', css: '' },
 		{ id: 'deep', label: 'Deep Space', css: 'linear-gradient(160deg, #0a0e1a 0%, #111936 50%, #0a0e1a 100%)' },
@@ -95,6 +116,7 @@
 		unsubscribeWs = wsStore.on('chat_message', async (data: Message) => {
 			if (activeConvo && data.conversation_id === activeConvo.id) {
 				if (data.sender_username === userStore.user?.username) return;
+				// incoming message is new — do NOT add to seenMessageIds so it animates
 				convoMessages = [...convoMessages, data];
 				await tick();
 				scrollToBottom();
@@ -135,9 +157,13 @@
 		showProfilePanel = true;
 		msgLoading = true;
 		try {
-			convoMessages = await messages.messages(convo.id);
+			const loaded = await messages.messages(convo.id);
+			// Mark all existing messages as seen so they don't animate
+			seenMessageIds = new Set(loaded.map(m => m.id));
+			convoMessages = loaded;
 		} catch {
 			convoMessages = [];
+			seenMessageIds = new Set();
 		} finally {
 			msgLoading = false;
 			await tick();
@@ -153,15 +179,35 @@
 	}
 
 	async function sendMessage() {
+		// Handle attachment send
+		if (attachPreview && activeConvo && !sending) {
+			const { dataUrl, type } = attachPreview;
+			attachPreview = null;
+			sending = true;
+			try {
+				const { id } = await messages.send(activeConvo.id, { content: dataUrl, type });
+				const fresh = await messages.messages(activeConvo.id);
+				// mark all but the new one as seen
+				fresh.forEach(m => { if (m.id !== id) seenMessageIds.add(m.id); });
+				convoMessages = fresh;
+				await tick();
+				scrollToBottom();
+			} catch { /* ignore */ }
+			finally { sending = false; }
+			return;
+		}
+
 		if (!newMessage.trim() || !activeConvo || sending) return;
 		const content = newMessage;
 		const replyId = replyToMessage?.id;
 		sending = true;
 		newMessage = '';
+		showMdPreview = false;
 		replyToMessage = null;
 
+		const optimisticId = -Date.now();
 		const optimistic: Message = {
-			id: -Date.now(),
+			id: optimisticId,
 			conversation_id: activeConvo.id,
 			sender_id: userStore.user?.id ?? 0,
 			sender_username: userStore.user?.username ?? '',
@@ -174,6 +220,7 @@
 			created_at: new Date().toISOString(),
 			updated_at: new Date().toISOString()
 		};
+		// Optimistic message should animate (not in seenMessageIds)
 		convoMessages = [...convoMessages, optimistic];
 		await tick();
 		scrollToBottom();
@@ -182,9 +229,11 @@
 			const sendData: { content: string; reply_to_id?: number } = { content };
 			if (replyId) sendData.reply_to_id = replyId;
 			const { id } = await messages.send(activeConvo.id, sendData);
-			convoMessages = convoMessages.map(m => m.id === optimistic.id ? { ...m, id } : m);
+			// The confirmed message ID should NOT animate (we already showed the optimistic one)
+			seenMessageIds.add(id);
+			convoMessages = convoMessages.map(m => m.id === optimisticId ? { ...m, id } : m);
 		} catch {
-			convoMessages = convoMessages.filter(m => m.id !== optimistic.id);
+			convoMessages = convoMessages.filter(m => m.id !== optimisticId);
 		} finally {
 			sending = false;
 		}
@@ -322,7 +371,6 @@
 		if (!activeConvo) return;
 		try {
 			await messages.react(activeConvo.id, msgId, emoji);
-			// Update local state
 			convoMessages = convoMessages.map(m => {
 				if (m.id !== msgId) return m;
 				const reactions = [...m.reactions];
@@ -409,14 +457,9 @@
 		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 	}
 
-	// Markdown rendering
-	function renderMd(content: string): string {
-		return marked.parse(content, { async: false }) as string;
-	}
-
-	// Formatting toolbar
+	// --- Formatting toolbar ---
 	function insertFormat(prefix: string, suffix: string = prefix) {
-		const el = textareaEl as HTMLTextAreaElement;
+		const el = textareaEl;
 		if (!el) return;
 		const start = el.selectionStart;
 		const end = el.selectionEnd;
@@ -429,13 +472,14 @@
 			newMessage = before + prefix + suffix + after;
 		}
 		tick().then(() => {
-			const cursorPos = selected ? start + prefix.length + selected.length + suffix.length : start + prefix.length;
-			el.selectionStart = el.selectionEnd = selected ? cursorPos : start + prefix.length;
+			el.selectionStart = el.selectionEnd = selected
+				? start + prefix.length + selected.length + suffix.length
+				: start + prefix.length;
 			el.focus();
 		});
 	}
 
-	// Audio recording
+	// --- Audio recording ---
 	async function startRecording() {
 		try {
 			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
@@ -472,8 +516,10 @@
 		reader.onloadend = async () => {
 			const base64 = reader.result as string;
 			try {
-				await messages.send(activeConvo!.id, { content: base64, type: 'audio' });
-				convoMessages = await messages.messages(activeConvo!.id);
+				const { id } = await messages.send(activeConvo!.id, { content: base64, type: 'audio' });
+				const fresh = await messages.messages(activeConvo!.id);
+				fresh.forEach(m => { if (m.id !== id) seenMessageIds.add(m.id); });
+				convoMessages = fresh;
 				await tick();
 				scrollToBottom();
 			} catch { /* ignore */ }
@@ -481,7 +527,52 @@
 		reader.readAsDataURL(blob);
 	}
 
-	// Chat background
+	// --- File / image attachment ---
+	function handleFileSelect(e: Event) {
+		const input = e.currentTarget as HTMLInputElement;
+		const file = input.files?.[0];
+		if (!file) return;
+		const isVideo = file.type.startsWith('video/');
+		const reader = new FileReader();
+		reader.onloadend = () => {
+			attachPreview = {
+				dataUrl: reader.result as string,
+				type: isVideo ? 'video' : 'image',
+				name: file.name
+			};
+		};
+		reader.readAsDataURL(file);
+		// reset so same file can be re-selected
+		input.value = '';
+	}
+
+	function handlePaste(e: ClipboardEvent) {
+		const items = e.clipboardData?.items;
+		if (!items) return;
+		for (const item of Array.from(items)) {
+			if (item.type.startsWith('image/')) {
+				e.preventDefault();
+				const file = item.getAsFile();
+				if (!file) continue;
+				const reader = new FileReader();
+				reader.onloadend = () => {
+					attachPreview = {
+						dataUrl: reader.result as string,
+						type: 'image',
+						name: 'pasted-image.png'
+					};
+				};
+				reader.readAsDataURL(file);
+				break;
+			}
+		}
+	}
+
+	function cancelAttach() {
+		attachPreview = null;
+	}
+
+	// --- Chat background ---
 	function setChatBg(id: string) {
 		chatBgId = id;
 		try { localStorage.setItem('devnook-chat-bg', id); } catch {}
@@ -765,6 +856,7 @@
 							{@const showHeader = !sameSender || i === 0 || shouldShowDateDivider(convoMessages, i)}
 							{@const replyTarget = getReplyToMsg(msg.reply_to_id)}
 							{@const isEditing = editingMessageId === msg.id}
+							{@const isNew = !seenMessageIds.has(msg.id)}
 
 							{#if shouldShowDateDivider(convoMessages, i)}
 								<div class="date-divider">
@@ -774,13 +866,7 @@
 								</div>
 							{/if}
 
-							<!-- svelte-ignore a11y_no_static_element_interactions -->
-							<div
-								class="message-wrapper"
-								class:message-wrapper-hover={hoveredMessageId === msg.id}
-								onmouseenter={() => hoveredMessageId = msg.id}
-								onmouseleave={() => hoveredMessageId = null}
-							>
+							<div class="message-wrapper">
 								{#if replyTarget}
 									<div class="reply-context" class:reply-context-self={isMine}>
 										<svg class="reply-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" /></svg>
@@ -820,17 +906,37 @@
 												</div>
 											</div>
 										{:else if msg.type === 'audio'}
-											<div class="audio-msg" class:audio-msg-self={isMine}>
+											<div class="audio-msg" class:audio-msg-self={isMine} class:msg-animate-receive={isNew && !isMine} class:msg-animate-send={isNew && isMine}>
 												<div class="audio-wave-icon">
 													<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
 												</div>
 												<!-- svelte-ignore a11y_media_has_caption -->
 												<audio controls preload="metadata" src={msg.content} class="audio-player"></audio>
 											</div>
+										{:else if msg.type === 'image'}
+											<!-- svelte-ignore a11y_click_events_have_key_events -->
+											<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
+											<img
+												src={msg.content}
+												alt="Image message"
+												class="image-msg"
+												class:msg-animate-receive={isNew && !isMine}
+												class:msg-animate-send={isNew && isMine}
+												onclick={() => window.open(msg.content, '_blank')}
+											/>
+										{:else if msg.type === 'video'}
+											<!-- svelte-ignore a11y_media_has_caption -->
+											<video
+												src={msg.content}
+												controls
+												class="video-msg"
+												class:msg-animate-receive={isNew && !isMine}
+												class:msg-animate-send={isNew && isMine}
+											></video>
 										{:else if isMine}
-											<div class="bubble-self chat-md">{@html renderMd(msg.content)}</div>
+											<div class="bubble-self chat-md" class:msg-animate-send={isNew}>{@html renderMd(msg.content)}</div>
 										{:else}
-											<div class="msg-text chat-md">{@html renderMd(msg.content)}</div>
+											<div class="msg-text chat-md" class:msg-animate-receive={isNew}>{@html renderMd(msg.content)}</div>
 										{/if}
 										{#if msg.id < 0}
 											<span class="text-[10px] mt-0.5 block" style="color: var(--color-text-dim); opacity: 0.4; {isMine ? 'text-align: right;' : ''}">Sending...</span>
@@ -859,8 +965,8 @@
 										</div>
 									{/if}
 								</div>
-								<!-- Action toolbar (appears on hover) -->
-								{#if hoveredMessageId === msg.id && msg.id > 0 && !isEditing}
+								<!-- Action toolbar — shown via CSS :hover, no reactive hovered state -->
+								{#if msg.id > 0 && !isEditing}
 									<div class="action-toolbar" class:action-toolbar-self={isMine}>
 										<button class="toolbar-btn" title="Reply" onclick={() => startReply(msg)}>
 											<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" /></svg>
@@ -905,6 +1011,23 @@
 							</button>
 						</div>
 					{/if}
+
+					<!-- File/image attachment preview -->
+					{#if attachPreview}
+						<div class="attach-preview-bar">
+							{#if attachPreview.type === 'image'}
+								<img src={attachPreview.dataUrl} alt="Preview" class="attach-thumb" />
+							{:else}
+								<!-- svelte-ignore a11y_media_has_caption -->
+								<video src={attachPreview.dataUrl} class="attach-thumb-video"></video>
+							{/if}
+							<span class="attach-filename">{attachPreview.name}</span>
+							<button class="attach-cancel" onclick={cancelAttach} title="Remove">
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+							</button>
+						</div>
+					{/if}
+
 					<div class="message-input-box">
 						<!-- Formatting toolbar -->
 						<div class="formatting-toolbar">
@@ -932,10 +1055,36 @@
 							<button class="format-btn" title="Quote" onclick={() => insertFormat('\n> ', '')}>
 								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
 							</button>
+							<!-- Markdown preview toggle -->
+							<div class="format-sep"></div>
+							<button
+								class="format-btn"
+								class:format-btn-active={showMdPreview}
+								title="Preview markdown"
+								onclick={() => { showMdPreview = !showMdPreview; }}
+							>
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path stroke-linecap="round" stroke-linejoin="round" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg>
+							</button>
 						</div>
+
+						<!-- Markdown preview panel -->
+						{#if showMdPreview && newMessage.trim()}
+							<div class="md-preview-panel chat-md">
+								{@html mdPreview}
+							</div>
+						{/if}
+
 						<!-- Input row -->
 						<div class="input-row">
-							<button class="attach-btn" title="Attach file">
+							<!-- Hidden file input -->
+							<input
+								bind:this={fileInputEl}
+								type="file"
+								accept="image/*,video/*"
+								class="hidden"
+								onchange={handleFileSelect}
+							/>
+							<button class="attach-btn" title="Attach image or video" onclick={() => fileInputEl?.click()}>
 								<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
 							</button>
 							{#if isRecording}
@@ -955,6 +1104,7 @@
 									class="text-input"
 									rows="1"
 									onkeydown={handleKeydown}
+									onpaste={handlePaste}
 									oninput={(e) => {
 										const target = e.currentTarget;
 										target.style.height = 'auto';
@@ -964,7 +1114,7 @@
 								<button class="emoji-btn" title="Emoji">
 									<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
 								</button>
-								{#if newMessage.trim()}
+								{#if newMessage.trim() || attachPreview}
 									<button class="send-btn" disabled={sending} onclick={sendMessage} title="Send">
 										<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
 									</button>
@@ -1135,11 +1285,13 @@
 </PageShell>
 
 <style>
+	/* === Layout === */
 	.chat-wrapper {
 		display: flex;
 		height: calc(100vh - 100px);
 		gap: 24px;
 		position: relative;
+		min-width: 0;
 	}
 
 	/* === Channels Sidebar === */
@@ -1156,6 +1308,7 @@
 		padding: 12px 0 16px;
 		overflow-y: auto;
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
+		min-width: 0;
 	}
 
 	/* === Sidebar Search === */
@@ -1205,9 +1358,7 @@
 		align-items: center;
 		justify-content: center;
 	}
-	.search-clear:hover {
-		opacity: 1;
-	}
+	.search-clear:hover { opacity: 1; }
 	.no-results-hint {
 		padding: 8px 16px;
 		font-size: 12px;
@@ -1232,9 +1383,7 @@
 		opacity: 0.7;
 		transition: opacity 0.15s;
 	}
-	.section-header button:hover {
-		opacity: 1;
-	}
+	.section-header button:hover { opacity: 1; }
 
 	.channel-item {
 		height: 32px;
@@ -1295,12 +1444,8 @@
 		width: calc(100% - 16px);
 		transition: background 0.15s;
 	}
-	.dm-item:hover {
-		background: rgba(255,255,255,0.05);
-	}
-	.dm-item.active {
-		background: rgba(6,182,212,0.12);
-	}
+	.dm-item:hover { background: rgba(255,255,255,0.05); }
+	.dm-item.active { background: rgba(6,182,212,0.12); }
 	.dm-item-content {
 		flex: 1;
 		min-width: 0;
@@ -1321,10 +1466,7 @@
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.dm-item-name.unread {
-		font-weight: 600;
-		color: var(--color-text);
-	}
+	.dm-item-name.unread { font-weight: 600; }
 	.dm-item-time {
 		font-size: 11px;
 		color: var(--color-text-dim);
@@ -1343,9 +1485,7 @@
 		opacity: 0.9;
 		color: var(--color-text);
 	}
-	.preview-you {
-		color: var(--color-text-dim);
-	}
+	.preview-you { color: var(--color-text-dim); }
 
 	.new-msg-btn {
 		margin: 16px 12px 0;
@@ -1361,9 +1501,7 @@
 		gap: 8px;
 		transition: background 0.15s;
 	}
-	.new-msg-btn:hover {
-		background: #22d3ee;
-	}
+	.new-msg-btn:hover { background: #22d3ee; }
 
 	/* === Chat Area === */
 	.chat-area {
@@ -1455,6 +1593,7 @@
 		50% { transform: translateY(-6px); }
 	}
 
+	/* === Channel header === */
 	.channel-header {
 		height: 64px;
 		padding: 0 20px;
@@ -1492,17 +1631,13 @@
 		align-items: center;
 		gap: 8px;
 	}
-	.member-avatars {
-		display: flex;
-	}
+	.member-avatars { display: flex; }
 	.member-av {
 		margin-left: -8px;
 		border-radius: 50%;
 		border: 2px solid var(--glass-border);
 	}
-	.member-av:first-child {
-		margin-left: 0;
-	}
+	.member-av:first-child { margin-left: 0; }
 	.member-count {
 		width: 28px;
 		height: 28px;
@@ -1535,10 +1670,12 @@
 	.messages-area {
 		flex: 1;
 		overflow-y: auto;
+		overflow-x: hidden;
 		padding: 20px;
 		display: flex;
 		flex-direction: column;
 		gap: 4px;
+		min-height: 0;
 	}
 
 	.date-divider {
@@ -1558,17 +1695,24 @@
 		text-transform: uppercase;
 		letter-spacing: 0.03em;
 		color: var(--color-text-dim);
+		flex-shrink: 0;
 	}
 
-	/* === Message wrapper === */
+	/* === Message wrapper — action toolbar shown via CSS :hover === */
 	.message-wrapper {
 		position: relative;
 		padding: 2px 0;
 		border-radius: 8px;
-		transition: background 0.1s;
 	}
-	.message-wrapper-hover {
+	.message-wrapper:hover {
 		background: rgba(255, 255, 255, 0.02);
+	}
+	/* Action toolbar hidden by default, shown on wrapper hover */
+	.message-wrapper .action-toolbar {
+		display: none;
+	}
+	.message-wrapper:hover .action-toolbar {
+		display: flex;
 	}
 
 	/* === Reply context above message === */
@@ -1576,12 +1720,13 @@
 		display: flex;
 		align-items: center;
 		gap: 6px;
-		padding: 4px 0 2px 56px;
+		padding: 4px 0 2px 48px;
 		font-size: 12px;
+		min-width: 0;
 	}
 	.reply-context-self {
 		padding-left: 0;
-		padding-right: 56px;
+		padding-right: 48px;
 		justify-content: flex-end;
 	}
 	.reply-icon {
@@ -1595,6 +1740,7 @@
 		font-weight: 600;
 		color: var(--color-primary);
 		opacity: 0.7;
+		flex-shrink: 0;
 	}
 	.reply-text {
 		color: var(--color-text-dim);
@@ -1602,14 +1748,14 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		min-width: 0;
 	}
 
-	/* === Action toolbar (hover) === */
+	/* === Action toolbar === */
 	.action-toolbar {
 		position: absolute;
 		top: -14px;
 		right: 12px;
-		display: flex;
 		align-items: center;
 		gap: 1px;
 		padding: 2px 4px;
@@ -1620,9 +1766,7 @@
 		z-index: 10;
 		animation: toolbarFadeIn 100ms ease-out;
 	}
-	.action-toolbar-self {
-		right: 12px;
-	}
+	.action-toolbar-self { right: 12px; }
 	.toolbar-btn {
 		width: 30px;
 		height: 30px;
@@ -1652,27 +1796,36 @@
 		to { opacity: 1; transform: translateY(0); }
 	}
 
-	/* === Reactions display === */
+	/* === Reactions === */
 	.reactions-display {
 		display: flex;
 		flex-wrap: wrap;
 		gap: 4px;
 		margin-top: 6px;
 	}
-	.reactions-self {
-		justify-content: flex-end;
+	.reactions-self { justify-content: flex-end; }
+	.reaction-pill {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: 13px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		transition: background 0.12s, border-color 0.12s, transform 0.15s;
 	}
+	.reaction-pill:hover {
+		background: rgba(255, 255, 255, 0.1);
+		transform: scale(1.1);
+	}
+	.reaction-pill:active { transform: scale(0.9); }
 	.reaction-active {
 		background: rgba(6, 182, 212, 0.12);
 		border-color: rgba(6, 182, 212, 0.3);
 	}
-	.reaction-count {
-		font-size: 11px;
-		color: var(--color-text-dim);
-	}
-	.reaction-active .reaction-count {
-		color: var(--color-primary);
-	}
+	.reaction-count { font-size: 11px; color: var(--color-text-dim); }
+	.reaction-active .reaction-count { color: var(--color-primary); }
 
 	/* === Edit mode === */
 	.edit-box {
@@ -1708,9 +1861,7 @@
 		color: var(--color-text-dim);
 		transition: background 0.12s;
 	}
-	.edit-cancel:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
+	.edit-cancel:hover { background: rgba(255, 255, 255, 0.06); }
 	.edit-save {
 		padding: 4px 14px;
 		border-radius: 6px;
@@ -1720,16 +1871,132 @@
 		background: var(--color-primary);
 		transition: background 0.12s;
 	}
-	.edit-save:hover {
-		background: #22d3ee;
-	}
+	.edit-save:hover { background: #22d3ee; }
 	.msg-edited {
 		font-size: 11px;
 		color: var(--color-text-dim);
 		opacity: 0.5;
 	}
 
-	/* === Reply bar above input === */
+	/* === Message bubble layout === */
+	.message {
+		display: flex;
+		gap: 12px;
+		margin-bottom: 4px;
+		min-width: 0;
+	}
+	.message.grouped { margin-bottom: 2px; }
+	.message.self { flex-direction: row-reverse; }
+	.message.self .msg-body { align-items: flex-end; }
+	.message.self .msg-header { flex-direction: row-reverse; }
+
+	/* Avatar column: 36px to match Avatar size={36} */
+	.msg-avatar-col {
+		width: 36px;
+		flex-shrink: 0;
+	}
+	.msg-body {
+		flex: 1;
+		min-width: 0;
+		max-width: 560px;
+		display: flex;
+		flex-direction: column;
+	}
+	.msg-header {
+		display: flex;
+		align-items: baseline;
+		gap: 8px;
+		margin-bottom: 4px;
+	}
+	.msg-name {
+		font-size: 14px;
+		font-weight: 600;
+		color: var(--color-text);
+	}
+	.msg-time {
+		font-size: 12px;
+		color: var(--color-text-dim);
+	}
+
+	/* Bubbles — inline-fit width, not full width */
+	.bubble-self {
+		background: var(--color-primary, #0e7490);
+		color: white;
+		padding: 10px 16px;
+		border-radius: 20px 20px 4px 20px;
+		font-size: 15px;
+		line-height: 1.5;
+		max-width: 480px;
+		width: fit-content;
+		word-break: break-word;
+	}
+	.msg-text {
+		font-size: 15px;
+		line-height: 1.5;
+		color: var(--color-text);
+		opacity: 0.9;
+		background: rgba(255, 255, 255, 0.04);
+		padding: 10px 16px;
+		border-radius: 20px 20px 20px 4px;
+		max-width: 480px;
+		width: fit-content;
+		word-break: break-word;
+	}
+
+	/* Image / video messages */
+	.image-msg {
+		max-width: 320px;
+		max-height: 300px;
+		border-radius: 16px;
+		object-fit: cover;
+		cursor: pointer;
+		display: block;
+		transition: opacity 0.15s;
+	}
+	.image-msg:hover { opacity: 0.9; }
+	.video-msg {
+		max-width: 360px;
+		max-height: 280px;
+		border-radius: 16px;
+		display: block;
+		background: rgba(0,0,0,0.3);
+	}
+
+	/* === New-message animations (only applied when isNew=true) === */
+	.msg-animate-send {
+		animation: msgSend 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	}
+	.msg-animate-receive {
+		animation: msgReceive 300ms cubic-bezier(0.34, 1.56, 0.64, 1) both;
+	}
+	@keyframes msgSend {
+		from { transform: scale(0.85) translateY(10px); opacity: 0; }
+		to   { transform: scale(1) translateY(0); opacity: 1; }
+	}
+	@keyframes msgReceive {
+		from { transform: translateX(-15px) scale(0.9); opacity: 0; }
+		to   { transform: translateX(0) scale(1); opacity: 1; }
+	}
+
+	@media (prefers-reduced-motion: reduce) {
+		.msg-animate-send,
+		.msg-animate-receive,
+		.empty-state-icon-ring,
+		.empty-msg-icon,
+		.reaction-pill,
+		.bg-picker-item {
+			animation: none !important;
+			transition: none !important;
+		}
+	}
+
+	/* === Message Input === */
+	.message-input-container {
+		padding: 16px 20px;
+		flex-shrink: 0;
+	}
+
+	/* Reply bar */
 	.reply-bar {
 		display: flex;
 		align-items: center;
@@ -1765,6 +2032,7 @@
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
+		min-width: 0;
 	}
 	.reply-bar-close {
 		width: 28px;
@@ -1777,149 +2045,60 @@
 		flex-shrink: 0;
 		transition: background 0.12s;
 	}
-	.reply-bar-close:hover {
-		background: rgba(255, 255, 255, 0.06);
-	}
+	.reply-bar-close:hover { background: rgba(255, 255, 255, 0.06); }
 
-	/* === Channel avatar (details panel) === */
-	.channel-avatar {
-		width: 80px;
-		height: 80px;
-		border-radius: 20px;
-		background: rgba(6, 182, 212, 0.1);
-		border: 1px solid rgba(6, 182, 212, 0.2);
-		display: flex;
-		align-items: center;
-		justify-content: center;
-	}
-	.members-list {
-		display: flex;
-		flex-direction: column;
-		gap: 2px;
-	}
-	.member-row {
+	/* Attachment preview bar */
+	.attach-preview-bar {
 		display: flex;
 		align-items: center;
 		gap: 10px;
-		padding: 6px 8px;
+		padding: 8px 12px;
+		margin-bottom: 8px;
+		border-radius: 12px;
+		background: rgba(255,255,255,0.04);
+		border: 1px solid rgba(255,255,255,0.08);
+	}
+	.attach-thumb {
+		width: 48px;
+		height: 48px;
 		border-radius: 8px;
-		text-decoration: none;
-		transition: background 0.12s;
+		object-fit: cover;
+		flex-shrink: 0;
 	}
-	.member-row:hover {
-		background: rgba(255, 255, 255, 0.05);
+	.attach-thumb-video {
+		width: 80px;
+		height: 48px;
+		border-radius: 8px;
+		object-fit: cover;
+		flex-shrink: 0;
+		background: rgba(0,0,0,0.3);
 	}
-	.member-info {
-		display: flex;
-		flex-direction: column;
+	.attach-filename {
+		flex: 1;
 		min-width: 0;
-	}
-	.member-name {
 		font-size: 13px;
-		font-weight: 500;
 		color: var(--color-text);
 		overflow: hidden;
 		text-overflow: ellipsis;
 		white-space: nowrap;
 	}
-	.member-role {
-		font-size: 11px;
+	.attach-cancel {
+		width: 28px;
+		height: 28px;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
 		color: var(--color-text-dim);
-		text-transform: capitalize;
-	}
-
-	.message {
-		display: flex;
-		gap: 12px;
-		margin-bottom: 4px;
-		animation: messageSlideIn 200ms ease-out;
-	}
-	.message.grouped {
-		margin-bottom: 2px;
-	}
-	.message.self {
-		flex-direction: row-reverse;
-	}
-	.message.self .msg-body {
-		align-items: flex-end;
-	}
-	.message.self .msg-header {
-		flex-direction: row-reverse;
-	}
-
-	.msg-avatar-col {
-		width: 40px;
 		flex-shrink: 0;
+		transition: background 0.12s;
 	}
-	.msg-body {
-		flex: 1;
-		max-width: 600px;
-		display: flex;
-		flex-direction: column;
-	}
-	.msg-header {
-		display: flex;
-		align-items: baseline;
-		gap: 8px;
-		margin-bottom: 4px;
-	}
-	.msg-name {
-		font-size: 14px;
-		font-weight: 600;
-		color: var(--color-text);
-	}
-	.msg-time {
-		font-size: 12px;
-		color: var(--color-text-dim);
+	.attach-cancel:hover {
+		background: rgba(239, 68, 68, 0.15);
+		color: #ef4444;
 	}
 
-	.bubble-self {
-		background: var(--color-primary, #0e7490);
-		color: white;
-		padding: 10px 16px;
-		border-radius: 20px 20px 4px 20px;
-		font-size: 15px;
-		line-height: 1.5;
-		max-width: 480px;
-		animation: iMsgSend 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
-		word-break: break-word;
-	}
-	.msg-text {
-		font-size: 15px;
-		line-height: 1.5;
-		color: var(--color-text);
-		opacity: 0.9;
-		background: rgba(255, 255, 255, 0.04);
-		padding: 10px 16px;
-		border-radius: 20px 20px 20px 4px;
-		max-width: 480px;
-		animation: iMsgReceive 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
-		word-break: break-word;
-	}
-
-	/* iMessage spring animations */
-	@keyframes iMsgSend {
-		0% { transform: scale(0.3) translateY(20px); opacity: 0; }
-		50% { transform: scale(1.05) translateY(-3px); opacity: 1; }
-		75% { transform: scale(0.97) translateY(1px); }
-		100% { transform: scale(1) translateY(0); }
-	}
-	@keyframes iMsgReceive {
-		0% { transform: translateX(-30px) scale(0.7); opacity: 0; }
-		50% { transform: translateX(4px) scale(1.03); opacity: 1; }
-		75% { transform: translateX(-2px) scale(0.99); }
-		100% { transform: translateX(0) scale(1); }
-	}
-	@keyframes messageSlideIn {
-		from { opacity: 0; transform: translateY(8px); }
-		to { opacity: 1; transform: translateY(0); }
-	}
-
-	/* === Message Input === */
-	.message-input-container {
-		padding: 16px 20px;
-		flex-shrink: 0;
-	}
+	/* Input box */
 	.message-input-box {
 		border: 1px solid var(--glass-border, rgba(255,255,255,0.08));
 		border-radius: 16px;
@@ -1932,11 +2111,20 @@
 	.message-input-box:focus-within {
 		border-color: rgba(6,182,212,0.5);
 	}
+
+	/* Formatting toolbar */
 	.formatting-toolbar {
 		padding: 8px 12px;
 		border-bottom: 1px solid var(--glass-border);
 		display: flex;
 		gap: 4px;
+		align-items: center;
+	}
+	.format-sep {
+		width: 1px;
+		height: 20px;
+		background: rgba(255,255,255,0.08);
+		margin: 0 2px;
 	}
 	.format-btn {
 		width: 32px;
@@ -1954,6 +2142,23 @@
 		background: rgba(255,255,255,0.06);
 		color: var(--color-text);
 	}
+	.format-btn-active {
+		background: rgba(6,182,212,0.15);
+		color: var(--color-primary);
+	}
+
+	/* Markdown preview panel */
+	.md-preview-panel {
+		padding: 12px 16px;
+		border-bottom: 1px solid var(--glass-border);
+		background: rgba(0,0,0,0.15);
+		font-size: 14px;
+		color: var(--color-text);
+		max-height: 160px;
+		overflow-y: auto;
+	}
+
+	/* Input row */
 	.input-row {
 		padding: 12px;
 		display: flex;
@@ -1979,6 +2184,7 @@
 	}
 	.text-input {
 		flex: 1;
+		min-width: 0;
 		background: transparent;
 		border: none;
 		outline: none;
@@ -1989,9 +2195,7 @@
 		max-height: 120px;
 		font-family: inherit;
 	}
-	.text-input::placeholder {
-		color: var(--color-text-dim);
-	}
+	.text-input::placeholder { color: var(--color-text-dim); }
 	.emoji-btn {
 		width: 32px;
 		height: 32px;
@@ -2003,9 +2207,7 @@
 		flex-shrink: 0;
 		transition: color 0.15s;
 	}
-	.emoji-btn:hover {
-		color: #fbbf24;
-	}
+	.emoji-btn:hover { color: #fbbf24; }
 	.send-btn {
 		width: 36px;
 		height: 36px;
@@ -2027,7 +2229,7 @@
 		cursor: not-allowed;
 	}
 
-	/* === Profile Panel === */
+	/* === Profile / Details Panel === */
 	.profile-panel {
 		width: 280px;
 		flex-shrink: 0;
@@ -2043,9 +2245,7 @@
 		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2);
 	}
 	@media (min-width: 1440px) {
-		.profile-panel {
-			display: flex;
-		}
+		.profile-panel { display: flex; }
 	}
 	.profile-name {
 		font-size: 18px;
@@ -2097,8 +2297,51 @@
 		border: 1px solid var(--glass-border);
 		color: var(--color-text);
 	}
-	.profile-action-btn.secondary:hover {
-		background: rgba(255,255,255,0.08);
+	.profile-action-btn.secondary:hover { background: rgba(255,255,255,0.08); }
+
+	/* === Channel details avatar === */
+	.channel-avatar {
+		width: 80px;
+		height: 80px;
+		border-radius: 20px;
+		background: rgba(6, 182, 212, 0.1);
+		border: 1px solid rgba(6, 182, 212, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.members-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.member-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 6px 8px;
+		border-radius: 8px;
+		text-decoration: none;
+		transition: background 0.12s;
+	}
+	.member-row:hover { background: rgba(255, 255, 255, 0.05); }
+	.member-info {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.member-name {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.member-role {
+		font-size: 11px;
+		color: var(--color-text-dim);
+		text-transform: capitalize;
 	}
 
 	/* === Create Channel Modal === */
@@ -2186,9 +2429,7 @@
 		color: var(--color-text-dim);
 		opacity: 0.5;
 	}
-	.form-input:focus {
-		border-color: rgba(6,182,212,0.5);
-	}
+	.form-input:focus { border-color: rgba(6,182,212,0.5); }
 	.form-select {
 		appearance: none;
 		background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='rgba(255,255,255,0.4)' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
@@ -2226,9 +2467,7 @@
 		border: 1px solid var(--glass-border);
 		transition: background 0.15s;
 	}
-	.modal-btn-cancel:hover {
-		background: rgba(255,255,255,0.1);
-	}
+	.modal-btn-cancel:hover { background: rgba(255,255,255,0.1); }
 	.modal-btn-submit {
 		padding: 8px 20px;
 		border-radius: 8px;
@@ -2308,16 +2547,10 @@
 		border-top: 1px solid rgba(255,255,255,0.1);
 		margin: 8px 0;
 	}
-	/* Self bubble overrides */
-	.bubble-self.chat-md :global(code) {
-		background: rgba(255,255,255,0.18);
-	}
-	.bubble-self.chat-md :global(pre) {
-		background: rgba(0,0,0,0.25);
-	}
-	.bubble-self.chat-md :global(a) {
-		color: white;
-	}
+	/* Self bubble markdown overrides */
+	.bubble-self.chat-md :global(code) { background: rgba(255,255,255,0.18); }
+	.bubble-self.chat-md :global(pre) { background: rgba(0,0,0,0.25); }
+	.bubble-self.chat-md :global(a) { color: white; }
 	.bubble-self.chat-md :global(blockquote) {
 		border-left-color: rgba(255,255,255,0.5);
 		background: rgba(255,255,255,0.08);
@@ -2332,12 +2565,11 @@
 		border-radius: 20px 20px 20px 4px;
 		background: rgba(255,255,255,0.04);
 		max-width: 320px;
-		animation: iMsgReceive 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		width: fit-content;
 	}
 	.audio-msg-self {
 		border-radius: 20px 20px 4px 20px;
 		background: var(--color-primary, #0e7490);
-		animation: iMsgSend 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
 	}
 	.audio-wave-icon {
 		width: 36px;
@@ -2406,9 +2638,7 @@
 		flex-shrink: 0;
 		transition: background 0.15s;
 	}
-	.stop-record-btn:hover {
-		background: #dc2626;
-	}
+	.stop-record-btn:hover { background: #dc2626; }
 	.mic-btn {
 		width: 36px;
 		height: 36px;
@@ -2465,35 +2695,13 @@
 		transition: border-color 0.15s, transform 0.15s;
 		color: white;
 	}
-	.bg-picker-item:hover {
-		transform: scale(1.08);
-	}
+	.bg-picker-item:hover { transform: scale(1.08); }
 	.bg-picker-active {
 		border-color: var(--color-primary);
 		box-shadow: 0 0 8px rgba(6,182,212,0.3);
 	}
 
-	/* === Reaction tapback animation === */
-	.reaction-pill {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		padding: 2px 8px;
-		border-radius: 12px;
-		font-size: 13px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		transition: background 0.12s, border-color 0.12s, transform 0.15s;
-	}
-	.reaction-pill:hover {
-		background: rgba(255, 255, 255, 0.1);
-		transform: scale(1.1);
-	}
-	.reaction-pill:active {
-		transform: scale(0.9);
-	}
-
-	/* Responsive */
+	/* === Responsive === */
 	@media (max-width: 1023px) {
 		.channels-sidebar {
 			width: 100%;
@@ -2503,8 +2711,6 @@
 			height: calc(100vh - 80px);
 			gap: 16px;
 		}
-		.chat-area {
-			border-radius: 16px;
-		}
+		.chat-area { border-radius: 16px; }
 	}
 </style>

@@ -28,7 +28,7 @@ export interface Message {
 	sender_username: string;
 	sender_full_name: string;
 	content: string;
-	type: 'text' | 'code' | 'image' | 'file' | 'audio' | 'system';
+	type: 'text' | 'code' | 'image' | 'file' | 'audio' | 'video' | 'system';
 	reply_to_id?: number;
 	reactions: MessageReaction[];
 	edited: boolean;
