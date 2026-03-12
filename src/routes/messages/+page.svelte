@@ -42,6 +42,13 @@
 	// Channel search state
 	let channelSearchQuery = $state('');
 
+	// Message actions state
+	let editingMessageId = $state<number | null>(null);
+	let editContent = $state('');
+	let replyToMessage = $state<Message | null>(null);
+	let hoveredMessageId = $state<number | null>(null);
+	let deletingMessageId = $state<number | null>(null);
+
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
 		await loadConversations();
@@ -101,7 +108,7 @@
 	async function selectConvo(convo: Conversation) {
 		activeConvo = convo;
 		mobileShowChat = true;
-		showProfilePanel = convo.type === 'direct';
+		showProfilePanel = true;
 		msgLoading = true;
 		try {
 			convoMessages = await messages.messages(convo.id);
@@ -124,8 +131,10 @@
 	async function sendMessage() {
 		if (!newMessage.trim() || !activeConvo || sending) return;
 		const content = newMessage;
+		const replyId = replyToMessage?.id;
 		sending = true;
 		newMessage = '';
+		replyToMessage = null;
 
 		const optimistic: Message = {
 			id: -Date.now(),
@@ -135,6 +144,7 @@
 			sender_full_name: userStore.user?.full_name ?? '',
 			content,
 			type: 'text',
+			reply_to_id: replyId,
 			reactions: [],
 			edited: false,
 			created_at: new Date().toISOString(),
@@ -145,7 +155,9 @@
 		scrollToBottom();
 
 		try {
-			const { id } = await messages.send(activeConvo.id, { content });
+			const sendData: { content: string; reply_to_id?: number } = { content };
+			if (replyId) sendData.reply_to_id = replyId;
+			const { id } = await messages.send(activeConvo.id, sendData);
 			convoMessages = convoMessages.map(m => m.id === optimistic.id ? { ...m, id } : m);
 		} catch {
 			convoMessages = convoMessages.filter(m => m.id !== optimistic.id);
@@ -270,8 +282,107 @@
 	function handleKeydown(e: KeyboardEvent) {
 		if (e.key === 'Enter' && !e.shiftKey) {
 			e.preventDefault();
-			sendMessage();
+			if (editingMessageId) {
+				saveEdit();
+			} else {
+				sendMessage();
+			}
 		}
+		if (e.key === 'Escape') {
+			if (editingMessageId) cancelEdit();
+			if (replyToMessage) cancelReply();
+		}
+	}
+
+	async function reactToMessage(msgId: number, emoji: string) {
+		if (!activeConvo) return;
+		try {
+			await messages.react(activeConvo.id, msgId, emoji);
+			// Update local state
+			convoMessages = convoMessages.map(m => {
+				if (m.id !== msgId) return m;
+				const reactions = [...m.reactions];
+				const existing = reactions.find(r => r.emoji === emoji);
+				if (existing) {
+					if (existing.reacted) {
+						existing.count--;
+						existing.reacted = false;
+						if (existing.count <= 0) {
+							return { ...m, reactions: reactions.filter(r => r.emoji !== emoji) };
+						}
+					} else {
+						existing.count++;
+						existing.reacted = true;
+					}
+					return { ...m, reactions: [...reactions] };
+				}
+				return { ...m, reactions: [...reactions, { emoji, count: 1, reacted: true }] };
+			});
+		} catch { /* ignore */ }
+	}
+
+	function startEdit(msg: Message) {
+		editingMessageId = msg.id;
+		editContent = msg.content;
+	}
+
+	async function saveEdit() {
+		if (!activeConvo || !editingMessageId || !editContent.trim()) return;
+		try {
+			await messages.edit(activeConvo.id, editingMessageId, { content: editContent.trim() });
+			convoMessages = convoMessages.map(m =>
+				m.id === editingMessageId ? { ...m, content: editContent.trim(), edited: true } : m
+			);
+		} catch { /* ignore */ }
+		cancelEdit();
+	}
+
+	function cancelEdit() {
+		editingMessageId = null;
+		editContent = '';
+	}
+
+	async function deleteMessage(msg: Message) {
+		if (!activeConvo) return;
+		deletingMessageId = msg.id;
+		try {
+			await messages.remove(activeConvo.id, msg.id);
+			convoMessages = convoMessages.filter(m => m.id !== msg.id);
+		} catch { /* ignore */ }
+		deletingMessageId = null;
+	}
+
+	function startReply(msg: Message) {
+		replyToMessage = msg;
+		textareaEl?.focus();
+	}
+
+	function cancelReply() {
+		replyToMessage = null;
+	}
+
+	function getReplyToMsg(replyToId: number | undefined): Message | undefined {
+		if (!replyToId) return undefined;
+		return convoMessages.find(m => m.id === replyToId);
+	}
+
+	function formatPreview(content: string): string {
+		if (!content) return '';
+		return content.length > 40 ? content.slice(0, 40) + '...' : content;
+	}
+
+	function formatSidebarTime(dateStr: string): string {
+		const date = new Date(dateStr);
+		const now = new Date();
+		const diff = now.getTime() - date.getTime();
+		const mins = Math.floor(diff / 60000);
+		if (mins < 1) return 'now';
+		if (mins < 60) return `${mins}m`;
+		const hours = Math.floor(mins / 60);
+		if (hours < 24) return `${hours}h`;
+		const days = Math.floor(hours / 24);
+		if (days < 7) return `${days}d`;
+		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 	}
 
 	function convoFilter(convo: Conversation): boolean {
@@ -392,8 +503,23 @@
 				{#each directMessages as convo}
 					{@const isActive = activeConvo?.id === convo.id}
 					<button class="dm-item" class:active={isActive} onclick={() => selectConvo(convo)}>
-						<Avatar username={getConvoAvatar(convo)} size={24} />
-						<span class="truncate flex-1 text-left">{getConvoDisplayName(convo)}</span>
+						<Avatar username={getConvoAvatar(convo)} size={32} />
+						<div class="dm-item-content">
+							<div class="dm-item-top">
+								<span class="dm-item-name" class:unread={convo.unread_count > 0}>{getConvoDisplayName(convo)}</span>
+								{#if convo.last_message}
+									<span class="dm-item-time">{formatSidebarTime(convo.last_message.created_at)}</span>
+								{/if}
+							</div>
+							{#if convo.last_message}
+								<div class="dm-item-preview" class:unread={convo.unread_count > 0}>
+									{#if convo.last_message.sender_username === userStore.user?.username}
+										<span class="preview-you">You: </span>
+									{/if}
+									{formatPreview(convo.last_message.content)}
+								</div>
+							{/if}
+						</div>
 						{#if convo.unread_count > 0}
 							<span class="ch-badge">{convo.unread_count}</span>
 						{/if}
@@ -508,6 +634,8 @@
 							{@const prevMsg = convoMessages[i - 1]}
 							{@const sameSender = prevMsg?.sender_username === msg.sender_username}
 							{@const showHeader = !sameSender || i === 0 || shouldShowDateDivider(convoMessages, i)}
+							{@const replyTarget = getReplyToMsg(msg.reply_to_id)}
+							{@const isEditing = editingMessageId === msg.id}
 
 							{#if shouldShowDateDivider(convoMessages, i)}
 								<div class="date-divider">
@@ -517,23 +645,52 @@
 								</div>
 							{/if}
 
-							<div class="message-wrapper">
-								<div class="message" class:self={isMine} class:grouped={!showHeader}>
+							<!-- svelte-ignore a11y_no_static_element_interactions -->
+							<div
+								class="message-wrapper"
+								class:message-wrapper-hover={hoveredMessageId === msg.id}
+								onmouseenter={() => hoveredMessageId = msg.id}
+								onmouseleave={() => hoveredMessageId = null}
+							>
+								{#if replyTarget}
+									<div class="reply-context" class:reply-context-self={isMine}>
+										<svg class="reply-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" /></svg>
+										<span class="reply-author">{replyTarget.sender_full_name || replyTarget.sender_username}</span>
+										<span class="reply-text">{formatPreview(replyTarget.content)}</span>
+									</div>
+								{/if}
+								<div class="message" class:self={isMine} class:grouped={!showHeader && !replyTarget}>
 									{#if !isMine}
 										<div class="msg-avatar-col">
-											{#if showHeader}
-												<Avatar username={msg.sender_username} size={40} />
+											{#if showHeader || replyTarget}
+												<Avatar username={msg.sender_username} size={36} />
 											{/if}
 										</div>
 									{/if}
 									<div class="msg-body">
-										{#if showHeader}
+										{#if showHeader || replyTarget}
 											<div class="msg-header" class:msg-header-self={isMine}>
 												<span class="msg-name">{msg.sender_full_name || msg.sender_username}</span>
 												<span class="msg-time"><RelativeTime date={msg.created_at} /></span>
+												{#if msg.edited}
+													<span class="msg-edited">(edited)</span>
+												{/if}
 											</div>
 										{/if}
-										{#if isMine}
+										{#if isEditing}
+											<div class="edit-box">
+												<textarea
+													class="edit-textarea"
+													bind:value={editContent}
+													onkeydown={handleKeydown}
+													rows="1"
+												></textarea>
+												<div class="edit-actions">
+													<button class="edit-cancel" onclick={cancelEdit}>Cancel</button>
+													<button class="edit-save" onclick={saveEdit}>Save</button>
+												</div>
+											</div>
+										{:else if isMine}
 											<div class="bubble-self">
 												{msg.content}
 											</div>
@@ -545,30 +702,56 @@
 										{#if msg.id < 0}
 											<span class="text-[10px] mt-0.5 block" style="color: var(--color-text-dim); opacity: 0.4; {isMine ? 'text-align: right;' : ''}">Sending...</span>
 										{/if}
+										<!-- Reactions display -->
+										{#if msg.reactions && msg.reactions.length > 0}
+											<div class="reactions-display" class:reactions-self={isMine}>
+												{#each msg.reactions as reaction}
+													<button
+														class="reaction-pill"
+														class:reaction-active={reaction.reacted}
+														onclick={() => reactToMessage(msg.id, reaction.emoji)}
+													>
+														<span>{reaction.emoji}</span>
+														<span class="reaction-count">{reaction.count}</span>
+													</button>
+												{/each}
+											</div>
+										{/if}
 									</div>
 									{#if isMine}
 										<div class="msg-avatar-col">
-											{#if showHeader}
-												<Avatar username={msg.sender_username} size={40} />
+											{#if showHeader || replyTarget}
+												<Avatar username={msg.sender_username} size={36} />
 											{/if}
 										</div>
 									{/if}
 								</div>
-								<!-- Reaction bar (appears on hover) -->
-								<div class="reaction-bar" class:reaction-bar-self={isMine}>
-									<button class="reaction-btn" title="Like">
-										<span>&#128077;</span>
-									</button>
-									<button class="reaction-btn" title="Laugh">
-										<span>&#128516;</span>
-									</button>
-									<button class="reaction-btn" title="Love">
-										<span>&#10084;&#65039;</span>
-									</button>
-									<button class="reaction-btn" title="Celebrate">
-										<span>&#127881;</span>
-									</button>
-								</div>
+								<!-- Action toolbar (appears on hover) -->
+								{#if hoveredMessageId === msg.id && msg.id > 0 && !isEditing}
+									<div class="action-toolbar" class:action-toolbar-self={isMine}>
+										<button class="toolbar-btn" title="Reply" onclick={() => startReply(msg)}>
+											<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" /></svg>
+										</button>
+										<button class="toolbar-btn" title="Like" onclick={() => reactToMessage(msg.id, '\u{1F44D}')}>
+											<span class="text-sm">&#128077;</span>
+										</button>
+										<button class="toolbar-btn" title="Love" onclick={() => reactToMessage(msg.id, '\u{2764}\u{FE0F}')}>
+											<span class="text-sm">&#10084;&#65039;</span>
+										</button>
+										<button class="toolbar-btn" title="Laugh" onclick={() => reactToMessage(msg.id, '\u{1F604}')}>
+											<span class="text-sm">&#128516;</span>
+										</button>
+										{#if isMine}
+											<div class="toolbar-divider"></div>
+											<button class="toolbar-btn" title="Edit" onclick={() => startEdit(msg)}>
+												<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
+											</button>
+											<button class="toolbar-btn toolbar-btn-danger" title="Delete" onclick={() => deleteMessage(msg)}>
+												<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+											</button>
+										{/if}
+									</div>
+								{/if}
 							</div>
 						{/each}
 					{/if}
@@ -576,6 +759,19 @@
 
 				<!-- Message Input -->
 				<div class="message-input-container">
+					{#if replyToMessage}
+						<div class="reply-bar">
+							<div class="reply-bar-content">
+								<svg class="w-4 h-4 shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" /></svg>
+								<span class="reply-bar-label">Replying to</span>
+								<span class="reply-bar-name">{replyToMessage.sender_full_name || replyToMessage.sender_username}</span>
+								<span class="reply-bar-text">{formatPreview(replyToMessage.content)}</span>
+							</div>
+							<button class="reply-bar-close" onclick={cancelReply}>
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+							</button>
+						</div>
+					{/if}
 					<div class="message-input-box">
 						<!-- Formatting toolbar -->
 						<div class="formatting-toolbar">
@@ -625,40 +821,84 @@
 			{/if}
 		</div>
 
-		<!-- Profile Panel -->
-		{#if activeConvo && activeConvo.type === 'direct' && showProfilePanel}
-			{@const otherUser = activeConvo.participants.find(p => p.username !== userStore.user?.username)}
-			{#if otherUser}
-				<div class="profile-panel">
-					<div class="flex flex-col items-center">
-						<Avatar username={otherUser.username} size={80} />
-						<h3 class="profile-name">{otherUser.full_name || otherUser.username}</h3>
-						<span class="profile-handle">@{otherUser.username}</span>
-					</div>
-
-					<div class="profile-section">
-						<span class="profile-section-title">STATUS</span>
-						<div class="flex items-center gap-2">
-							<span class="w-2.5 h-2.5 rounded-full" style="background: var(--color-success);"></span>
-							<span class="text-[13px]" style="color: var(--color-text);">Online</span>
+		<!-- Details Panel -->
+		{#if activeConvo && showProfilePanel}
+			<div class="profile-panel">
+				{#if activeConvo.type === 'direct'}
+					{@const otherUser = activeConvo.participants.find(p => p.username !== userStore.user?.username)}
+					{#if otherUser}
+						<div class="flex flex-col items-center">
+							<Avatar username={otherUser.username} size={80} />
+							<h3 class="profile-name">{otherUser.full_name || otherUser.username}</h3>
+							<span class="profile-handle">@{otherUser.username}</span>
 						</div>
+
+						<div class="profile-section">
+							<span class="profile-section-title">STATUS</span>
+							<div class="flex items-center gap-2">
+								<span class="w-2.5 h-2.5 rounded-full" style="background: var(--color-success);"></span>
+								<span class="text-[13px]" style="color: var(--color-text);">Online</span>
+							</div>
+						</div>
+
+						<div class="profile-section">
+							<span class="profile-section-title">ROLE</span>
+							<span class="text-[13px] capitalize" style="color: var(--color-text);">{otherUser.role}</span>
+						</div>
+
+						<div class="flex-1"></div>
+
+						<div class="profile-actions">
+							<a href="/{otherUser.username}" class="profile-action-btn secondary">
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+								Profile
+							</a>
+						</div>
+					{/if}
+				{:else}
+					<!-- Channel details -->
+					<div class="flex flex-col items-center">
+						<div class="channel-avatar">
+							<span class="text-2xl font-bold" style="color: var(--color-primary);">#</span>
+						</div>
+						<h3 class="profile-name">{getConvoDisplayName(activeConvo)}</h3>
+						{#if getConvoDescription(activeConvo)}
+							<span class="profile-handle" style="color: var(--color-text-dim);">{getConvoDescription(activeConvo)}</span>
+						{/if}
 					</div>
 
 					<div class="profile-section">
-						<span class="profile-section-title">ROLE</span>
-						<span class="text-[13px] capitalize" style="color: var(--color-text);">{otherUser.role}</span>
+						<span class="profile-section-title">TYPE</span>
+						<span class="text-[13px] capitalize" style="color: var(--color-text);">{activeConvo.type}</span>
+					</div>
+
+					<div class="profile-section">
+						<span class="profile-section-title">MEMBERS ({activeConvo.participants.length})</span>
+						<div class="members-list">
+							{#each activeConvo.participants as member}
+								<a href="/{member.username}" class="member-row">
+									<Avatar username={member.username} size={28} />
+									<div class="member-info">
+										<span class="member-name">{member.full_name || member.username}</span>
+										<span class="member-role">{member.role}</span>
+									</div>
+								</a>
+							{/each}
+						</div>
 					</div>
 
 					<div class="flex-1"></div>
 
-					<div class="profile-actions">
-						<a href="/{otherUser.username}" class="profile-action-btn secondary">
-							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
-							Profile
-						</a>
-					</div>
-				</div>
-			{/if}
+					{#if activeConvo.type === 'repo' && activeConvo.repo_owner}
+						<div class="profile-actions">
+							<a href="/{activeConvo.repo_owner}/{activeConvo.repo_name}" class="profile-action-btn secondary">
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14" /></svg>
+								View Repo
+							</a>
+						</div>
+					{/if}
+				{/if}
+			</div>
 		{/if}
 	</div>
 
@@ -884,9 +1124,9 @@
 	}
 
 	.dm-item {
-		height: 36px;
+		min-height: 52px;
 		margin: 2px 8px;
-		padding: 0 8px;
+		padding: 8px 10px;
 		border-radius: 10px;
 		display: flex;
 		align-items: center;
@@ -900,8 +1140,52 @@
 		background: rgba(255,255,255,0.05);
 	}
 	.dm-item.active {
-		background: rgba(6,182,212,0.15);
-		color: #22d3ee;
+		background: rgba(6,182,212,0.12);
+	}
+	.dm-item-content {
+		flex: 1;
+		min-width: 0;
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.dm-item-top {
+		display: flex;
+		justify-content: space-between;
+		align-items: baseline;
+	}
+	.dm-item-name {
+		font-size: 14px;
+		font-weight: 500;
+		color: var(--color-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.dm-item-name.unread {
+		font-weight: 600;
+		color: var(--color-text);
+	}
+	.dm-item-time {
+		font-size: 11px;
+		color: var(--color-text-dim);
+		flex-shrink: 0;
+		margin-left: 8px;
+	}
+	.dm-item-preview {
+		font-size: 12px;
+		color: var(--color-text-dim);
+		opacity: 0.6;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.dm-item-preview.unread {
+		opacity: 0.9;
+		color: var(--color-text);
+	}
+	.preview-you {
+		color: var(--color-text-dim);
 	}
 
 	.new-msg-btn {
@@ -1117,50 +1401,286 @@
 		color: var(--color-text-dim);
 	}
 
-	/* === Message wrapper with reactions === */
+	/* === Message wrapper === */
 	.message-wrapper {
 		position: relative;
+		padding: 2px 0;
+		border-radius: 8px;
+		transition: background 0.1s;
 	}
-	.message-wrapper:hover .reaction-bar {
-		opacity: 1;
-		pointer-events: auto;
-		transform: translateY(0);
+	.message-wrapper-hover {
+		background: rgba(255, 255, 255, 0.02);
 	}
-	.reaction-bar {
-		position: absolute;
-		bottom: -4px;
-		left: 52px;
+
+	/* === Reply context above message === */
+	.reply-context {
 		display: flex;
-		gap: 2px;
+		align-items: center;
+		gap: 6px;
+		padding: 4px 0 2px 56px;
+		font-size: 12px;
+	}
+	.reply-context-self {
+		padding-left: 0;
+		padding-right: 56px;
+		justify-content: flex-end;
+	}
+	.reply-icon {
+		width: 14px;
+		height: 14px;
+		color: var(--color-text-dim);
+		opacity: 0.5;
+		flex-shrink: 0;
+	}
+	.reply-author {
+		font-weight: 600;
+		color: var(--color-primary);
+		opacity: 0.7;
+	}
+	.reply-text {
+		color: var(--color-text-dim);
+		opacity: 0.5;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+
+	/* === Action toolbar (hover) === */
+	.action-toolbar {
+		position: absolute;
+		top: -14px;
+		right: 12px;
+		display: flex;
+		align-items: center;
+		gap: 1px;
 		padding: 2px 4px;
 		border-radius: 8px;
-		background: rgba(13, 17, 26, 0.95);
-		border: 1px solid rgba(255,255,255,0.08);
-		backdrop-filter: blur(12px);
-		-webkit-backdrop-filter: blur(12px);
-		opacity: 0;
-		pointer-events: none;
-		transform: translateY(4px);
-		transition: opacity 0.15s, transform 0.15s;
-		z-index: 5;
+		background: rgba(13, 17, 26, 0.97);
+		border: 1px solid rgba(255, 255, 255, 0.1);
+		box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+		z-index: 10;
+		animation: toolbarFadeIn 100ms ease-out;
 	}
-	.reaction-bar-self {
-		left: auto;
-		right: 52px;
+	.action-toolbar-self {
+		right: 12px;
 	}
-	.reaction-btn {
+	.toolbar-btn {
+		width: 30px;
+		height: 30px;
+		border-radius: 6px;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		color: var(--color-text-dim);
+		transition: background 0.1s, color 0.1s;
+	}
+	.toolbar-btn:hover {
+		background: rgba(255, 255, 255, 0.08);
+		color: var(--color-text);
+	}
+	.toolbar-btn-danger:hover {
+		background: rgba(239, 68, 68, 0.15);
+		color: #ef4444;
+	}
+	.toolbar-divider {
+		width: 1px;
+		height: 20px;
+		background: rgba(255, 255, 255, 0.08);
+		margin: 0 2px;
+	}
+	@keyframes toolbarFadeIn {
+		from { opacity: 0; transform: translateY(4px); }
+		to { opacity: 1; transform: translateY(0); }
+	}
+
+	/* === Reactions display === */
+	.reactions-display {
+		display: flex;
+		flex-wrap: wrap;
+		gap: 4px;
+		margin-top: 6px;
+	}
+	.reactions-self {
+		justify-content: flex-end;
+	}
+	.reaction-pill {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: 13px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		transition: background 0.12s, border-color 0.12s;
+	}
+	.reaction-pill:hover {
+		background: rgba(255, 255, 255, 0.1);
+	}
+	.reaction-active {
+		background: rgba(6, 182, 212, 0.12);
+		border-color: rgba(6, 182, 212, 0.3);
+	}
+	.reaction-count {
+		font-size: 11px;
+		color: var(--color-text-dim);
+	}
+	.reaction-active .reaction-count {
+		color: var(--color-primary);
+	}
+
+	/* === Edit mode === */
+	.edit-box {
+		display: flex;
+		flex-direction: column;
+		gap: 8px;
+		padding: 8px;
+		border-radius: 12px;
+		background: rgba(255, 255, 255, 0.04);
+		border: 1px solid rgba(6, 182, 212, 0.3);
+	}
+	.edit-textarea {
+		width: 100%;
+		background: transparent;
+		border: none;
+		outline: none;
+		font-size: 15px;
+		color: var(--color-text);
+		resize: none;
+		min-height: 24px;
+		font-family: inherit;
+		line-height: 1.5;
+	}
+	.edit-actions {
+		display: flex;
+		gap: 8px;
+		justify-content: flex-end;
+	}
+	.edit-cancel {
+		padding: 4px 12px;
+		border-radius: 6px;
+		font-size: 12px;
+		color: var(--color-text-dim);
+		transition: background 0.12s;
+	}
+	.edit-cancel:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+	.edit-save {
+		padding: 4px 14px;
+		border-radius: 6px;
+		font-size: 12px;
+		font-weight: 500;
+		color: white;
+		background: var(--color-primary);
+		transition: background 0.12s;
+	}
+	.edit-save:hover {
+		background: #22d3ee;
+	}
+	.msg-edited {
+		font-size: 11px;
+		color: var(--color-text-dim);
+		opacity: 0.5;
+	}
+
+	/* === Reply bar above input === */
+	.reply-bar {
+		display: flex;
+		align-items: center;
+		justify-content: space-between;
+		padding: 8px 16px;
+		margin-bottom: 8px;
+		border-radius: 12px;
+		background: rgba(6, 182, 212, 0.06);
+		border: 1px solid rgba(6, 182, 212, 0.15);
+	}
+	.reply-bar-content {
+		display: flex;
+		align-items: center;
+		gap: 8px;
+		min-width: 0;
+		flex: 1;
+	}
+	.reply-bar-label {
+		font-size: 12px;
+		color: var(--color-text-dim);
+		flex-shrink: 0;
+	}
+	.reply-bar-name {
+		font-size: 13px;
+		font-weight: 600;
+		color: var(--color-primary);
+		flex-shrink: 0;
+	}
+	.reply-bar-text {
+		font-size: 12px;
+		color: var(--color-text-dim);
+		opacity: 0.6;
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.reply-bar-close {
 		width: 28px;
 		height: 28px;
 		border-radius: 6px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
-		font-size: 14px;
-		transition: background 0.12s, transform 0.12s;
+		color: var(--color-text-dim);
+		flex-shrink: 0;
+		transition: background 0.12s;
 	}
-	.reaction-btn:hover {
-		background: rgba(255,255,255,0.08);
-		transform: scale(1.2);
+	.reply-bar-close:hover {
+		background: rgba(255, 255, 255, 0.06);
+	}
+
+	/* === Channel avatar (details panel) === */
+	.channel-avatar {
+		width: 80px;
+		height: 80px;
+		border-radius: 20px;
+		background: rgba(6, 182, 212, 0.1);
+		border: 1px solid rgba(6, 182, 212, 0.2);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+	}
+	.members-list {
+		display: flex;
+		flex-direction: column;
+		gap: 2px;
+	}
+	.member-row {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 6px 8px;
+		border-radius: 8px;
+		text-decoration: none;
+		transition: background 0.12s;
+	}
+	.member-row:hover {
+		background: rgba(255, 255, 255, 0.05);
+	}
+	.member-info {
+		display: flex;
+		flex-direction: column;
+		min-width: 0;
+	}
+	.member-name {
+		font-size: 13px;
+		font-weight: 500;
+		color: var(--color-text);
+		overflow: hidden;
+		text-overflow: ellipsis;
+		white-space: nowrap;
+	}
+	.member-role {
+		font-size: 11px;
+		color: var(--color-text-dim);
+		text-transform: capitalize;
 	}
 
 	.message {
