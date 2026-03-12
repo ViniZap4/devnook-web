@@ -11,6 +11,9 @@
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
+	import { marked } from 'marked';
+
+	marked.setOptions({ breaks: true, gfm: true });
 
 	let conversations = $state<Conversation[]>([]);
 	let activeConvo = $state<Conversation | null>(null);
@@ -48,6 +51,27 @@
 	let replyToMessage = $state<Message | null>(null);
 	let hoveredMessageId = $state<number | null>(null);
 	let deletingMessageId = $state<number | null>(null);
+
+	// Audio recording state
+	let isRecording = $state(false);
+	let mediaRecorder: MediaRecorder | null = null;
+	let audioChunks: Blob[] = [];
+	let recordingTime = $state(0);
+	let recordingInterval: ReturnType<typeof setInterval> | null = null;
+
+	// Chat background state
+	const chatBgOptions = [
+		{ id: 'default', label: 'Default', css: '' },
+		{ id: 'deep', label: 'Deep Space', css: 'linear-gradient(160deg, #0a0e1a 0%, #111936 50%, #0a0e1a 100%)' },
+		{ id: 'ocean', label: 'Ocean', css: 'linear-gradient(160deg, #061520 0%, #0c2a3d 50%, #061520 100%)' },
+		{ id: 'aurora', label: 'Aurora', css: 'linear-gradient(160deg, #0f0a2e 0%, #1a1350 50%, #0f0a2e 100%)' },
+		{ id: 'ember', label: 'Ember', css: 'linear-gradient(160deg, #1a0a0a 0%, #2d1515 50%, #1a0a0a 100%)' },
+		{ id: 'forest', label: 'Forest', css: 'linear-gradient(160deg, #0a1a0f 0%, #142b1a 50%, #0a1a0f 100%)' },
+		{ id: 'mesh', label: 'Mesh', css: 'radial-gradient(at 20% 30%, rgba(6,182,212,0.06) 0%, transparent 50%), radial-gradient(at 80% 70%, rgba(139,92,246,0.05) 0%, transparent 50%), radial-gradient(at 50% 50%, rgba(236,72,153,0.04) 0%, transparent 50%)' },
+	];
+	let chatBgId = $state(typeof localStorage !== 'undefined' ? (localStorage.getItem('devnook-chat-bg') || 'default') : 'default');
+	let showBgPicker = $state(false);
+	const chatBgStyle = $derived(chatBgOptions.find(b => b.id === chatBgId)?.css || '');
 
 	onMount(async () => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
@@ -385,6 +409,85 @@
 		return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
 	}
 
+	// Markdown rendering
+	function renderMd(content: string): string {
+		return marked.parse(content, { async: false }) as string;
+	}
+
+	// Formatting toolbar
+	function insertFormat(prefix: string, suffix: string = prefix) {
+		const el = textareaEl as HTMLTextAreaElement;
+		if (!el) return;
+		const start = el.selectionStart;
+		const end = el.selectionEnd;
+		const selected = newMessage.substring(start, end);
+		const before = newMessage.substring(0, start);
+		const after = newMessage.substring(end);
+		if (selected) {
+			newMessage = before + prefix + selected + suffix + after;
+		} else {
+			newMessage = before + prefix + suffix + after;
+		}
+		tick().then(() => {
+			const cursorPos = selected ? start + prefix.length + selected.length + suffix.length : start + prefix.length;
+			el.selectionStart = el.selectionEnd = selected ? cursorPos : start + prefix.length;
+			el.focus();
+		});
+	}
+
+	// Audio recording
+	async function startRecording() {
+		try {
+			const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+			mediaRecorder = new MediaRecorder(stream);
+			audioChunks = [];
+			mediaRecorder.ondataavailable = (e) => { if (e.data.size > 0) audioChunks.push(e.data); };
+			mediaRecorder.onstop = () => {
+				const blob = new Blob(audioChunks, { type: 'audio/webm' });
+				sendAudioMessage(blob);
+				stream.getTracks().forEach(t => t.stop());
+			};
+			mediaRecorder.start();
+			isRecording = true;
+			recordingTime = 0;
+			recordingInterval = setInterval(() => { recordingTime++; }, 1000);
+		} catch { /* mic denied */ }
+	}
+
+	function stopRecording() {
+		if (mediaRecorder && mediaRecorder.state !== 'inactive') mediaRecorder.stop();
+		isRecording = false;
+		if (recordingInterval) { clearInterval(recordingInterval); recordingInterval = null; }
+	}
+
+	function formatRecordingTime(secs: number): string {
+		const m = Math.floor(secs / 60);
+		const s = secs % 60;
+		return `${m}:${s.toString().padStart(2, '0')}`;
+	}
+
+	async function sendAudioMessage(blob: Blob) {
+		if (!activeConvo) return;
+		const reader = new FileReader();
+		reader.onloadend = async () => {
+			const base64 = reader.result as string;
+			try {
+				await messages.send(activeConvo!.id, { content: base64, type: 'audio' });
+				convoMessages = await messages.messages(activeConvo!.id);
+				await tick();
+				scrollToBottom();
+			} catch { /* ignore */ }
+		};
+		reader.readAsDataURL(blob);
+	}
+
+	// Chat background
+	function setChatBg(id: string) {
+		chatBgId = id;
+		try { localStorage.setItem('devnook-chat-bg', id); } catch {}
+		showBgPicker = false;
+	}
+
 	function convoFilter(convo: Conversation): boolean {
 		if (!filterQuery.trim() || showNewChat) return true;
 		const name = getConvoDisplayName(convo).toLowerCase();
@@ -584,6 +687,32 @@
 						{/if}
 					</div>
 					<div class="channel-actions">
+						<!-- Background picker -->
+						<div style="position: relative;">
+							<button class="action-btn" title="Chat background" onclick={() => showBgPicker = !showBgPicker}>
+								<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
+							</button>
+							{#if showBgPicker}
+								<div class="bg-picker">
+									<span class="bg-picker-title">Chat Background</span>
+									<div class="bg-picker-grid">
+										{#each chatBgOptions as bg}
+											<button
+												class="bg-picker-item"
+												class:bg-picker-active={chatBgId === bg.id}
+												style="background: {bg.css || 'var(--glass-bg)'};"
+												onclick={() => setChatBg(bg.id)}
+												title={bg.label}
+											>
+												{#if chatBgId === bg.id}
+													<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
+												{/if}
+											</button>
+										{/each}
+									</div>
+								</div>
+							{/if}
+						</div>
 						<!-- Member avatars -->
 						{#if activeConvo.participants.length > 1}
 							<div class="member-avatars">
@@ -609,7 +738,7 @@
 				</div>
 
 				<!-- Messages -->
-				<div bind:this={chatAreaEl} class="messages-area">
+				<div bind:this={chatAreaEl} class="messages-area" style="{chatBgStyle ? `background: ${chatBgStyle};` : ''}">
 					{#if msgLoading}
 						<div class="flex-1 flex items-center justify-center py-20">
 							<Spinner size="sm" />
@@ -690,14 +819,18 @@
 													<button class="edit-save" onclick={saveEdit}>Save</button>
 												</div>
 											</div>
+										{:else if msg.type === 'audio'}
+											<div class="audio-msg" class:audio-msg-self={isMine}>
+												<div class="audio-wave-icon">
+													<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+												</div>
+												<!-- svelte-ignore a11y_media_has_caption -->
+												<audio controls preload="metadata" src={msg.content} class="audio-player"></audio>
+											</div>
 										{:else if isMine}
-											<div class="bubble-self">
-												{msg.content}
-											</div>
+											<div class="bubble-self chat-md">{@html renderMd(msg.content)}</div>
 										{:else}
-											<div class="msg-text">
-												{msg.content}
-											</div>
+											<div class="msg-text chat-md">{@html renderMd(msg.content)}</div>
 										{/if}
 										{#if msg.id < 0}
 											<span class="text-[10px] mt-0.5 block" style="color: var(--color-text-dim); opacity: 0.4; {isMine ? 'text-align: right;' : ''}">Sending...</span>
@@ -775,46 +908,72 @@
 					<div class="message-input-box">
 						<!-- Formatting toolbar -->
 						<div class="formatting-toolbar">
-							<button class="format-btn" title="Bold"><strong>B</strong></button>
-							<button class="format-btn" title="Italic"><em>I</em></button>
-							<button class="format-btn" title="Code">
+							<button class="format-btn" title="Bold" onclick={() => insertFormat('**')}>
+								<strong>B</strong>
+							</button>
+							<button class="format-btn" title="Italic" onclick={() => insertFormat('*')}>
+								<em>I</em>
+							</button>
+							<button class="format-btn" title="Strikethrough" onclick={() => insertFormat('~~')}>
+								<span style="text-decoration: line-through;">S</span>
+							</button>
+							<button class="format-btn" title="Inline Code" onclick={() => insertFormat('`')}>
 								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
 							</button>
-							<button class="format-btn" title="Link">
+							<button class="format-btn" title="Code Block" onclick={() => insertFormat('\n```\n', '\n```\n')}>
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" /><path d="M8 10l3 3-3 3M13 16h3" /></svg>
+							</button>
+							<button class="format-btn" title="Link" onclick={() => insertFormat('[', '](url)')}>
 								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path stroke-linecap="round" stroke-linejoin="round" d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
 							</button>
-							<button class="format-btn" title="List">
+							<button class="format-btn" title="List" onclick={() => insertFormat('\n- ', '')}>
 								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 6h13M8 12h13M8 18h13M3 6h.01M3 12h.01M3 18h.01" /></svg>
+							</button>
+							<button class="format-btn" title="Quote" onclick={() => insertFormat('\n> ', '')}>
+								<svg class="w-4 h-4" viewBox="0 0 24 24" fill="currentColor"><path d="M6 17h3l2-4V7H5v6h3zm8 0h3l2-4V7h-6v6h3z"/></svg>
 							</button>
 						</div>
 						<!-- Input row -->
 						<div class="input-row">
 							<button class="attach-btn" title="Attach file">
-								<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" /></svg>
+								<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" /></svg>
 							</button>
-							<textarea
-								bind:this={textareaEl}
-								bind:value={newMessage}
-								placeholder="Message {activeConvo.type === 'direct' ? getConvoDisplayName(activeConvo) : '#' + getConvoDisplayName(activeConvo)}..."
-								class="text-input"
-								rows="1"
-								onkeydown={handleKeydown}
-								oninput={(e) => {
-									const target = e.currentTarget;
-									target.style.height = 'auto';
-									target.style.height = Math.min(target.scrollHeight, 120) + 'px';
-								}}
-							></textarea>
-							<button class="emoji-btn" title="Emoji">
-								<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
-							</button>
-							<button
-								class="send-btn"
-								disabled={!newMessage.trim() || sending}
-								onclick={sendMessage}
-							>
-								<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
-							</button>
+							{#if isRecording}
+								<div class="recording-indicator">
+									<span class="recording-dot"></span>
+									<span class="recording-time">{formatRecordingTime(recordingTime)}</span>
+									<span class="recording-label">Recording...</span>
+								</div>
+								<button class="stop-record-btn" title="Stop & Send" onclick={stopRecording}>
+									<svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2" /></svg>
+								</button>
+							{:else}
+								<textarea
+									bind:this={textareaEl}
+									bind:value={newMessage}
+									placeholder="Message {activeConvo.type === 'direct' ? getConvoDisplayName(activeConvo) : '#' + getConvoDisplayName(activeConvo)}..."
+									class="text-input"
+									rows="1"
+									onkeydown={handleKeydown}
+									oninput={(e) => {
+										const target = e.currentTarget;
+										target.style.height = 'auto';
+										target.style.height = Math.min(target.scrollHeight, 120) + 'px';
+									}}
+								></textarea>
+								<button class="emoji-btn" title="Emoji">
+									<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10" /><path d="M8 14s1.5 2 4 2 4-2 4-2" /><line x1="9" y1="9" x2="9.01" y2="9" /><line x1="15" y1="9" x2="15.01" y2="9" /></svg>
+								</button>
+								{#if newMessage.trim()}
+									<button class="send-btn" disabled={sending} onclick={sendMessage} title="Send">
+										<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 19l9 2-9-18-9 18 9-2zm0 0v-8" /></svg>
+									</button>
+								{:else}
+									<button class="mic-btn" title="Record audio" onclick={startRecording}>
+										<svg class="w-5 h-5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m-4 0h8m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+									</button>
+								{/if}
+							{/if}
 						</div>
 					</div>
 				</div>
@@ -1503,20 +1662,6 @@
 	.reactions-self {
 		justify-content: flex-end;
 	}
-	.reaction-pill {
-		display: flex;
-		align-items: center;
-		gap: 4px;
-		padding: 2px 8px;
-		border-radius: 12px;
-		font-size: 13px;
-		background: rgba(255, 255, 255, 0.05);
-		border: 1px solid rgba(255, 255, 255, 0.06);
-		transition: background 0.12s, border-color 0.12s;
-	}
-	.reaction-pill:hover {
-		background: rgba(255, 255, 255, 0.1);
-	}
 	.reaction-active {
 		background: rgba(6, 182, 212, 0.12);
 		border-color: rgba(6, 182, 212, 0.3);
@@ -1727,31 +1872,47 @@
 		font-size: 12px;
 		color: var(--color-text-dim);
 	}
+
+	.bubble-self {
+		background: var(--color-primary, #0e7490);
+		color: white;
+		padding: 10px 16px;
+		border-radius: 20px 20px 4px 20px;
+		font-size: 15px;
+		line-height: 1.5;
+		max-width: 480px;
+		animation: iMsgSend 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		word-break: break-word;
+	}
 	.msg-text {
 		font-size: 15px;
 		line-height: 1.5;
 		color: var(--color-text);
 		opacity: 0.9;
-	}
-
-	.bubble-self {
-		background: #0e7490;
-		color: white;
-		padding: 12px 16px;
-		border-radius: 16px 16px 4px 16px;
-		font-size: 15px;
-		line-height: 1.5;
+		background: rgba(255, 255, 255, 0.04);
+		padding: 10px 16px;
+		border-radius: 20px 20px 20px 4px;
 		max-width: 480px;
-		animation: bubblePop 200ms ease-out;
+		animation: iMsgReceive 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+		word-break: break-word;
 	}
 
+	/* iMessage spring animations */
+	@keyframes iMsgSend {
+		0% { transform: scale(0.3) translateY(20px); opacity: 0; }
+		50% { transform: scale(1.05) translateY(-3px); opacity: 1; }
+		75% { transform: scale(0.97) translateY(1px); }
+		100% { transform: scale(1) translateY(0); }
+	}
+	@keyframes iMsgReceive {
+		0% { transform: translateX(-30px) scale(0.7); opacity: 0; }
+		50% { transform: translateX(4px) scale(1.03); opacity: 1; }
+		75% { transform: translateX(-2px) scale(0.99); }
+		100% { transform: translateX(0) scale(1); }
+	}
 	@keyframes messageSlideIn {
 		from { opacity: 0; transform: translateY(8px); }
 		to { opacity: 1; transform: translateY(0); }
-	}
-	@keyframes bubblePop {
-		0% { transform: scale(0.95); opacity: 0; }
-		100% { transform: scale(1); opacity: 1; }
 	}
 
 	/* === Message Input === */
@@ -2096,6 +2257,240 @@
 	@keyframes modalSlideIn {
 		from { opacity: 0; transform: scale(0.96) translateY(8px); }
 		to { opacity: 1; transform: scale(1) translateY(0); }
+	}
+
+	/* === Markdown in chat === */
+	.chat-md :global(p) { margin: 0; }
+	.chat-md :global(p + p) { margin-top: 4px; }
+	.chat-md :global(strong) { font-weight: 700; }
+	.chat-md :global(em) { font-style: italic; }
+	.chat-md :global(del) { text-decoration: line-through; opacity: 0.7; }
+	.chat-md :global(code) {
+		padding: 2px 6px;
+		border-radius: 4px;
+		background: rgba(255,255,255,0.1);
+		font-family: 'SF Mono', 'Fira Code', monospace;
+		font-size: 13px;
+	}
+	.chat-md :global(pre) {
+		margin: 6px 0;
+		padding: 12px;
+		border-radius: 10px;
+		background: rgba(0,0,0,0.35);
+		overflow-x: auto;
+	}
+	.chat-md :global(pre code) {
+		padding: 0;
+		background: transparent;
+		font-size: 13px;
+		line-height: 1.6;
+	}
+	.chat-md :global(a) {
+		color: var(--color-primary);
+		text-decoration: underline;
+		text-underline-offset: 2px;
+	}
+	.chat-md :global(ul), .chat-md :global(ol) {
+		margin: 4px 0;
+		padding-left: 20px;
+	}
+	.chat-md :global(li) { margin: 2px 0; }
+	.chat-md :global(blockquote) {
+		border-left: 3px solid var(--color-primary);
+		padding: 4px 12px;
+		margin: 6px 0;
+		opacity: 0.85;
+		border-radius: 0 6px 6px 0;
+		background: rgba(255,255,255,0.03);
+	}
+	.chat-md :global(hr) {
+		border: none;
+		border-top: 1px solid rgba(255,255,255,0.1);
+		margin: 8px 0;
+	}
+	/* Self bubble overrides */
+	.bubble-self.chat-md :global(code) {
+		background: rgba(255,255,255,0.18);
+	}
+	.bubble-self.chat-md :global(pre) {
+		background: rgba(0,0,0,0.25);
+	}
+	.bubble-self.chat-md :global(a) {
+		color: white;
+	}
+	.bubble-self.chat-md :global(blockquote) {
+		border-left-color: rgba(255,255,255,0.5);
+		background: rgba(255,255,255,0.08);
+	}
+
+	/* === Audio message === */
+	.audio-msg {
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 10px 14px;
+		border-radius: 20px 20px 20px 4px;
+		background: rgba(255,255,255,0.04);
+		max-width: 320px;
+		animation: iMsgReceive 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+	.audio-msg-self {
+		border-radius: 20px 20px 4px 20px;
+		background: var(--color-primary, #0e7490);
+		animation: iMsgSend 400ms cubic-bezier(0.175, 0.885, 0.32, 1.275);
+	}
+	.audio-wave-icon {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: rgba(255,255,255,0.1);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		color: var(--color-primary);
+	}
+	.audio-msg-self .audio-wave-icon {
+		color: white;
+		background: rgba(255,255,255,0.2);
+	}
+	.audio-player {
+		height: 32px;
+		flex: 1;
+		min-width: 0;
+		border-radius: 8px;
+		filter: invert(0.85) hue-rotate(180deg);
+	}
+	.audio-msg-self .audio-player {
+		filter: invert(0.15) hue-rotate(0deg);
+	}
+
+	/* === Recording indicator === */
+	.recording-indicator {
+		flex: 1;
+		display: flex;
+		align-items: center;
+		gap: 10px;
+		padding: 0 8px;
+	}
+	.recording-dot {
+		width: 10px;
+		height: 10px;
+		border-radius: 50%;
+		background: #ef4444;
+		animation: recPulse 1s ease-in-out infinite;
+	}
+	@keyframes recPulse {
+		0%, 100% { opacity: 1; transform: scale(1); }
+		50% { opacity: 0.4; transform: scale(0.8); }
+	}
+	.recording-time {
+		font-size: 15px;
+		font-weight: 600;
+		color: var(--color-text);
+		font-variant-numeric: tabular-nums;
+	}
+	.recording-label {
+		font-size: 13px;
+		color: var(--color-text-dim);
+	}
+	.stop-record-btn {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: #ef4444;
+		color: white;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: background 0.15s;
+	}
+	.stop-record-btn:hover {
+		background: #dc2626;
+	}
+	.mic-btn {
+		width: 36px;
+		height: 36px;
+		border-radius: 50%;
+		background: rgba(255,255,255,0.06);
+		color: var(--color-text-dim);
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		flex-shrink: 0;
+		transition: background 0.15s, color 0.15s;
+	}
+	.mic-btn:hover {
+		background: rgba(255,255,255,0.1);
+		color: var(--color-text);
+	}
+
+	/* === Background picker === */
+	.bg-picker {
+		position: absolute;
+		top: 44px;
+		right: 0;
+		width: 220px;
+		padding: 12px;
+		border-radius: 14px;
+		background: rgba(13, 17, 26, 0.97);
+		border: 1px solid rgba(255,255,255,0.1);
+		box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+		z-index: 50;
+		animation: toolbarFadeIn 150ms ease-out;
+	}
+	.bg-picker-title {
+		display: block;
+		font-size: 11px;
+		font-weight: 600;
+		text-transform: uppercase;
+		letter-spacing: 0.05em;
+		color: var(--color-text-dim);
+		margin-bottom: 10px;
+	}
+	.bg-picker-grid {
+		display: grid;
+		grid-template-columns: repeat(4, 1fr);
+		gap: 6px;
+	}
+	.bg-picker-item {
+		width: 100%;
+		aspect-ratio: 1;
+		border-radius: 10px;
+		border: 2px solid transparent;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		transition: border-color 0.15s, transform 0.15s;
+		color: white;
+	}
+	.bg-picker-item:hover {
+		transform: scale(1.08);
+	}
+	.bg-picker-active {
+		border-color: var(--color-primary);
+		box-shadow: 0 0 8px rgba(6,182,212,0.3);
+	}
+
+	/* === Reaction tapback animation === */
+	.reaction-pill {
+		display: flex;
+		align-items: center;
+		gap: 4px;
+		padding: 2px 8px;
+		border-radius: 12px;
+		font-size: 13px;
+		background: rgba(255, 255, 255, 0.05);
+		border: 1px solid rgba(255, 255, 255, 0.06);
+		transition: background 0.12s, border-color 0.12s, transform 0.15s;
+	}
+	.reaction-pill:hover {
+		background: rgba(255, 255, 255, 0.1);
+		transform: scale(1.1);
+	}
+	.reaction-pill:active {
+		transform: scale(0.9);
 	}
 
 	/* Responsive */
