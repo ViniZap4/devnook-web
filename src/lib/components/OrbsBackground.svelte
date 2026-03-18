@@ -89,7 +89,7 @@
       <T.MeshBasicMaterial
         color={accentColor}
         transparent
-        opacity={0.08 + (i % 3) * 0.03}
+        opacity={0.15 + (i % 3) * 0.05}
       />
     </T.Mesh>
   {/each}

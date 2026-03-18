@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { browser } from '$app/environment';
 	import { Canvas, T } from '@threlte/core';
-	import { Stars } from '@threlte/extras';
+	// Stars removed — too noisy for a dev platform UI
 	import { themeStore } from '$lib/stores/theme.svelte';
 	import { onMount } from 'svelte';
 	import Particles3D from './Particles3D.svelte';
@@ -58,9 +58,6 @@
 		{#if isVisible}
 			<Canvas>
 				<T.PerspectiveCamera makeDefault position={[0, 0, 35]} fov={75} />
-				<T.Fog args={['#000', 20, 90]} attach="fog" />
-
-				<Stars radius={100} depth={50} count={2000} factor={4} saturation={0} fade speed={1} />
 
 				{#if effect === 'grid'}
 					<GridBackground {accentColor} />
@@ -89,7 +86,7 @@
 
 		<MouseGlow />
 
-		<!-- Gradient overlay to blend scene into page -->
-		<div class="absolute inset-0 z-10" style="background: linear-gradient(to top, var(--color-background) 0%, color-mix(in srgb, var(--color-background) 40%, transparent) 40%, transparent 100%);"></div>
+		<!-- Subtle bottom fade only -->
+		<div class="absolute inset-0 z-10" style="background: linear-gradient(to top, var(--color-background) 0%, transparent 25%);"></div>
 	</div>
 {/if}
