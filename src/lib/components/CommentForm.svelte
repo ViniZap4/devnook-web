@@ -22,7 +22,7 @@
 		bind:value={body}
 		placeholder="Leave a comment..."
 		rows="4"
-		class="w-full px-4 py-3 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--color-primary)]"
+		class="w-full px-4 py-3 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--color-primary)]"
 	></textarea>
 	<div class="flex justify-end">
 		<button

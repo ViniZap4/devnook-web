@@ -64,9 +64,9 @@
 			bind:value={fileName}
 			placeholder="name your file..."
 			class="px-2 py-1 text-sm rounded border flex-1 min-w-[200px]"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		/>
-		<span class="text-xs px-2 py-0.5 rounded" style="background: var(--color-surface); color: var(--color-text-dim);">
+		<span class="text-xs px-2 py-0.5 rounded" style="background: rgba(255, 255, 255, 0.03); color: var(--color-text-dim);">
 			on <code>{branch}</code>
 		</span>
 	</div>
@@ -77,7 +77,7 @@
 		spellcheck={false}
 		placeholder="Enter file contents..."
 		class="w-full px-4 py-3 text-sm font-mono rounded-lg border resize-y"
-		style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text); tab-size: 4;"
+		style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text); tab-size: 4;"
 	></textarea>
 
 	<div class="card p-4 flex flex-col gap-3">
@@ -87,13 +87,13 @@
 			bind:value={message}
 			placeholder="Create {fullFilePath || 'new file'}"
 			class="w-full px-3 py-2 text-sm rounded-lg border"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		/>
 		{#if branches.length > 1}
 			<select
 				bind:value={branch}
 				class="w-full px-3 py-2 text-sm rounded-lg border"
-				style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+				style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 			>
 				{#each branches as b}
 					<option value={b.name}>{b.name}</option>
@@ -115,8 +115,8 @@
 		>{saving ? 'Committing...' : 'Commit new file'}</button>
 		<a
 			href="/{owner}/{repoName}"
-			class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-			style="border-color: var(--color-border); color: var(--color-text);"
+			class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+			style="border-color: var(--glass-border); color: var(--color-text);"
 		>Cancel</a>
 	</div>
 </form>

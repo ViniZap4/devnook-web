@@ -134,6 +134,16 @@
 			toastStore.error('Failed to remove member');
 		}
 	}
+
+	async function changeRole(username: string, role: string) {
+		try {
+			await orgs.updateMember(orgName, username, { role });
+			members = await orgs.members(orgName);
+			toastStore.success(`${username} role updated to ${role}`);
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update role');
+		}
+	}
 </script>
 
 <svelte:window onresize={updateTabIndicator} />
@@ -221,8 +231,8 @@
 									type="text"
 									bind:value={newRepoName}
 									placeholder="my-project"
-									class="flex-1 px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-									style="border-color: var(--color-border); color: var(--color-text);"
+									class="flex-1 px-3 py-2 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+									style="border-color: var(--glass-border); color: var(--color-text);"
 									required
 								/>
 							</div>
@@ -233,13 +243,13 @@
 								type="text"
 								bind:value={newRepoDesc}
 								placeholder="Short description of your repository"
-								class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-								style="border-color: var(--color-border); color: var(--color-text);"
+								class="w-full px-3 py-2 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+								style="border-color: var(--glass-border); color: var(--color-text);"
 							/>
 						</div>
 
 						<!-- Visibility -->
-						<div class="flex items-center justify-between p-4 rounded-xl" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+						<div class="flex items-center justify-between p-4 rounded-xl" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 							<div class="flex items-center gap-3">
 								{#if newRepoPrivate}
 									<svg class="w-5 h-5" style="color: var(--color-warning);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -257,7 +267,7 @@
 								style="background-color: {newRepoPrivate ? 'var(--color-warning)' : 'var(--color-success)'};"
 								onclick={() => { newRepoPrivate = !newRepoPrivate; }}
 							>
-								<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style="transform: translateX({newRepoPrivate ? '20px' : '0'});"></span>
+								<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease" style="transform: translateX({newRepoPrivate ? '20px' : '0'});"></span>
 							</button>
 						</div>
 
@@ -284,7 +294,7 @@
 				{#if tabMounted}
 					<div
 						class="absolute rounded-lg pointer-events-none z-0"
-						style="{tabIndicatorStyle} background: color-mix(in srgb, var(--color-primary) 12%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 20%, transparent); transition: left 0.4s cubic-bezier(0.34, 1.56, 0.64, 1), width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;"
+						style="{tabIndicatorStyle} background: var(--color-primary-subtle); border: 1px solid var(--color-primary-subtle); transition: left 0.4s ease, width 0.35s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.2s ease;"
 						aria-hidden="true"
 					></div>
 				{/if}
@@ -299,7 +309,7 @@
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
 					Repositories
-					<span class="px-1.5 py-0.5 rounded-md text-[0.625rem] font-mono" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent);">{repos.length}</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[0.625rem] font-mono" style="background: var(--color-primary-subtle);">{repos.length}</span>
 				</button>
 				<button
 					data-tab
@@ -312,7 +322,7 @@
 				>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
 					Members
-					<span class="px-1.5 py-0.5 rounded-md text-[0.625rem] font-mono" style="background: color-mix(in srgb, var(--color-secondary) 10%, transparent);">{members.length}</span>
+					<span class="px-1.5 py-0.5 rounded-md text-[0.625rem] font-mono" style="background: var(--color-info-subtle);">{members.length}</span>
 				</button>
 			</div>
 
@@ -329,8 +339,8 @@
 									type="text"
 									bind:value={repoSearch}
 									placeholder="Find a repository..."
-									class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-									style="border-color: var(--color-border); color: var(--color-text);"
+									class="w-full pl-9 pr-3 py-2 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+									style="border-color: var(--glass-border); color: var(--color-text);"
 								/>
 							</div>
 						</div>
@@ -338,7 +348,7 @@
 
 					{#if repos.length === 0}
 						<div class="card p-12 text-center card-animate">
-							<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent);">
+							<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
 								<RepoIcon size={32} color="var(--color-primary)" />
 							</div>
 							<p class="text-sm font-medium" style="color: var(--color-text);">No repositories yet</p>
@@ -362,11 +372,11 @@
 								<a
 									href="/{orgName}/{repo.name}"
 									class="card-hover p-5 group hover-lift"
-									style="animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 40}ms;"
+									style="animation: fade-up 0.3s ease both; animation-delay: {i * 40}ms;"
 								>
 									<div class="flex items-center justify-between gap-4">
 										<div class="flex items-center gap-3 min-w-0">
-											<div class="transition-transform duration-300 group-hover:scale-110">
+											<div class="transition-transform duration-300 group-hover:scale-105">
 												<RepoIcon size={16} color="var(--color-primary)" />
 											</div>
 											<span class="text-sm font-semibold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
@@ -393,7 +403,7 @@
 									{#if repo.topics && repo.topics.length > 0}
 										<div class="flex flex-wrap gap-1 mt-2 ml-7">
 											{#each repo.topics.slice(0, 5) as topic}
-												<span class="text-[0.5625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{topic}</span>
+												<span class="text-[0.5625rem] px-2 py-0.5 rounded-full" style="background: var(--color-primary-subtle); color: var(--color-primary);">{topic}</span>
 											{/each}
 										</div>
 									{/if}
@@ -416,14 +426,14 @@
 					</div>
 
 					{#if showInvite}
-						<form onsubmit={inviteMember} class="flex items-end gap-3 mb-4 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+						<form onsubmit={inviteMember} class="flex items-end gap-3 mb-4 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 							<div class="flex-1">
 								<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Username</label>
-								<input type="text" bind:value={inviteUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+								<input type="text" bind:value={inviteUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 							</div>
 							<div>
 								<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Role</label>
-								<select bind:value={inviteRole} class="px-3 py-2 text-sm rounded-xl border bg-transparent" style="border-color: var(--color-border); color: var(--color-text);">
+								<select bind:value={inviteRole} class="px-3 py-2 text-sm rounded-xl border bg-[#0f1629]" style="border-color: var(--glass-border); color: var(--color-text);">
 									<option value="member">Member</option>
 									<option value="admin">Admin</option>
 									<option value="owner">Owner</option>
@@ -433,14 +443,38 @@
 						</form>
 					{/if}
 
-					<OrgMemberList {members} onRemove={removeMember} />
+					<OrgMemberList {members} onRemove={removeMember} onRoleChange={changeRole} />
+
+					<!-- Permissions info card -->
+					<div class="card p-5 mt-4">
+						<h4 class="text-sm font-semibold mb-3" style="color: var(--color-text);">
+							<span class="flex items-center gap-2">
+								<svg class="w-4 h-4" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
+								Permissions
+							</span>
+						</h4>
+						<div class="flex flex-col gap-2">
+							<div class="flex items-start gap-3 p-3 rounded-xl" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02);">
+								<Badge label="Owner" variant="warning" />
+								<p class="text-xs leading-relaxed" style="color: var(--color-text-dim);">Full organization access, manage settings, delete org</p>
+							</div>
+							<div class="flex items-start gap-3 p-3 rounded-xl" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02);">
+								<Badge label="Admin" variant="info" />
+								<p class="text-xs leading-relaxed" style="color: var(--color-text-dim);">Manage repositories, invite/remove members, manage teams</p>
+							</div>
+							<div class="flex items-start gap-3 p-3 rounded-xl" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.02);">
+								<Badge label="Member" variant="default" />
+								<p class="text-xs leading-relaxed" style="color: var(--color-text-dim);">Read access, contribute to repositories, create issues</p>
+							</div>
+						</div>
+					</div>
 				{/if}
 			</div>
 			{/key}
 		</div>
 	{:else}
 		<div class="flex flex-col items-center justify-center py-20 gap-4 card-animate">
-			<div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-error) 8%, transparent);">
+			<div class="w-16 h-16 rounded-2xl flex items-center justify-center" style="background: var(--color-error-subtle);">
 				<svg class="w-8 h-8 opacity-40" style="color: var(--color-error);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
 			</div>
 			<p class="text-lg font-medium" style="color: var(--color-text);">Organization not found</p>

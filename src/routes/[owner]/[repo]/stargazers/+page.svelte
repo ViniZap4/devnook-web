@@ -24,7 +24,7 @@
 
 <div class="flex flex-col gap-6">
 	<div class="flex items-center gap-3 page-header">
-		<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-warning) 12%, transparent);">
+		<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-warning-subtle);">
 			<svg class="w-4.5 h-4.5" style="color: var(--color-warning);" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
 		</div>
 		<div>
@@ -49,7 +49,7 @@
 		</div>
 	{:else if stargazers.length === 0}
 		<div class="card p-16 text-center card-animate">
-			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-warning) 8%, transparent);">
+			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-warning-subtle);">
 				<svg class="w-8 h-8 opacity-30" style="color: var(--color-warning);" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
 			</div>
 			<p class="text-sm font-semibold mb-1" style="color: var(--color-text);">No stargazers yet</p>
@@ -65,7 +65,7 @@
 					<div class="flex items-center gap-3">
 						<div class="relative">
 							<Avatar username={user.username} size={40} />
-							<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style="background: var(--color-background); border: 1.5px solid var(--color-border);">
+							<div class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full flex items-center justify-center" style="background: var(--color-background); border: 1.5px solid var(--glass-border);">
 								<svg class="w-2 h-2" style="color: var(--color-warning);" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
 							</div>
 						</div>

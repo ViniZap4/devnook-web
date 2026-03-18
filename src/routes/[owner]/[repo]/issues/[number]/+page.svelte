@@ -203,7 +203,7 @@
 							type="text"
 							bind:value={editTitle}
 							class="flex-1 text-xl font-bold px-3 py-2 rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-							style="border-color: var(--color-border); color: var(--color-text);"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 						<button class="btn-glow px-4 py-2 text-sm rounded-xl text-white font-medium" style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));" onclick={saveTitle}>Save</button>
 						<button class="px-4 py-2 text-sm rounded-xl glass-subtle" style="color: var(--color-text-dim);" onclick={() => { editingTitle = false; }}>Cancel</button>
@@ -224,12 +224,12 @@
 						class="px-3 py-1 rounded-full text-xs font-semibold transition-all duration-300"
 						style="
 							background: {issue.state === 'open'
-								? 'color-mix(in srgb, var(--color-success) 15%, transparent)'
-								: 'color-mix(in srgb, var(--color-text-dim) 15%, transparent)'};
+								? 'var(--color-success-subtle)'
+								: 'rgba(255, 255, 255, 0.06)'};
 							color: {issue.state === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};
 							border: 1px solid {issue.state === 'open'
-								? 'color-mix(in srgb, var(--color-success) 25%, transparent)'
-								: 'color-mix(in srgb, var(--color-text-dim) 20%, transparent)'};
+								? 'var(--color-success-subtle)'
+								: 'rgba(255, 255, 255, 0.06)'};
 						"
 					>
 						<span class="inline-block w-1.5 h-1.5 rounded-full mr-1.5 {issue.state === 'open' ? 'live-dot' : ''}" style="background: {issue.state === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};"></span>
@@ -252,7 +252,7 @@
 								class="px-2.5 py-1 text-[0.625rem] rounded-md transition-all duration-200"
 								style="
 									color: {!editPreview ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-									background: {!editPreview ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+									background: {!editPreview ? 'var(--color-primary-subtle)' : 'transparent'};
 									font-weight: {!editPreview ? '600' : '400'};
 								"
 								onclick={() => { editPreview = false; }}
@@ -262,7 +262,7 @@
 								class="px-2.5 py-1 text-[0.625rem] rounded-md transition-all duration-200"
 								style="
 									color: {editPreview ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-									background: {editPreview ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+									background: {editPreview ? 'var(--color-primary-subtle)' : 'transparent'};
 									font-weight: {editPreview ? '600' : '400'};
 								"
 								onclick={() => { editPreview = true; }}
@@ -270,7 +270,7 @@
 						</div>
 					</div>
 					{#if editPreview}
-						<div class="min-h-[200px] px-4 py-3 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border);">
+						<div class="card min-h-[200px] px-4 py-3 animate-fade-up-sm">
 							{#if editBody.trim()}
 								<MarkdownRenderer content={editBody} />
 							{:else}
@@ -282,7 +282,7 @@
 							bind:value={editBody}
 							rows={8}
 							class="w-full px-4 py-3 text-sm rounded-xl border resize-y bg-transparent font-mono transition-all duration-200 focus:border-[var(--color-primary)]"
-							style="border-color: var(--color-border); color: var(--color-text);"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						></textarea>
 					{/if}
 					<div class="flex items-center gap-2">
@@ -316,12 +316,12 @@
 					class="px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 press-scale"
 					style="
 						border: 1px solid {issue.state === 'open'
-							? 'color-mix(in srgb, var(--color-error) 30%, transparent)'
-							: 'color-mix(in srgb, var(--color-success) 30%, transparent)'};
+							? 'var(--color-error-subtle)'
+							: 'var(--color-success-subtle)'};
 						color: {issue.state === 'open' ? 'var(--color-error)' : 'var(--color-success)'};
 						background: {issue.state === 'open'
-							? 'color-mix(in srgb, var(--color-error) 5%, transparent)'
-							: 'color-mix(in srgb, var(--color-success) 5%, transparent)'};
+							? 'var(--color-error-subtle)'
+							: 'var(--color-success-subtle)'};
 					"
 				>
 					{issue.state === 'open' ? 'Close issue' : 'Reopen issue'}
@@ -367,7 +367,7 @@
 				<div class="flex flex-wrap gap-1.5">
 					{#each issueLabels as label}
 						<span class="flex items-center gap-1 text-xs px-2.5 py-0.5 rounded-full font-medium transition-all duration-200 hover:scale-105"
-							style="background-color: {label.color}18; color: {label.color}; border: 1px solid {label.color}30;"
+							style="background-color: color-mix(in srgb, {label.color} 10%, var(--color-surface)); color: {label.color}; border: 1px solid color-mix(in srgb, {label.color} 19%, var(--color-surface));"
 						>
 							{label.name}
 							{#if isOwner}
@@ -382,7 +382,7 @@
 							<button
 								class="flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg w-full text-left hover-slide transition-all duration-200"
 								style="color: var(--color-text);"
-								onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 6%, transparent)'; }}
+								onmouseenter={(e) => { e.currentTarget.style.background = 'var(--color-primary-subtle)'; }}
 								onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 								onclick={() => addLabel(label.id)}
 							>
@@ -402,7 +402,7 @@
 						value={issue.milestone_id ?? ''}
 						onchange={(e) => setMilestone(Number((e.target as HTMLSelectElement).value))}
 						class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="0">None</option>
 						{#each repoMilestones as m}
@@ -433,7 +433,7 @@
 				{#if issue.assignee}
 					<div class="flex items-center justify-between">
 						<a href="/{issue.assignee}" class="flex items-center gap-2 text-sm font-medium animated-link" style="color: var(--color-primary);">
-							<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{issue.assignee.charAt(0).toUpperCase()}</div>
+							<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold" style="background: var(--color-primary-subtle); color: var(--color-primary);">{issue.assignee.charAt(0).toUpperCase()}</div>
 							{issue.assignee}
 						</a>
 						{#if isOwner}
@@ -449,12 +449,12 @@
 							{#each collaboratorsList as collab}
 								<button
 									class="flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg w-full text-left transition-all duration-200"
-									style="color: var(--color-text); {issue.assignee === collab.username ? 'background: color-mix(in srgb, var(--color-primary) 8%, transparent);' : ''}"
-									onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 6%, transparent)'; }}
-									onmouseleave={(e) => { e.currentTarget.style.background = issue?.assignee === collab.username ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'; }}
+									style="color: var(--color-text); {issue.assignee === collab.username ? 'background: var(--color-primary-subtle);' : ''}"
+									onmouseenter={(e) => { e.currentTarget.style.background = 'var(--color-primary-subtle)'; }}
+									onmouseleave={(e) => { e.currentTarget.style.background = issue?.assignee === collab.username ? 'var(--color-primary-subtle)' : 'transparent'; }}
 									onclick={() => setAssignee(collab.id)}
 								>
-									<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold shrink-0" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{collab.username.charAt(0).toUpperCase()}</div>
+									<div class="w-5 h-5 rounded-full flex items-center justify-center text-[0.5rem] font-bold shrink-0" style="background: var(--color-primary-subtle); color: var(--color-primary);">{collab.username.charAt(0).toUpperCase()}</div>
 									<span class="truncate">{collab.username}</span>
 									{#if issue.assignee === collab.username}
 										<svg class="w-3 h-3 ml-auto shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
@@ -471,7 +471,7 @@
 	</div>
 {:else}
 	<div class="py-16 text-center card-animate">
-		<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-error) 8%, transparent);">
+		<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-error-subtle);">
 			<svg class="w-8 h-8 opacity-40" style="color: var(--color-error);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
 		</div>
 		<p class="text-lg font-medium" style="color: var(--color-text);">Issue not found</p>

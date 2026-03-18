@@ -78,24 +78,25 @@
 			type="text"
 			bind:value={search}
 			placeholder="Search users by name, username, or email..."
-			class="w-full px-4 py-2.5 text-sm rounded-xl border bg-transparent transition-colors focus:border-[var(--color-primary)]"
-			style="border-color: var(--color-border); color: var(--color-text);"
+			class="w-full px-4 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
+			style="border-color: var(--glass-border); color: var(--color-text); background: #0f1629;"
 		/>
 	</div>
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading users...</div>
 	{:else if filtered.length === 0}
-		<div class="rounded-xl border p-12 text-center" style="border-color: var(--color-border);">
+		<div class="rounded-xl border p-12 text-center" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
 			</svg>
 			<p class="text-sm" style="color: var(--color-text-dim);">{search ? 'No users match your search.' : 'No users found.'}</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
+		<div class="overflow-x-auto -mx-4 sm:mx-0">
+		<div class="rounded-xl border overflow-hidden min-w-[600px] sm:min-w-full" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<!-- Table header -->
-			<div class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 px-4 py-2.5 text-xs font-medium uppercase tracking-wider border-b" style="border-color: var(--color-border); color: var(--color-text-dim); background-color: var(--color-surface);">
+			<div class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 px-4 py-2.5 text-xs font-medium uppercase tracking-wider border-b" style="border-color: var(--glass-border); color: var(--color-text-dim); background: rgba(255, 255, 255, 0.02);">
 				<span class="w-8"></span>
 				<span>User</span>
 				<span class="w-16 text-center">Role</span>
@@ -104,8 +105,8 @@
 			</div>
 			{#each filtered as user, i}
 				<div
-					class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 px-4 py-3 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}"
-					style="border-color: var(--color-border);"
+					class="grid grid-cols-[auto_1fr_auto_auto_auto] items-center gap-4 px-4 py-3 transition-colors hover:bg-[rgba(255,255,255,0.03)] {i > 0 ? 'border-t' : ''}"
+					style="border-color: var(--glass-border);"
 				>
 					<Avatar username={user.username} size={32} />
 					<div class="min-w-0">
@@ -119,7 +120,7 @@
 					</div>
 					<div class="w-16 text-center">
 						{#if user.is_admin}
-							<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">Admin</span>
+							<span class="inline-flex items-center px-2 py-0.5 rounded-full text-[0.625rem] font-medium" style="background-color: var(--color-primary-subtle); color: var(--color-primary);">Admin</span>
 						{:else}
 							<span class="text-[0.625rem]" style="color: var(--color-text-dim);">User</span>
 						{/if}
@@ -131,16 +132,16 @@
 					</div>
 					<div class="w-40 flex items-center justify-end gap-2">
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-surface-hover)]"
-							style="border-color: var(--color-border); color: {user.username === userStore.user?.username && user.is_admin ? 'var(--color-warning)' : 'var(--color-text-dim)'};"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+							style="border-color: var(--glass-border); color: {user.username === userStore.user?.username && user.is_admin ? 'var(--color-warning)' : 'var(--color-text-dim)'};"
 							onclick={() => toggleAdmin(user.username, user.is_admin)}
 						>
 							{user.is_admin ? 'Revoke Admin' : 'Make Admin'}
 						</button>
 						{#if user.username !== userStore.user?.username}
 							<button
-								class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10"
-								style="border-color: var(--color-border); color: var(--color-error);"
+								class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
+								style="border-color: var(--glass-border); color: var(--color-error);"
 								onclick={() => deleteUser(user.username)}
 							>
 								Delete
@@ -149,6 +150,7 @@
 					</div>
 				</div>
 			{/each}
+		</div>
 		</div>
 	{/if}
 </div>

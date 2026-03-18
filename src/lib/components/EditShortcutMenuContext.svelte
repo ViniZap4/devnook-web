@@ -1,7 +1,7 @@
 <script lang="ts">
 	import { shortcutsStore } from '$lib/stores/shortcuts.svelte';
 	import { copyTextToClipboard } from '$lib/util/copyTextToClipboard';
-	import { clickOutside } from '$lib/actions/clickOutside';
+	import ContextMenu from './ContextMenu.svelte';
 
 	let { onedit }: { onedit: () => void } = $props();
 
@@ -34,37 +34,15 @@
 	}
 </script>
 
-<div
-	use:clickOutside={close}
-	class="ctx-menu"
-	style="
-		top: {ctx.y}px;
-		left: {ctx.x}px;
-		--ctx-accent: var(--color-primary);
-	"
->
+<ContextMenu x={ctx.x} y={ctx.y} onclose={close}>
 	<button class="ctx-item" onclick={openEditShortcut}>Edit</button>
 	<button class="ctx-item ctx-danger" onclick={handleDelete}>Delete</button>
 	<div class="ctx-divider"></div>
 	<a class="ctx-item" href={ctx.shortcut.url} target="_blank" rel="noopener noreferrer" onclick={close}>Open in new tab</a>
 	<button class="ctx-item" onclick={handleCopyAddress}>Copy link</button>
-</div>
+</ContextMenu>
 
 <style>
-	.ctx-menu {
-		position: fixed;
-		z-index: 50;
-		display: flex;
-		flex-direction: column;
-		min-width: 10rem;
-		padding: 0.375rem;
-		border-radius: 0.75rem;
-		background-color: var(--color-background);
-		border: 1px solid var(--color-surface-hover);
-		box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), 0 0 0 1px var(--color-surface) inset;
-		backdrop-filter: blur(24px) saturate(1.4);
-		animation: scale-in-center 0.15s ease;
-	}
 	.ctx-item {
 		display: block;
 		width: 100%;
@@ -77,15 +55,15 @@
 		transition: background-color 0.1s;
 	}
 	.ctx-item:hover {
-		background-color: var(--color-surface-hover);
+		background-color: rgba(255, 255, 255, 0.06);
 	}
 	.ctx-danger:hover {
-		background-color: color-mix(in srgb, var(--color-error) 15%, transparent);
-		color: #ff6b6b;
+		background-color: var(--color-error-subtle);
+		color: var(--color-error);
 	}
 	.ctx-divider {
 		height: 1px;
 		margin: 0.25rem 0.5rem;
-		background: var(--color-surface-hover);
+		background: var(--glass-border);
 	}
 </style>

@@ -28,12 +28,12 @@
 <tr
 	class="row-animate hover-slide transition-colors last:border-b-0 group"
 	style="border-bottom: 1px solid var(--color-separator); animation-delay: {delay}s;"
-	onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.background = 'color-mix(in srgb, var(--color-primary) 3%, transparent)'; }}
+	onmouseenter={(e) => { (e.currentTarget as HTMLElement).style.background = 'rgba(255, 255, 255, 0.06)'; }}
 	onmouseleave={(e) => { (e.currentTarget as HTMLElement).style.background = 'transparent'; }}
 >
 	<td class="px-4 py-2.5">
 		<a href={href} class="flex items-center gap-3" style="color: var(--color-text);">
-			<span class="transition-transform duration-300 group-hover:scale-110">
+			<span class="transition-transform duration-300 group-hover:scale-105">
 				{#if entry.type === 'tree'}
 					<FolderIcon size={16} color="var(--color-primary)" />
 				{:else}

@@ -139,11 +139,12 @@ export interface ExploreResponse {
 }
 
 export const explore = {
-	repos: (opts?: { page?: number; q?: string; sort?: string }) => {
+	repos: (opts?: { page?: number; q?: string; sort?: string; language?: string }) => {
 		const params = new URLSearchParams();
 		if (opts?.page) params.set('page', String(opts.page));
 		if (opts?.q) params.set('q', opts.q);
 		if (opts?.sort) params.set('sort', opts.sort);
+		if (opts?.language) params.set('language', opts.language);
 		const qs = params.toString();
 		return request<ExploreResponse>('GET', `/api/v1/explore/repos${qs ? '?' + qs : ''}`);
 	}
@@ -208,7 +209,7 @@ import type { Repository, TreeEntry, Commit, CommitDetail, Branch, Tag, BlobCont
 
 export const repos = {
 	list: () => request<Repository[]>('GET', '/api/v1/repos'),
-	create: (data: { name: string; description: string; is_private: boolean }) =>
+	create: (data: { name: string; description: string; is_private: boolean; default_branch?: string; auto_init?: boolean; gitignore_template?: string; license?: string }) =>
 		request<{ id: number; name: string; clone_url: string }>('POST', '/api/v1/repos', data),
 	get: (owner: string, name: string) =>
 		request<Repository>('GET', `/api/v1/repos/${owner}/${name}`),
@@ -543,6 +544,29 @@ export const messages = {
 	react: (conversationId: number, messageId: number, emoji: string) =>
 		request<void>('POST', `/api/v1/messages/conversations/${conversationId}/messages/${messageId}/react`, { emoji }),
 	unreadCount: () => request<{ count: number }>('GET', '/api/v1/messages/unread'),
+	typing: (conversationId: number) => request<void>('POST', `/api/v1/messages/conversations/${conversationId}/typing`),
+	initiateCall: (conversationId: number) => request<{ status: string }>('POST', `/api/v1/messages/conversations/${conversationId}/call`),
+	markRead: (conversationId: number) => request<void>('POST', `/api/v1/messages/conversations/${conversationId}/read`),
+	deleteConversation: (conversationId: number) => request<void>('DELETE', `/api/v1/messages/conversations/${conversationId}`),
+	addParticipant: (conversationId: number, username: string) =>
+		request<void>('POST', `/api/v1/messages/conversations/${conversationId}/participants`, { username }),
+	removeParticipant: (conversationId: number, username: string) =>
+		request<void>('DELETE', `/api/v1/messages/conversations/${conversationId}/participants/${username}`),
+	searchMessages: (conversationId: number, query: string) =>
+		request<Message[]>('GET', `/api/v1/messages/conversations/${conversationId}/search?q=${encodeURIComponent(query)}`),
+};
+
+// Link previews
+export interface LinkPreviewData {
+	url: string;
+	title: string;
+	description: string;
+	image_url: string;
+	domain: string;
+}
+
+export const links = {
+	preview: (url: string) => request<LinkPreviewData>('GET', `/api/v1/links/preview?url=${encodeURIComponent(url)}`),
 };
 
 // Social Posts / Feed

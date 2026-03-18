@@ -2,13 +2,10 @@
 	import { reposStore } from '$lib/stores/repos.svelte';
 	import { onMount } from 'svelte';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
-	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
 	import RelativeTime from './RelativeTime.svelte';
 	import Skeleton from './Skeleton.svelte';
 
 	let { limit = 0 }: { limit?: number } = $props();
-
-	let visible = $state(false);
 
 	onMount(() => {
 		reposStore.load();
@@ -23,18 +20,12 @@
 			? displayRepos.filter(r => r.name.toLowerCase().includes(search.toLowerCase()) || r.owner.toLowerCase().includes(search.toLowerCase()))
 			: displayRepos
 	);
-
-	$effect(() => {
-		if (!reposStore.loading && filtered.length > 0) {
-			requestAnimationFrame(() => { visible = true; });
-		}
-	});
 </script>
 
 <section>
 	<div class="flex items-center justify-between mb-4">
-		<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-50">Repositories</h2>
-		<a href="/new" class="text-xs font-medium rounded-lg px-2.5 py-1 border border-[var(--color-border)] text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] transition-all duration-200">
+		<h2 class="text-[var(--color-text)] text-sm font-semibold uppercase tracking-wider opacity-70">Repositories</h2>
+		<a href="/new" class="text-xs font-medium rounded-lg px-2.5 py-1 border border-[var(--glass-border)] text-[var(--color-text)] opacity-60 hover:opacity-100 hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--glass-border-hover)] transition-all duration-200">
 			+ New
 		</a>
 	</div>
@@ -45,24 +36,31 @@
 			type="text"
 			bind:value={search}
 			placeholder="Find a repository..."
-			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--color-primary)] transition-all duration-200"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-20 focus:border-[var(--color-primary)] transition-all duration-200"
 		/>
 	</div>
 	{/if}
 
 	{#if reposStore.loading}
-		<div class="flex flex-col gap-3">
-			{#each Array(3) as _, i}
-				<div class="flex items-center gap-3 py-3" style="animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 100}ms;">
-					<Skeleton width="14px" height="14px" rounded="rounded-sm" />
-					<Skeleton width="60%" height="14px" />
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+			{#each Array(4) as _, i}
+				<div class="card-glow p-5 flex flex-col gap-3" style="animation: fade-up 0.3s ease both; animation-delay: {i * 100}ms;">
+					<div class="flex items-center gap-3">
+						<Skeleton width="14px" height="14px" rounded="rounded-sm" />
+						<Skeleton width="60%" height="14px" />
+					</div>
+					<Skeleton width="80%" height="10px" />
+					<div class="flex items-center gap-4 mt-auto">
+						<Skeleton width="40px" height="10px" />
+						<Skeleton width="30px" height="10px" />
+					</div>
 				</div>
 			{/each}
 		</div>
 	{:else if filtered.length === 0}
 		<div class="card p-8 text-center animate-fade-in">
 			<RepoIcon size={24} color="var(--color-text)" />
-			<p class="text-sm text-[var(--color-text)] opacity-30 mt-3">
+			<p class="text-sm text-[var(--color-text)] opacity-50 mt-3">
 				{search ? 'No repositories match your search.' : 'No repositories yet.'}
 			</p>
 			{#if !search}
@@ -70,48 +68,42 @@
 			{/if}
 		</div>
 	{:else}
-		<div class="rounded-xl border border-[var(--color-border)] overflow-hidden divide-y divide-white/[0.04]">
+		<div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 			{#each filtered as repo, i}
-				<a
-					href="/{repo.owner}/{repo.name}"
-					class="flex items-center gap-3 px-4 py-3 transition-all duration-200 group"
-					style="
-						opacity: {visible ? 1 : 0};
-						transform: {visible ? 'translateY(0)' : 'translateY(8px)'};
-						transition-delay: {i * 40}ms;
-					"
-					onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'; }}
-					onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-				>
-					<div class="shrink-0 opacity-40 group-hover:opacity-70 transition-all duration-200 group-hover:scale-110">
+				<a href="/{repo.owner}/{repo.name}" class="card-glow p-5 flex flex-col gap-3 animate-fade-up stagger-{Math.min(i + 1, 8)}">
+					<div class="flex items-center gap-3">
+						<svg class="w-4 h-4 shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+						</svg>
+						<span class="font-semibold text-sm truncate" style="color: var(--color-text);">
+							{repo.name}
+						</span>
 						{#if repo.is_private}
-							<LockIcon size={14} />
+							<span class="text-[10px] px-2 py-0.5 rounded-full font-medium" style="background: var(--color-warning-subtle); color: var(--color-warning);">Private</span>
 						{:else}
-							<RepoIcon size={14} />
+							<span class="text-[10px] px-2 py-0.5 rounded-full font-medium" style="background: var(--color-success-subtle); color: var(--color-success);">Public</span>
 						{/if}
 					</div>
-					<div class="min-w-0 flex-1">
-						<div class="flex items-center gap-1.5">
-							<span class="text-sm text-[var(--color-text)] opacity-50">{repo.owner}</span>
-							<span class="text-[var(--color-text)] opacity-15">/</span>
-							<span class="text-sm font-semibold group-hover:underline transition-colors" style="color: var(--color-primary);">{repo.name}</span>
-							{#if repo.is_private}
-								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full bg-yellow-500/10 text-yellow-500/60 border border-yellow-500/10 ml-1">Private</span>
-							{/if}
-						</div>
-						{#if repo.description}
-							<p class="text-xs text-[var(--color-text)] opacity-25 truncate mt-0.5">{repo.description}</p>
-						{/if}
+					{#if repo.description}
+						<p class="text-xs line-clamp-2" style="color: var(--color-text-dim);">{repo.description}</p>
+					{/if}
+					<div class="flex items-center gap-4 mt-auto text-xs" style="color: var(--color-text-dim);">
+						<span class="flex items-center gap-1">
+							<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+								<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z" />
+							</svg>
+							{repo.stars_count ?? 0}
+						</span>
+						<span class="ml-auto">
+							<RelativeTime date={repo.updated_at} />
+						</span>
 					</div>
-					<span class="text-[0.6875rem] text-[var(--color-text)] opacity-15 shrink-0 group-hover:opacity-30 transition-opacity">
-						<RelativeTime date={repo.updated_at} />
-					</span>
 				</a>
 			{/each}
 		</div>
 		{#if hasMore}
 			<p class="text-xs text-center mt-3">
-				<a href="/dashboard" class="opacity-40 hover:opacity-70 text-[var(--color-text)] transition-opacity animated-link">View all {reposStore.repos.length} repositories</a>
+				<a href="/dashboard" class="opacity-60 hover:opacity-80 text-[var(--color-text)] transition-opacity animated-link">View all {reposStore.repos.length} repositories</a>
 			</p>
 		{/if}
 	{/if}

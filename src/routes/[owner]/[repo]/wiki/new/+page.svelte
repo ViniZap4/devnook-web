@@ -42,7 +42,7 @@
 	</div>
 
 	{#if error}
-		<div class="card px-4 py-3 text-sm animate-pop-in" style="background: color-mix(in srgb, var(--color-error) 8%, transparent); border-color: color-mix(in srgb, var(--color-error) 20%, transparent); color: var(--color-error);">
+		<div class="card px-4 py-3 text-sm animate-pop-in" style="background: var(--color-error-subtle); border-color: var(--color-error-subtle); color: var(--color-error);">
 			{error}
 		</div>
 	{/if}
@@ -56,7 +56,7 @@
 				bind:value={title}
 				placeholder="e.g. Home, Getting Started, API Reference"
 				class="w-full px-4 py-2.5 text-sm rounded-xl bg-transparent transition-all"
-				style="border: 1px solid var(--color-border); color: var(--color-text);"
+				style="border: 1px solid var(--glass-border); color: var(--color-text);"
 				required
 			/>
 		</div>
@@ -69,7 +69,7 @@
 				placeholder="Write your wiki page content here..."
 				rows="20"
 				class="w-full px-4 py-3 text-sm rounded-xl bg-transparent font-mono transition-all"
-				style="border: 1px solid var(--color-border); color: var(--color-text); resize: vertical;"
+				style="border: 1px solid var(--glass-border); color: var(--color-text); resize: vertical;"
 			></textarea>
 		</div>
 

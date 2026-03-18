@@ -34,7 +34,7 @@
 			type="text"
 			bind:value={name}
 			placeholder="my-org"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 			required
 		/>
 	</div>
@@ -48,7 +48,7 @@
 			type="text"
 			bind:value={displayName}
 			placeholder="My Organization"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 		/>
 	</div>
 
@@ -61,12 +61,12 @@
 			type="text"
 			bind:value={description}
 			placeholder="A short description"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 		/>
 	</div>
 
 	{#if error}
-		<p class="text-sm text-red-400">{error}</p>
+		<p class="text-sm" style="color: var(--color-error);">{error}</p>
 	{/if}
 
 	<button

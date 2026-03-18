@@ -47,8 +47,8 @@
 	}
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
-	<div class="flex items-center gap-2 px-4 py-2 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+<div class="rounded-lg border border-[var(--glass-border)] overflow-hidden">
+	<div class="flex items-center gap-2 px-4 py-2 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.03)]">
 		<span class="text-sm text-[var(--color-text)] font-medium">{comment.author}</span>
 		<span class="text-xs text-[var(--color-text)] opacity-40">
 			commented <RelativeTime date={comment.created_at} />
@@ -95,7 +95,7 @@
 				bind:value={editBody}
 				rows={4}
 				class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
-				style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+				style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 			></textarea>
 			<div class="flex items-center gap-2">
 				<button

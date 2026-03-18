@@ -41,3 +41,16 @@ export interface MessageReaction {
 	count: number;
 	reacted: boolean;
 }
+
+export type CallState = 'idle' | 'calling' | 'ringing' | 'connecting' | 'connected' | 'ended';
+
+export interface CallInfo {
+	conversationId: number;
+	callerId: number;
+	callerUsername: string;
+	remoteUserId: number;
+	remoteUsername: string;
+	state: CallState;
+	startTime?: number;
+	isAudioOnly: boolean;
+}

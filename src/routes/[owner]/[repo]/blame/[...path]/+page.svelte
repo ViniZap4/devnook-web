@@ -55,11 +55,11 @@
 	{:else if lines.length === 0}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">No blame data</div>
 	{:else}
-		<div class="rounded-xl border overflow-x-auto" style="border-color: var(--color-border);">
+		<div class="card overflow-x-auto">
 			<table class="w-full text-xs font-mono">
 				<tbody>
 					{#each lines as line, i}
-						<tr class="{isNewGroup(i) && i > 0 ? 'border-t' : ''}" style="border-color: var(--color-border);">
+						<tr class="{isNewGroup(i) && i > 0 ? 'border-t' : ''}" style="border-color: var(--glass-border);">
 							{#if isNewGroup(i)}
 								<td class="px-3 py-0.5 whitespace-nowrap align-top" style="color: var(--color-text-dim);">
 									<a href="/{owner}/{repoName}/commits/{line.hash}" class="hover:underline" style="color: var(--color-primary);">{line.hash.slice(0, 7)}</a>

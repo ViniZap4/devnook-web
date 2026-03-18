@@ -86,9 +86,16 @@ function on(type: string, handler: EventHandler): () => void {
 	};
 }
 
+function send(type: string, data: Record<string, any>) {
+	if (socket && socket.readyState === WebSocket.OPEN) {
+		socket.send(JSON.stringify({ type, data }));
+	}
+}
+
 export const wsStore = {
 	get connected() { return connected; },
 	connect,
 	disconnect,
 	on,
+	send,
 };

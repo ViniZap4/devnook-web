@@ -141,20 +141,20 @@
 	<!-- svelte-ignore a11y_no_static_element_interactions -->
 	<div
 		class="fixed inset-0 z-50 flex items-start justify-center pt-[20vh]"
-		style="background: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px);"
+		style="background-color: rgba(0, 0, 0, 0.5); backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);"
 		onclick={handleClose}
 		onkeydown={() => {}}
 	>
 		<!-- Panel -->
 		<!-- svelte-ignore a11y_no_static_element_interactions -->
 		<div
-			class="w-full max-w-lg rounded-2xl border shadow-2xl overflow-hidden animate-scale-in-center"
-			style="background: var(--color-background); border-color: var(--color-border);"
+			class="w-full max-w-2xl rounded-2xl border overflow-hidden animate-scale-in"
+			style="background: var(--glass-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); border-color: var(--glass-border); box-shadow: 0 24px 64px rgba(0, 0, 0, 0.4);"
 			onclick={(e) => e.stopPropagation()}
 			onkeydown={() => {}}
 		>
 			<!-- Search input -->
-			<div class="flex items-center gap-3 px-4 py-3 border-b" style="border-color: var(--color-border);">
+			<div class="flex items-center gap-3 px-4 py-3 border-b" style="border-color: var(--glass-border);">
 				<svg class="w-4 h-4 shrink-0" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 					<circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
 				</svg>
@@ -169,14 +169,14 @@
 				{#if searching}
 					<Spinner size="xs" />
 				{:else}
-					<kbd class="px-1.5 py-0.5 rounded border text-[10px] font-mono" style="border-color: var(--color-border); color: var(--color-text-dim);">
+					<kbd class="px-1.5 py-0.5 rounded border text-[10px] font-mono" style="border-color: var(--glass-border); color: var(--color-text-dim);">
 						ESC
 					</kbd>
 				{/if}
 			</div>
 
 			<!-- Results -->
-			<div class="max-h-72 overflow-y-auto py-1">
+			<div class="max-h-96 overflow-y-auto py-1">
 				{#if filtered().length === 0}
 					<div class="px-4 py-6 text-center text-sm" style="color: var(--color-text-dim);">
 						{searching ? 'Searching...' : 'No results found'}
@@ -185,7 +185,7 @@
 					{#each filtered() as item, i}
 						<button
 							class="w-full flex items-center gap-3 px-4 py-2.5 text-left transition-colors"
-							style="background: {i === selectedIndex ? 'var(--color-surface)' : 'transparent'};"
+							style="background: {i === selectedIndex ? 'rgba(255, 255, 255, 0.06)' : 'transparent'};"
 							onclick={() => { selectedIndex = i; handleSelect(); }}
 							onmouseenter={() => { selectedIndex = i; }}
 						>
@@ -210,7 +210,7 @@
 			</div>
 
 			<!-- Footer -->
-			<div class="flex items-center gap-4 px-4 py-2 border-t text-[10px]" style="border-color: var(--color-border); color: var(--color-text-dim);">
+			<div class="flex items-center gap-4 px-4 py-2 border-t text-[10px]" style="border-color: var(--glass-border); color: var(--color-text-dim);">
 				<span><kbd class="font-mono">↑↓</kbd> Navigate</span>
 				<span><kbd class="font-mono">↵</kbd> Select</span>
 				<span><kbd class="font-mono">Esc</kbd> Close</span>

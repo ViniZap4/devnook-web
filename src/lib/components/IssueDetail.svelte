@@ -16,7 +16,7 @@
 		<IssueIcon
 			size={20}
 			state={issue.state}
-			color={issue.state === 'open' ? '#3fb950' : '#8b949e'}
+			color={issue.state === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'}
 		/>
 		<div class="flex-1">
 			<h2 class="text-[var(--color-text)] font-semibold text-xl">
@@ -33,7 +33,7 @@
 	</div>
 
 	{#if issue.body}
-		<div class="rounded-lg border border-[var(--color-border)] p-5 text-[var(--color-text)]">
+		<div class="rounded-lg border border-[var(--glass-border)] p-5 text-[var(--color-text)]">
 			<MarkdownRenderer content={issue.body} />
 		</div>
 	{/if}
@@ -41,7 +41,8 @@
 	<div class="flex items-center gap-2">
 		<button
 			onclick={onToggleState}
-			class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors {issue.state === 'open' ? 'border-red-500/30 text-red-400 hover:bg-red-500/10' : 'border-green-500/30 text-green-400 hover:bg-green-500/10'}"
+			class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors"
+			style="border-color: {issue.state === 'open' ? 'var(--color-error-subtle)' : 'var(--color-success-subtle)'}; color: {issue.state === 'open' ? 'var(--color-error)' : 'var(--color-success)'};"
 		>
 			{issue.state === 'open' ? 'Close issue' : 'Reopen issue'}
 		</button>

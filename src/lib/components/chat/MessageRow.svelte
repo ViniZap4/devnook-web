@@ -26,7 +26,8 @@
 		oneditkeydown,
 		oneditcontentchange,
 		onmediaload,
-		onreplytargetclick
+		onreplytargetclick,
+		onforward
 	}: {
 		msg: Message;
 		groupStart: boolean;
@@ -48,6 +49,7 @@
 		oneditcontentchange: (value: string) => void;
 		onmediaload: () => void;
 		onreplytargetclick: (msgId: number) => void;
+		onforward: (msg: Message) => void;
 	} = $props();
 
 	let showEmojiPicker = $state(false);
@@ -81,6 +83,10 @@
 		text = text.replace(/(?<![\\*])\*([^*\n]+)\*(?!\*)/g, '<em>$1</em>');
 		text = text.replace(/(?<![\\_ ])\b_([^_\n]+)_\b(?!_)/g, '<em>$1</em>');
 		text = text.replace(/~([^~\n]+)~/g, '<del>$1</del>');
+		// Spoiler: ||text||
+		text = text.replace(/\|\|([^|]+)\|\|/g, '<span class="spoiler" onclick="this.classList.toggle(\'revealed\')" role="button" tabindex="0">$1</span>');
+		// @mentions
+		text = text.replace(/@(\w+)/g, '<span class="mention">@$1</span>');
 
 		// Better URL regex — avoid trailing punctuation
 		text = text.replace(/(https?:\/\/[^\s<]+[^\s<.,;:!?"')\]])/g, '<a href="$1" target="_blank" rel="noopener noreferrer">$1</a>');
@@ -127,7 +133,12 @@
 	}
 </script>
 
-{#if isBubble}
+{#if msg.type === 'system'}
+	<!-- === System message === -->
+	<div class="system-msg" class:msg-deleting={isDeleting} data-msg-id={msg.id}>
+		<span class="system-msg-text">{msg.content}</span>
+	</div>
+{:else if isBubble}
 	<!-- === iMessage Bubble Layout === -->
 	<div
 		class="bubble-row {getAnimClass()}"
@@ -150,7 +161,6 @@
 		<div class="bubble-content" class:bubble-content-mine={isMine}>
 			<!-- Reply context -->
 			{#if replyTarget}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="reply-context"
 					class:reply-mine={isMine}
@@ -220,9 +230,9 @@
 						<audio controls preload="metadata" src={msg.content} class="audio-player"></audio>
 					</div>
 				{:else if msg.type === 'image'}
-					<!-- svelte-ignore a11y_click_events_have_key_events -->
-					<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-					<img src={msg.content} alt="Image message" class="image-msg" onclick={() => window.open(msg.content, '_blank')} onload={onmediaload} />
+					<a href={msg.content} target="_blank" rel="noopener noreferrer" class="image-msg-link">
+						<img src={msg.content} alt="Image message" class="image-msg" onload={onmediaload} />
+					</a>
 				{:else if msg.type === 'video'}
 					<!-- svelte-ignore a11y_media_has_caption -->
 					<video src={msg.content} controls class="video-msg" onloadeddata={onmediaload}></video>
@@ -269,6 +279,11 @@
 				<button class="toolbar-btn" aria-label="Reply" onclick={() => onreply(msg)}>
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" />
+					</svg>
+				</button>
+				<button class="toolbar-btn" aria-label="Forward message" onclick={() => onforward(msg)}>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
 					</svg>
 				</button>
 				<div class="reaction-trigger-wrap">
@@ -323,7 +338,6 @@
 
 		<div class="msg-body">
 			{#if replyTarget}
-				<!-- svelte-ignore a11y_no_static_element_interactions -->
 				<div
 					class="reply-context"
 					role="button"
@@ -388,9 +402,9 @@
 					<audio controls preload="metadata" src={msg.content} class="audio-player"></audio>
 				</div>
 			{:else if msg.type === 'image'}
-				<!-- svelte-ignore a11y_click_events_have_key_events -->
-				<!-- svelte-ignore a11y_no_noninteractive_element_interactions -->
-				<img src={msg.content} alt="Image message" class="image-msg" onclick={() => window.open(msg.content, '_blank')} onload={onmediaload} />
+				<a href={msg.content} target="_blank" rel="noopener noreferrer" class="image-msg-link">
+					<img src={msg.content} alt="Image message" class="image-msg" onload={onmediaload} />
+				</a>
 			{:else if msg.type === 'video'}
 				<!-- svelte-ignore a11y_media_has_caption -->
 				<video src={msg.content} controls class="video-msg" onloadeddata={onmediaload}></video>
@@ -430,6 +444,11 @@
 						<path stroke-linecap="round" stroke-linejoin="round" d="M3 10h10a5 5 0 015 5v2M3 10l4-4M3 10l4 4" />
 					</svg>
 				</button>
+				<button class="toolbar-btn" aria-label="Forward message" onclick={() => onforward(msg)}>
+					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+					</svg>
+				</button>
 				<div class="reaction-trigger-wrap">
 					<button
 						class="toolbar-btn"
@@ -466,13 +485,24 @@
 {/if}
 
 <style>
+	/* === System message === */
+	.system-msg {
+		display: flex; justify-content: center; padding: 4px 20px;
+	}
+	.system-msg-text {
+		font-size: 12px; color: var(--color-text-dim); opacity: 0.6;
+		font-style: italic; text-align: center;
+		padding: 4px 14px; border-radius: 12px;
+		background: color-mix(in srgb, var(--color-text) 3%, transparent);
+	}
+
 	/* === Flat layout (Slack) === */
 	.msg-row {
 		position: relative; display: flex; align-items: flex-start;
 		gap: 0; padding: 1px 20px; border-radius: 0;
 		transition: background 0.1s;
 	}
-	.msg-row:hover { background: rgba(255,255,255,0.02); }
+	.msg-row:hover { background: color-mix(in srgb, var(--color-text) 4%, transparent); }
 	.msg-row-group-start { padding-top: 8px; margin-top: 4px; }
 	.msg-gutter {
 		width: 44px; flex-shrink: 0; display: flex;
@@ -497,7 +527,7 @@
 		position: relative; display: flex; align-items: flex-end;
 		padding: 1px 20px; gap: 8px;
 	}
-	.bubble-row:hover { background: rgba(255,255,255,0.015); }
+	.bubble-row:hover { background: color-mix(in srgb, var(--color-text) 3%, transparent); }
 	.bubble-row-group-start { padding-top: 6px; margin-top: 4px; }
 	.bubble-row-mine { flex-direction: row-reverse; }
 	.bubble-avatar { width: 32px; flex-shrink: 0; }
@@ -514,15 +544,16 @@
 	}
 	.edited-tag { font-size: 10px; opacity: 0.5; }
 
-	.msg-bubble { padding: 8px 14px; border-radius: 12px; }
+	.msg-bubble { padding: 10px 16px; border-radius: 20px; transition: background 0.15s; }
 	.msg-bubble-mine {
-		background: var(--color-primary); border-bottom-right-radius: 2px;
+		background: linear-gradient(135deg, var(--color-primary), color-mix(in srgb, var(--color-primary) 85%, var(--color-accent)));
 	}
 	.msg-bubble-other {
-		background: rgba(255,255,255,0.08); border-bottom-left-radius: 2px;
+		background: var(--color-surface);
+		border: 1px solid color-mix(in srgb, var(--color-text) 6%, transparent);
 	}
-	.msg-bubble-continuation-mine { border-top-right-radius: 2px; }
-	.msg-bubble-continuation-other { border-top-left-radius: 2px; }
+	.msg-bubble-continuation-mine { }
+	.msg-bubble-continuation-other { }
 
 	/* === Shared text styles === */
 	.msg-text {
@@ -536,14 +567,21 @@
 	.msg-text :global(em) { font-style: italic; }
 	.msg-text :global(del) { text-decoration: line-through; opacity: 0.7; }
 	.msg-text :global(code) {
-		padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.1);
-		font-family: 'SF Mono','Fira Code',monospace; font-size: 13px;
+		padding: 2px 6px; border-radius: 4px; background: color-mix(in srgb, var(--color-text) 10%, transparent);
+		font-family: 'JetBrains Mono', 'Fira Code', source-code-pro, Menlo, Monaco, Consolas, monospace; font-size: 13px;
 	}
 	.msg-text :global(pre) {
 		margin: 4px 0; padding: 10px 14px; border-radius: 8px;
-		background: rgba(0,0,0,0.3); overflow-x: auto;
+		background: color-mix(in srgb, var(--color-text) 8%, transparent); overflow-x: auto;
 	}
 	.msg-text :global(pre code) { padding: 0; background: transparent; font-size: 13px; line-height: 1.6; }
+	.msg-text :global(.spoiler) {
+		background: var(--color-text-dim); color: transparent; border-radius: 4px;
+		padding: 0 4px; cursor: pointer; transition: background 0.2s, color 0.2s;
+		user-select: none;
+	}
+	.msg-text :global(.spoiler.revealed) { background: color-mix(in srgb, var(--color-text) 10%, transparent); color: inherit; }
+	.msg-text :global(.mention) { color: var(--color-primary); font-weight: 600; }
 
 	/* === Reply context === */
 	.reply-context {
@@ -557,47 +595,55 @@
 	.reply-text { color: var(--color-text-dim); opacity: 0.5; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
 
 	/* === Media === */
+	.image-msg-link { display: block; width: fit-content; text-decoration: none; }
 	.image-msg {
-		max-width: 320px; max-height: 300px; border-radius: 8px;
-		object-fit: cover; cursor: pointer; display: block; transition: opacity 0.15s;
+		max-width: 320px; max-height: 300px; border-radius: 16px;
+		object-fit: cover; cursor: pointer; display: block;
+		transition: opacity 0.15s, transform 0.2s;
+		animation: media-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
-	.image-msg:hover { opacity: 0.9; }
+	.image-msg:hover { opacity: 0.92; transform: scale(1.01); }
 	.video-msg {
-		max-width: 360px; max-height: 280px; border-radius: 8px;
-		display: block; background: rgba(0,0,0,0.3);
+		max-width: 360px; max-height: 280px; border-radius: 16px;
+		display: block; background: color-mix(in srgb, var(--color-text) 8%, transparent);
+		animation: media-pop 0.4s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+	@keyframes media-pop {
+		0% { opacity: 0; transform: scale(0.9); border-radius: 24px; }
+		100% { opacity: 1; transform: scale(1); border-radius: 16px; }
 	}
 	.audio-msg {
 		display: flex; align-items: center; gap: 10px;
 		padding: 8px 14px; border-radius: 8px;
-		background: rgba(255,255,255,0.04); max-width: 320px; width: fit-content;
+		background: color-mix(in srgb, var(--color-text) 4%, transparent); max-width: 320px; width: fit-content;
 	}
 	.audio-icon {
 		width: 36px; height: 36px; border-radius: 50%;
-		background: rgba(255,255,255,0.1);
+		background: color-mix(in srgb, var(--color-text) 10%, transparent);
 		display: flex; align-items: center; justify-content: center;
 		flex-shrink: 0; color: var(--color-primary);
 	}
 	.audio-player { height: 32px; flex: 1; min-width: 0; border-radius: 8px; color-scheme: dark; accent-color: var(--color-primary); }
 
-	.sending-indicator { font-size: 10px; margin-top: 2px; display: block; color: var(--color-text-dim); opacity: 0.4; }
+	.sending-indicator { font-size: 10px; margin-top: 2px; display: block; color: var(--color-text-dim); opacity: 0.6; }
 
 	/* === Reactions === */
 	.reactions-display { display: flex; flex-wrap: wrap; gap: 4px; margin-top: 4px; }
 	.reaction-pill {
 		display: flex; align-items: center; gap: 4px; padding: 2px 8px;
-		border-radius: 12px; font-size: 13px;
-		background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.06);
+		border-radius: 16px; font-size: 13px;
+		background: color-mix(in srgb, var(--color-text) 5%, transparent); border: 1px solid var(--color-border);
 		transition: background 0.12s, border-color 0.12s;
 	}
-	.reaction-pill:hover { background: rgba(255,255,255,0.1); }
-	.reaction-active { background: rgba(6,182,212,0.12); border-color: rgba(6,182,212,0.3); }
+	.reaction-pill:hover { background: color-mix(in srgb, var(--color-text) 10%, transparent); }
+	.reaction-active { background: color-mix(in srgb, var(--color-primary) 12%, transparent); border-color: color-mix(in srgb, var(--color-primary) 30%, transparent); }
 	.reaction-count { font-size: 11px; color: var(--color-text-dim); }
 	.reaction-active .reaction-count { color: var(--color-primary); }
 
 	/* === Edit mode === */
 	.edit-box {
 		display: flex; flex-direction: column; gap: 6px; padding: 8px;
-		border-radius: 8px; background: rgba(255,255,255,0.04); border: 1px solid rgba(6,182,212,0.3);
+		border-radius: 12px; background: color-mix(in srgb, var(--color-text) 4%, transparent); border: none;
 	}
 	.edit-textarea {
 		width: 100%; background: transparent; border: none; outline: none;
@@ -607,68 +653,73 @@
 	.edit-actions { display: flex; gap: 8px; align-items: center; justify-content: flex-end; }
 	.edit-hint { font-size: 11px; color: var(--color-text-dim); opacity: 0.5; margin-right: auto; }
 	.edit-cancel {
-		padding: 4px 12px; border-radius: 6px; font-size: 12px;
+		padding: 4px 12px; border-radius: 10px; font-size: 12px;
 		color: var(--color-text-dim); transition: background 0.12s;
 	}
-	.edit-cancel:hover { background: rgba(255,255,255,0.06); }
+	.edit-cancel:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
 	.edit-save {
-		padding: 4px 14px; border-radius: 6px; font-size: 12px; font-weight: 500;
+		padding: 4px 14px; border-radius: 10px; font-size: 12px; font-weight: 500;
 		color: white; background: var(--color-primary); transition: background 0.12s;
 	}
-	.edit-save:hover { background: #22d3ee; }
+	.edit-save:hover { background: var(--color-accent); }
 
 	/* === Action toolbar === */
 	.msg-toolbar {
 		position: absolute; top: 0; right: 20px;
 		display: none; align-items: center; gap: 1px; padding: 2px 4px;
-		border-radius: 6px; background: rgba(13, 17, 26, 0.97);
-		border: 1px solid rgba(255,255,255,0.1);
-		box-shadow: 0 2px 8px rgba(0,0,0,0.3); z-index: 10;
+		border-radius: 8px; background: var(--glass-bg);
+		backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);
+		border: 1px solid var(--glass-border);
+		box-shadow: 0 2px 8px color-mix(in srgb, var(--color-overlay, #000) 40%, transparent); z-index: 10;
 		animation: toolbar-pop 0.15s cubic-bezier(0.34, 1.56, 0.64, 1) both;
 	}
 	.toolbar-mine { right: auto; left: 20px; }
-	.msg-row:hover .msg-toolbar,
-	.bubble-row:hover .msg-toolbar { display: flex; }
+	.msg-row:hover .msg-toolbar, .msg-row:focus-within .msg-toolbar,
+	.bubble-row:hover .msg-toolbar, .bubble-row:focus-within .msg-toolbar { display: flex; }
 	.toolbar-btn {
-		width: 30px; height: 30px; border-radius: 6px;
+		width: 30px; height: 30px; border-radius: 8px;
 		display: flex; align-items: center; justify-content: center;
 		color: var(--color-text-dim); transition: background 0.1s, color 0.1s;
 	}
-	.toolbar-btn:hover { background: rgba(255,255,255,0.08); color: var(--color-text); }
-	.toolbar-btn-danger:hover { background: rgba(239,68,68,0.15); color: #ef4444; }
-	.toolbar-divider { width: 1px; height: 20px; background: rgba(255,255,255,0.08); margin: 0 2px; }
+	.toolbar-btn:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
+	.toolbar-btn:hover { background: color-mix(in srgb, var(--color-text) 8%, transparent); color: var(--color-text); }
+	.toolbar-btn-danger:hover { background: color-mix(in srgb, var(--color-error) 15%, transparent); color: var(--color-error); }
+	.toolbar-divider { width: 1px; height: 20px; background: var(--color-separator); margin: 0 2px; }
 	.reaction-trigger-wrap { position: relative; }
 
 	/* === Animations === */
 	@keyframes toolbar-pop {
-		0% { opacity: 0; transform: scale(0.8) translateY(4px); }
+		0% { opacity: 0; transform: scale(0.85) translateY(6px); }
 		100% { opacity: 1; transform: scale(1) translateY(0); }
 	}
 
-	/* Send animation — subtle slide up (0.3s) */
+	/* Send animation — subtle slide up */
 	.anim-send {
-		animation: msg-send 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+		animation: msg-send 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
 	@keyframes msg-send {
-		0% { opacity: 0; transform: scale(0.95) translateY(12px); }
-		100% { opacity: 1; transform: scale(1) translateY(0); }
+		0% { opacity: 0; transform: translateY(8px) scale(0.96); }
+		100% { opacity: 1; transform: translateY(0) scale(1); }
 	}
 
-	/* Receive animation — subtle slide in (0.25s) */
+	/* Receive animation — subtle slide in */
 	.anim-receive {
-		animation: msg-receive 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
+		animation: msg-receive 0.3s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
 	@keyframes msg-receive {
-		0% { opacity: 0; transform: translateX(-8px) scale(0.98); }
+		0% { opacity: 0; transform: translateX(-6px) scale(0.97); }
 		100% { opacity: 1; transform: translateX(0) scale(1); }
 	}
 
 	/* Flat new message */
 	.anim-flat-new {
-		animation: msg-flat-in 0.2s ease-out both;
+		animation: msg-flat-in 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
 	}
 	@keyframes msg-flat-in {
-		from { opacity: 0; transform: translateY(4px); }
+		from { opacity: 0; transform: translateY(6px); }
 		to { opacity: 1; transform: translateY(0); }
 	}
 
@@ -686,19 +737,19 @@
 		animation: highlight-pulse 2s ease-out forwards;
 	}
 	@keyframes highlight-pulse {
-		0% { background: rgba(6,182,212,0.2); box-shadow: inset 0 0 0 1px rgba(6,182,212,0.3); }
+		0% { background: color-mix(in srgb, var(--color-primary) 20%, transparent); box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--color-primary) 30%, transparent); }
 		100% { background: transparent; box-shadow: none; }
 	}
 
 	/* Reply context clickable */
-	.reply-context[role="button"] { cursor: pointer; border-radius: 6px; padding: 4px 8px; margin: -2px -4px; transition: background 0.12s; }
-	.reply-context[role="button"]:hover { background: rgba(255,255,255,0.06); }
+	.reply-context[role="button"] { cursor: pointer; border-radius: 8px; padding: 4px 8px; margin: -2px -4px; transition: background 0.12s; }
+	.reply-context[role="button"]:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
+	.reply-context[role="button"]:focus-visible {
+		outline: 2px solid var(--color-primary);
+		outline-offset: 2px;
+	}
 
 	@media (prefers-reduced-motion: reduce) {
-		.anim-flat-new, .anim-send, .anim-receive,
-		.msg-toolbar, .msg-deleting, .msg-highlighted {
-			animation: none !important;
-			transition: none !important;
-		}
+		.anim-send, .anim-receive, .anim-flat-new, .msg-deleting, .msg-highlighted { animation: none !important; }
 	}
 </style>

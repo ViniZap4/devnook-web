@@ -2,12 +2,11 @@
 	import { onMount } from 'svelte';
 	import { users } from '$lib/services/api';
 	import type { ActivityItem } from '$lib/services/api';
-	import RelativeTime from './RelativeTime.svelte';
+	import Avatar from './Avatar.svelte';
 	import Spinner from './Spinner.svelte';
 
 	let items = $state<ActivityItem[]>([]);
 	let loading = $state(true);
-	let visible = $state(false);
 
 	onMount(async () => {
 		try {
@@ -16,25 +15,41 @@
 			// ignore
 		} finally {
 			loading = false;
-			requestAnimationFrame(() => { visible = true; });
 		}
 	});
 
-	function icon(type: string) {
-		if (type === 'issue') return { color: 'var(--color-success)', label: 'Issue', svg: '<circle cx="12" cy="12" r="10"/><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01"/>' };
-		if (type === 'pull_request') return { color: 'var(--color-secondary)', label: 'PR', svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"/>' };
-		if (type === 'release') return { color: 'var(--color-primary)', label: 'Release', svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A2 2 0 013 12V7a4 4 0 014-4z"/>' };
-		if (type === 'star') return { color: 'var(--color-warning)', label: 'Star', svg: '<path stroke-linecap="round" stroke-linejoin="round" d="M11.049 2.927c.3-.921 1.603-.921 1.902 0l1.519 4.674a1 1 0 00.95.69h4.915c.969 0 1.371 1.24.588 1.81l-3.976 2.888a1 1 0 00-.363 1.118l1.518 4.674c.3.922-.755 1.688-1.538 1.118l-3.976-2.888a1 1 0 00-1.176 0l-3.976 2.888c-.783.57-1.838-.197-1.538-1.118l1.518-4.674a1 1 0 00-.363-1.118l-3.976-2.888c-.784-.57-.38-1.81.588-1.81h4.914a1 1 0 00.951-.69l1.519-4.674z"/>' };
-		return { color: 'var(--color-text-dim)', label: type, svg: '<circle cx="12" cy="12" r="3"/>' };
+	function meta(type: string) {
+		if (type === 'issue') return { color: 'var(--color-success)', bg: 'var(--color-success-subtle)', label: 'Issue', verb: 'opened an issue' };
+		if (type === 'pull_request') return { color: 'var(--color-secondary)', bg: 'var(--color-secondary-subtle, rgba(139, 92, 246, 0.15))', label: 'PR', verb: 'opened a PR' };
+		if (type === 'release') return { color: 'var(--color-primary)', bg: 'var(--color-primary-subtle)', label: 'Release', verb: 'published a release' };
+		if (type === 'star') return { color: 'var(--color-warning)', bg: 'var(--color-warning-subtle)', label: 'Star', verb: 'starred' };
+		if (type === 'push') return { color: 'var(--color-info)', bg: 'var(--color-info-subtle)', label: 'Push', verb: 'pushed to' };
+		return { color: 'var(--color-text-dim)', bg: 'rgba(255, 255, 255, 0.06)', label: type, verb: 'acted in' };
+	}
+
+	function timeAgo(dateStr: string): string {
+		const now = Date.now();
+		const then = new Date(dateStr).getTime();
+		const diff = now - then;
+		const seconds = Math.floor(diff / 1000);
+		const minutes = Math.floor(seconds / 60);
+		const hours = Math.floor(minutes / 60);
+		const days = Math.floor(hours / 24);
+		const months = Math.floor(days / 30);
+		const years = Math.floor(days / 365);
+
+		if (seconds < 60) return 'just now';
+		if (minutes < 60) return `${minutes}m ago`;
+		if (hours < 24) return `${hours}h ago`;
+		if (days < 30) return `${days}d ago`;
+		if (months < 12) return `${months}mo ago`;
+		return `${years}y ago`;
 	}
 </script>
 
-<div class="card overflow-hidden">
-	<div class="px-5 py-3.5 border-b flex items-center gap-2" style="border-color: var(--color-border);">
-		<div class="relative">
-			<div class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-success);"></div>
-			<div class="absolute inset-0 w-1.5 h-1.5 rounded-full live-dot" style="background-color: var(--color-success); opacity: 0.4;"></div>
-		</div>
+<div class="card overflow-hidden animate-fade-up">
+	<div class="px-5 py-3.5 border-b flex items-center gap-2" style="border-color: var(--glass-border);">
+		<div class="w-1.5 h-1.5 rounded-full" style="background-color: var(--color-success);"></div>
 		<h2 class="text-sm font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Recent Activity</h2>
 	</div>
 
@@ -51,44 +66,27 @@
 			<p class="text-sm" style="color: var(--color-text-dim);">No recent activity.</p>
 		</div>
 	{:else}
-		<div class="divide-y" style="divide-color: var(--color-border);">
-			{#each items as item, i}
-				{@const meta = icon(item.type)}
-				<div
-					class="px-5 py-3 flex items-start gap-3 transition-all duration-300 group"
-					style="
-						opacity: {visible ? 1 : 0};
-						transform: {visible ? 'translateX(0)' : 'translateX(12px)'};
-						transition-delay: {i * 50}ms;
-					"
-					onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'; }}
-					onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
-				>
-					<div class="mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110">
-						<svg class="w-4 h-4" style="color: {meta.color};" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-							{@html meta.svg}
-						</svg>
-					</div>
-					<div class="min-w-0 flex-1">
-						<a
-							href="/{item.repo_owner}/{item.repo_name}{item.number ? (item.type === 'pull_request' ? '/pulls/' : '/issues/') + item.number : ''}"
-							class="text-sm font-medium truncate block animated-link"
-							style="color: var(--color-text);"
-						>{item.title}</a>
-						<div class="flex items-center gap-1.5 mt-0.5 text-xs" style="color: var(--color-text-dim);">
-							<span>{item.author}</span>
-							<span style="opacity: 0.3;">·</span>
-							<a href="/{item.repo_owner}/{item.repo_name}" class="animated-link">{item.repo_owner}/{item.repo_name}</a>
-							<span style="opacity: 0.3;">·</span>
-							<RelativeTime date={item.created_at} />
+		<div>
+			{#each items as item}
+				{@const m = meta(item.type)}
+				<div class="flex items-start gap-3 px-5 py-4" style="border-bottom: 1px solid var(--glass-border);">
+					<Avatar username={item.author} size={32} />
+					<div class="flex-1 min-w-0">
+						<div class="flex items-center gap-2 flex-wrap">
+							<span class="text-sm font-medium" style="color: var(--color-text);">{item.author}</span>
+							<span class="text-xs" style="color: var(--color-text-dim);">
+								{m.verb} in
+								<a href="/{item.repo_owner}/{item.repo_name}" class="font-medium hover:underline" style="color: var(--color-primary);">
+									{item.repo_owner}/{item.repo_name}
+								</a>
+							</span>
+							<span class="text-xs ml-auto shrink-0" style="color: var(--color-text-dim);">{timeAgo(item.created_at)}</span>
 						</div>
+						{#if item.title}
+							<p class="text-sm mt-1 truncate" style="color: var(--color-text);">{item.title}</p>
+						{/if}
 					</div>
-					<span
-						class="mt-0.5 text-[0.5625rem] px-1.5 py-0.5 rounded-full font-semibold shrink-0 transition-all duration-200 group-hover:scale-105"
-						style="background-color: {meta.color}15; color: {meta.color}; border: 1px solid {meta.color}20;"
-					>
-						{meta.label}
-					</span>
+					<span class="shrink-0 text-[10px] px-2 py-1 rounded-full font-medium" style="background: {m.bg}; color: {m.color};">{m.label}</span>
 				</div>
 			{/each}
 		</div>

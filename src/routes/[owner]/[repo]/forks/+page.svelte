@@ -38,7 +38,7 @@
 <div class="flex flex-col gap-6">
 	<div class="flex items-center justify-between page-header">
 		<div class="flex items-center gap-3">
-			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-accent) 12%, transparent);">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
 				<svg class="w-4.5 h-4.5" style="color: var(--color-accent);" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
 			</div>
 			<div>
@@ -73,7 +73,7 @@
 		</div>
 	{:else if forkList.length === 0}
 		<div class="card p-16 text-center card-animate">
-			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-accent) 8%, transparent);">
+			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
 				<svg class="w-8 h-8 opacity-30" style="color: var(--color-accent);" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
 			</div>
 			<p class="text-sm font-semibold mb-1" style="color: var(--color-text);">No forks yet</p>
@@ -88,7 +88,7 @@
 				>
 					<div class="flex items-center justify-between">
 						<div class="flex items-center gap-3 min-w-0">
-							<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent);">
+							<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background: var(--color-primary-subtle);">
 								<svg class="w-4 h-4 opacity-50" style="color: var(--color-primary);" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/></svg>
 							</div>
 							<div class="min-w-0">

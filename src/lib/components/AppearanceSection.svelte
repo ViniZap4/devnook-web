@@ -1,5 +1,6 @@
 <script lang="ts">
 	import { themeStore } from '$lib/stores/theme.svelte';
+	import { sidebarStore, type SidebarMode } from '$lib/stores/sidebar.svelte';
 	import { themes, darkThemeOrder, lightThemeOrder, type ThemeMode, type BackgroundEffect } from '$lib/styles/themes';
 
 	const modes: ThemeMode[] = ['auto', 'dark', 'light'];
@@ -19,6 +20,15 @@
 		particles: '<circle cx="12" cy="12" r="1"/><circle cx="5" cy="5" r="1"/><circle cx="19" cy="5" r="1"/><circle cx="5" cy="19" r="1"/><circle cx="19" cy="19" r="1"/><circle cx="12" cy="5" r="0.5"/><circle cx="5" cy="12" r="0.5"/><circle cx="19" cy="12" r="0.5"/><circle cx="12" cy="19" r="0.5"/>',
 		aurora: '<path d="M2 16c2-4 5-8 10-8s8 4 10 8"/><path d="M2 12c3-5 6-7 10-7s7 2 10 7" opacity="0.5"/>',
 	};
+
+	const sidebarModes: SidebarMode[] = ['auto', 'expanded', 'compact', 'hidden'];
+	const sidebarLabels: Record<SidebarMode, string> = { auto: 'Auto', expanded: 'Expanded', compact: 'Compact', hidden: 'Hidden' };
+	const sidebarIcons: Record<SidebarMode, string> = {
+		auto: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="9" y1="3" x2="9" y2="21"/><path d="M14 10l2 2-2 2"/>',
+		expanded: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="12" y1="3" x2="12" y2="21"/>',
+		compact: '<rect x="3" y="3" width="18" height="18" rx="2"/><line x1="7" y1="3" x2="7" y2="21"/>',
+		hidden: '<path d="M17.94 17.94A10.07 10.07 0 0112 20c-7 0-11-8-11-8a18.45 18.45 0 015.06-5.94M9.9 4.24A9.12 9.12 0 0112 4c7 0 11 8 11 8a18.5 18.5 0 01-2.16 3.19m-6.72-1.07a3 3 0 11-4.24-4.24"/><line x1="1" y1="1" x2="23" y2="23"/>',
+	};
 </script>
 
 <div class="flex flex-col gap-6">
@@ -31,8 +41,8 @@
 					class="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 border"
 					style="
 						color: {themeStore.mode === m ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {themeStore.mode === m ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
-						border-color: {themeStore.mode === m ? 'color-mix(in srgb, var(--color-primary) 19%, transparent)' : 'var(--color-border)'};
+						background: {themeStore.mode === m ? 'var(--color-primary-subtle)' : 'transparent'};
+						border-color: {themeStore.mode === m ? 'var(--color-primary-subtle)' : 'var(--glass-border)'};
 						transform: {themeStore.mode === m ? 'scale(1.02)' : 'scale(1)'};
 					"
 					onclick={() => { themeStore.mode = m; }}
@@ -55,10 +65,10 @@
 					class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 border"
 					style="
 						color: {themeStore.backgroundEffect === bg ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {themeStore.backgroundEffect === bg ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
-						border-color: {themeStore.backgroundEffect === bg ? 'color-mix(in srgb, var(--color-primary) 19%, transparent)' : 'var(--color-border)'};
+						background: {themeStore.backgroundEffect === bg ? 'var(--color-primary-subtle)' : 'transparent'};
+						border-color: {themeStore.backgroundEffect === bg ? 'var(--color-primary-subtle)' : 'var(--glass-border)'};
 						transform: {themeStore.backgroundEffect === bg ? 'scale(1.02)' : 'scale(1)'};
-						animation: fade-slide-in-sm 0.3s ease both;
+						animation: fade-up 0.3s ease both;
 						animation-delay: {i * 40}ms;
 					"
 					onclick={() => { themeStore.backgroundEffect = bg; }}
@@ -67,6 +77,32 @@
 						{@html bgIcons[bg]}
 					</svg>
 					{bgLabels[bg]}
+				</button>
+			{/each}
+		</div>
+	</div>
+
+	<!-- Sidebar -->
+	<div class="flex flex-col gap-3">
+		<span class="text-xs font-semibold uppercase tracking-wider" style="color: var(--color-text-dim);">Sidebar</span>
+		<div class="grid grid-cols-2 gap-2">
+			{#each sidebarModes as sb, i}
+				<button
+					class="flex items-center justify-center gap-1.5 px-3 py-2 rounded-xl text-xs font-medium transition-all duration-200 border"
+					style="
+						color: {sidebarStore.mode === sb ? 'var(--color-primary)' : 'var(--color-text-dim)'};
+						background: {sidebarStore.mode === sb ? 'var(--color-primary-subtle)' : 'transparent'};
+						border-color: {sidebarStore.mode === sb ? 'var(--color-primary-subtle)' : 'var(--glass-border)'};
+						transform: {sidebarStore.mode === sb ? 'scale(1.02)' : 'scale(1)'};
+						animation: fade-up 0.3s ease both;
+						animation-delay: {i * 40}ms;
+					"
+					onclick={() => { sidebarStore.mode = sb; }}
+				>
+					<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+						{@html sidebarIcons[sb]}
+					</svg>
+					{sidebarLabels[sb]}
 				</button>
 			{/each}
 		</div>
@@ -83,19 +119,19 @@
 					<button
 						class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all duration-200 group"
 						style="
-							border-color: {selected ? t.primary + '60' : 'var(--color-border)'};
-							background: {selected ? t.primary + '10' : 'transparent'};
+							border-color: {selected ? t.primary : 'var(--glass-border)'};
+							background: {selected ? 'rgba(255, 255, 255, 0.06)' : 'transparent'};
 							transform: {selected ? 'scale(1.02)' : 'scale(1)'};
-							animation: fade-slide-in-sm 0.3s ease both;
+							animation: fade-up 0.3s ease both;
 							animation-delay: {i * 40}ms;
 						"
 						onclick={() => themeStore.selectTheme(name)}
-						onmouseenter={(e) => { if (!selected) { e.currentTarget.style.background = 'var(--color-surface)'; e.currentTarget.style.borderColor = t.primary + '30'; } }}
-						onmouseleave={(e) => { if (!selected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--color-border)'; } }}
+						onmouseenter={(e) => { if (!selected) { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.borderColor = t.primary; } }}
+						onmouseleave={(e) => { if (!selected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--glass-border)'; } }}
 					>
 						<div class="flex gap-0.5 shrink-0">
 							{#each t.previewColors as color}
-								<span class="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-110" style="background: {color};"></span>
+								<span class="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-105" style="background: {color};"></span>
 							{/each}
 						</div>
 						<span class="text-xs truncate transition-colors duration-200" style="color: {selected ? t.primary : 'var(--color-text-dim)'};">{t.label}</span>
@@ -121,19 +157,19 @@
 					<button
 						class="flex items-center gap-2 px-3 py-2.5 rounded-xl border text-left transition-all duration-200 group"
 						style="
-							border-color: {selected ? t.primary + '60' : 'var(--color-border)'};
-							background: {selected ? t.primary + '10' : 'transparent'};
+							border-color: {selected ? t.primary : 'var(--glass-border)'};
+							background: {selected ? 'rgba(255, 255, 255, 0.06)' : 'transparent'};
 							transform: {selected ? 'scale(1.02)' : 'scale(1)'};
-							animation: fade-slide-in-sm 0.3s ease both;
+							animation: fade-up 0.3s ease both;
 							animation-delay: {i * 40}ms;
 						"
 						onclick={() => themeStore.selectTheme(name)}
-						onmouseenter={(e) => { if (!selected) { e.currentTarget.style.background = 'var(--color-surface)'; e.currentTarget.style.borderColor = t.primary + '30'; } }}
-						onmouseleave={(e) => { if (!selected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--color-border)'; } }}
+						onmouseenter={(e) => { if (!selected) { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; e.currentTarget.style.borderColor = t.primary; } }}
+						onmouseleave={(e) => { if (!selected) { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.borderColor = 'var(--glass-border)'; } }}
 					>
 						<div class="flex gap-0.5 shrink-0">
 							{#each t.previewColors as color}
-								<span class="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-110" style="background: {color};"></span>
+								<span class="w-2.5 h-2.5 rounded-full transition-transform duration-200 group-hover:scale-105" style="background: {color};"></span>
 							{/each}
 						</div>
 						<span class="text-xs truncate transition-colors duration-200" style="color: {selected ? t.primary : 'var(--color-text-dim)'};">{t.label}</span>

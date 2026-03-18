@@ -2,6 +2,10 @@
 	import type { Conversation } from '$lib/types/message';
 	import type { User } from '$lib/services/api';
 	import { userStore } from '$lib/stores/user.svelte';
+	import { isPinned, togglePin, pinnedIds } from '$lib/stores/chatPins.svelte';
+	import { isMarkedUnread, markUnread, clearUnread } from '$lib/stores/chatUnread.svelte';
+	import { hasDraft } from '$lib/stores/chatDrafts.svelte';
+	import { isOnline } from '$lib/stores/presence.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
 
@@ -12,15 +16,17 @@
 		mobileHidden = false,
 		onselect,
 		onnewchat,
-		oncreatechannel
+		oncreatechannel,
+		ondeleteconvo
 	}: {
 		conversations: Conversation[];
 		activeConvoId: number | null;
 		loading: boolean;
 		mobileHidden: boolean;
 		onselect: (convo: Conversation) => void;
-		onnewchat: () => void;
+		onnewchat: (created?: { id: number }) => void;
 		oncreatechannel: () => void;
+		ondeleteconvo: (convoId: number) => void;
 	} = $props();
 
 	let searchQuery = $state('');
@@ -71,8 +77,27 @@
 		return getDisplayName(convo).toLowerCase().includes(searchQuery.toLowerCase());
 	}
 
-	const channels = $derived(conversations.filter(c => c.type !== 'direct').filter(matchesSearch));
-	const directMessages = $derived(conversations.filter(c => c.type === 'direct').filter(matchesSearch));
+	// Context menu state
+	let contextMenu = $state<{ x: number; y: number; convoId: number } | null>(null);
+
+	const pinnedConvos = $derived(conversations.filter(c => isPinned(c.id)).filter(matchesSearch));
+	const channels = $derived(conversations.filter(c => c.type !== 'direct' && !isPinned(c.id)).filter(matchesSearch));
+	const directMessages = $derived(conversations.filter(c => c.type === 'direct' && !isPinned(c.id)).filter(matchesSearch));
+
+	function handleContextMenu(e: MouseEvent, convoId: number) {
+		e.preventDefault();
+		contextMenu = { x: e.clientX, y: e.clientY, convoId };
+	}
+
+	function closeContextMenu() {
+		contextMenu = null;
+	}
+
+	function getOtherUsername(convo: Conversation): string {
+		if (convo.type !== 'direct') return '';
+		const other = convo.participants.find(p => p.username !== userStore.user?.username);
+		return other?.username || '';
+	}
 
 	async function handleUserSearch() {
 		const q = userSearchQuery.trim();
@@ -114,7 +139,7 @@
 			showNewChat = false;
 			userSearchQuery = '';
 			searchResults = [];
-			onnewchat();
+			onnewchat(result);
 		} catch { /* handled in parent */ }
 	}
 
@@ -147,6 +172,41 @@
 		{/if}
 	</div>
 
+	{#if pinnedConvos.length > 0}
+		<div class="section-header">
+			<span>PINNED</span>
+		</div>
+		{#each pinnedConvos as convo (convo.id)}
+			{@const isActive = activeConvoId === convo.id}
+			<button
+				class="dm-item pinned-item"
+				class:active={isActive}
+				onclick={() => onselect(convo)}
+				oncontextmenu={(e) => handleContextMenu(e, convo.id)}
+			>
+				<div class="dm-avatar-wrap">
+					{#if convo.type === 'direct'}
+						<Avatar username={getAvatar(convo)} size={28} />
+						{#if isOnline(getOtherUsername(convo))}
+							<span class="online-dot"></span>
+						{/if}
+					{:else}
+						<span class="pin-hash">#</span>
+					{/if}
+				</div>
+				<span class="dm-name truncate" class:unread={convo.unread_count > 0 || isMarkedUnread(convo.id)}>{getDisplayName(convo)}</span>
+				{#if hasDraft(convo.id)}
+					<span class="draft-indicator">Draft</span>
+				{/if}
+				{#if convo.unread_count > 0}
+					<span class="badge">{convo.unread_count}</span>
+				{:else if isMarkedUnread(convo.id)}
+					<span class="unread-dot"></span>
+				{/if}
+			</button>
+		{/each}
+	{/if}
+
 	{#if channels.length > 0 || !loading}
 		<div class="section-header">
 			<span>CHANNELS</span>
@@ -158,11 +218,21 @@
 		</div>
 		{#each channels as convo (convo.id)}
 			{@const isActive = activeConvoId === convo.id}
-			<button class="channel-item" class:active={isActive} onclick={() => onselect(convo)}>
+			<button
+				class="channel-item"
+				class:active={isActive}
+				onclick={() => onselect(convo)}
+				oncontextmenu={(e) => handleContextMenu(e, convo.id)}
+			>
 				<span class="hash">#</span>
 				<span class="truncate">{getDisplayName(convo)}</span>
+				{#if hasDraft(convo.id)}
+					<span class="draft-indicator">Draft</span>
+				{/if}
 				{#if convo.unread_count > 0}
 					<span class="badge">{convo.unread_count}</span>
+				{:else if isMarkedUnread(convo.id)}
+					<span class="unread-dot"></span>
 				{/if}
 			</button>
 		{/each}
@@ -208,18 +278,29 @@
 	{:else}
 		{#each directMessages as convo (convo.id)}
 			{@const isActive = activeConvoId === convo.id}
-			<button class="dm-item" class:active={isActive} onclick={() => onselect(convo)}>
+			{@const otherName = getOtherUsername(convo)}
+			<button
+				class="dm-item"
+				class:active={isActive}
+				onclick={() => onselect(convo)}
+				oncontextmenu={(e) => handleContextMenu(e, convo.id)}
+			>
 				<div class="dm-avatar-wrap">
 					<Avatar username={getAvatar(convo)} size={32} />
+					{#if otherName && isOnline(otherName)}
+						<span class="online-dot"></span>
+					{/if}
 				</div>
 				<div class="dm-content">
 					<div class="dm-top">
-						<span class="dm-name" class:unread={convo.unread_count > 0}>{getDisplayName(convo)}</span>
+						<span class="dm-name" class:unread={convo.unread_count > 0 || isMarkedUnread(convo.id)}>{getDisplayName(convo)}</span>
 						{#if convo.last_message}
 							<span class="dm-time">{formatSidebarTime(convo.last_message.created_at)}</span>
 						{/if}
 					</div>
-					{#if convo.last_message}
+					{#if hasDraft(convo.id)}
+						<div class="dm-preview draft-text">Draft</div>
+					{:else if convo.last_message}
 						<div class="dm-preview" class:unread={convo.unread_count > 0}>
 							{#if convo.last_message.sender_username === userStore.user?.username}
 								<span class="preview-you">You: </span>
@@ -230,6 +311,8 @@
 				</div>
 				{#if convo.unread_count > 0}
 					<span class="badge">{convo.unread_count}</span>
+				{:else if isMarkedUnread(convo.id)}
+					<span class="unread-dot"></span>
 				{/if}
 			</button>
 		{/each}
@@ -248,14 +331,45 @@
 	</button>
 </aside>
 
+<!-- Context menu -->
+{#if contextMenu}
+	<!-- svelte-ignore a11y_no_static_element_interactions -->
+	<div class="ctx-overlay" onclick={closeContextMenu} onkeydown={(e) => { if (e.key === 'Escape') closeContextMenu(); }}></div>
+	<div class="ctx-menu" style="left:{contextMenu.x}px;top:{contextMenu.y}px;">
+		<button class="ctx-item" onclick={() => { togglePin(contextMenu!.convoId); closeContextMenu(); }}>
+			{isPinned(contextMenu.convoId) ? 'Unpin' : 'Pin conversation'}
+		</button>
+		{#if !isMarkedUnread(contextMenu.convoId)}
+			<button class="ctx-item" onclick={() => { markUnread(contextMenu!.convoId); closeContextMenu(); }}>
+				Mark as unread
+			</button>
+		{:else}
+			<button class="ctx-item" onclick={() => { clearUnread(contextMenu!.convoId); closeContextMenu(); }}>
+				Mark as read
+			</button>
+		{/if}
+		<button class="ctx-item ctx-danger" onclick={() => { ondeleteconvo(contextMenu!.convoId); closeContextMenu(); }}>
+			Delete conversation
+		</button>
+	</div>
+{/if}
+
 <style>
 	.sidebar {
-		width: 260px; flex-shrink: 0; display: flex; flex-direction: column;
-		background: rgba(13, 17, 26, 0.92);
+		width: 264px; flex-shrink: 0; display: flex; flex-direction: column;
+		background: var(--glass-bg);
 		backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
-		border: 1px solid var(--glass-border); border-radius: 16px 0 0 16px;
+		border: 1px solid var(--glass-border); border-radius: 16px;
 		padding: 12px 0 16px; overflow-y: auto;
-		box-shadow: 0 4px 24px rgba(0, 0, 0, 0.2); min-width: 0;
+		box-shadow: 0 4px 24px color-mix(in srgb, var(--color-overlay, #000) 20%, transparent); min-width: 0;
+		animation: chat-panel-in 0.6s cubic-bezier(0.16, 1, 0.3, 1) both;
+	}
+	@keyframes chat-panel-in {
+		from { opacity: 0; transform: translateY(20px) scale(0.97); filter: blur(4px); }
+		to { opacity: 1; transform: translateY(0) scale(1); filter: blur(0); }
+	}
+	@media (prefers-reduced-motion: reduce) {
+		.sidebar { animation: none !important; }
 	}
 	.sidebar-search { position: relative; margin: 0 12px 12px; }
 	.search-icon {
@@ -264,12 +378,12 @@
 	}
 	.search-input {
 		width: 100%; padding: 7px 30px 7px 30px; font-size: 12px;
-		border-radius: 8px; border: 1px solid rgba(255,255,255,0.06);
-		background: rgba(255,255,255,0.04); color: var(--color-text); outline: none;
+		border-radius: 12px; border: 1px solid var(--glass-border);
+		background: color-mix(in srgb, var(--color-text) 4%, transparent); color: var(--color-text); outline: none;
 		transition: border-color 0.15s, background 0.15s;
 	}
 	.search-input::placeholder { color: var(--color-text-dim); opacity: 0.5; }
-	.search-input:focus { border-color: rgba(6,182,212,0.4); background: rgba(255,255,255,0.06); }
+	.search-input:focus { border-color: color-mix(in srgb, var(--color-primary) 40%, transparent); background: color-mix(in srgb, var(--color-text) 6%, transparent); }
 	.search-clear {
 		position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
 		color: var(--color-text-dim); opacity: 0.5; transition: opacity 0.15s;
@@ -286,13 +400,13 @@
 	.section-header button { color: var(--color-text-dim); opacity: 0.7; transition: opacity 0.15s; }
 	.section-header button:hover { opacity: 1; }
 	.channel-item {
-		height: 32px; margin: 2px 8px; padding: 0 8px; border-radius: 6px;
+		height: 32px; margin: 2px 8px; padding: 0 8px; border-radius: 8px;
 		display: flex; align-items: center; gap: 8px; font-size: 14px;
 		color: var(--color-text-dim); width: calc(100% - 16px); text-align: left;
 		transition: background 0.15s, color 0.15s;
 	}
-	.channel-item:hover { background: rgba(255,255,255,0.05); color: var(--color-text); }
-	.channel-item.active { background: rgba(6,182,212,0.15); color: var(--color-primary); }
+	.channel-item:hover { background: color-mix(in srgb, var(--color-text) 5%, transparent); color: var(--color-text); }
+	.channel-item.active { background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary); }
 	.hash { font-size: 16px; opacity: 0.6; }
 	.channel-item.active .hash { color: var(--color-primary); opacity: 1; }
 	.badge {
@@ -301,27 +415,27 @@
 		font-size: 11px; font-weight: 600; display: flex; align-items: center; justify-content: center;
 	}
 	.user-search-input {
-		width: 100%; padding: 6px 12px; font-size: 13px; border-radius: 8px;
-		border: none; background: rgba(255,255,255,0.05); color: var(--color-text); outline: none;
+		width: 100%; padding: 6px 12px; font-size: 13px; border-radius: 12px;
+		border: none; background: color-mix(in srgb, var(--color-text) 5%, transparent); color: var(--color-text); outline: none;
 	}
 	.user-results {
 		margin-top: 4px; max-height: 192px; overflow-y: auto; border-radius: 8px;
-		background: rgba(255,255,255,0.06);
+		background: color-mix(in srgb, var(--color-text) 6%, transparent);
 	}
 	.user-result-item {
 		width: 100%; display: flex; align-items: center; gap: 8px;
 		padding: 8px 12px; text-align: left; font-size: 13px;
 		color: var(--color-text); transition: background 0.12s;
 	}
-	.user-result-item:hover { background: rgba(255,255,255,0.05); }
+	.user-result-item:hover { background: color-mix(in srgb, var(--color-text) 5%, transparent); }
 	.dm-avatar-wrap { position: relative; flex-shrink: 0; }
 	.dm-item {
-		min-height: 52px; margin: 2px 8px; padding: 8px 10px; border-radius: 6px;
+		min-height: 52px; margin: 2px 8px; padding: 8px 10px; border-radius: 8px;
 		display: flex; align-items: center; gap: 10px; font-size: 14px;
 		color: var(--color-text); width: calc(100% - 16px); transition: background 0.15s;
 	}
-	.dm-item:hover { background: rgba(255,255,255,0.05); }
-	.dm-item.active { background: rgba(6,182,212,0.15); }
+	.dm-item:hover { background: color-mix(in srgb, var(--color-text) 5%, transparent); }
+	.dm-item.active { background: color-mix(in srgb, var(--color-primary) 15%, transparent); }
 	.dm-content { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 2px; }
 	.dm-top { display: flex; justify-content: space-between; align-items: baseline; }
 	.dm-name {
@@ -331,18 +445,63 @@
 	.dm-name.unread { font-weight: 600; }
 	.dm-time { font-size: 11px; color: var(--color-text-dim); flex-shrink: 0; margin-left: 8px; }
 	.dm-preview {
-		font-size: 12px; color: var(--color-text-dim); opacity: 0.6;
+		font-size: 12px; color: var(--color-text-dim); opacity: 0.75;
 		overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
 	}
 	.dm-preview.unread { opacity: 0.9; color: var(--color-text); }
 	.preview-you { color: var(--color-text-dim); }
 	.new-msg-btn {
-		margin: 16px 12px 0; height: 40px; border-radius: 8px;
+		margin: 16px 12px 0; height: 40px; border-radius: 12px;
 		background: var(--color-primary); color: white; font-size: 14px; font-weight: 500;
 		display: flex; align-items: center; justify-content: center; gap: 8px; transition: background 0.15s;
 	}
-	.new-msg-btn:hover { background: #22d3ee; }
+	.new-msg-btn:hover { background: var(--color-accent); }
+	/* Online dot */
+	.online-dot {
+		position: absolute; bottom: 0; right: 0;
+		width: 10px; height: 10px; border-radius: 50%;
+		background: var(--color-success); border: 2px solid var(--glass-bg);
+	}
+	/* Draft indicator */
+	.draft-indicator {
+		margin-left: auto; font-size: 11px; color: var(--color-warning, #eab308);
+		font-style: italic; flex-shrink: 0;
+	}
+	.draft-text { color: var(--color-warning, #eab308); font-style: italic; opacity: 1; }
+	/* Unread dot (no count) */
+	.unread-dot {
+		margin-left: auto; width: 8px; height: 8px; border-radius: 50%;
+		background: var(--color-primary); flex-shrink: 0;
+	}
+	/* Pinned item */
+	.pinned-item { min-height: 36px; padding: 4px 10px; }
+	.pin-hash {
+		width: 28px; height: 28px; border-radius: 6px;
+		background: color-mix(in srgb, var(--color-text) 4%, transparent); display: flex; align-items: center; justify-content: center;
+		font-size: 14px; color: var(--color-text-dim);
+	}
+	/* Context menu */
+	.ctx-overlay { position: fixed; inset: 0; z-index: 50; }
+	.ctx-menu {
+		position: fixed; z-index: 51;
+		min-width: 160px; border-radius: 10px; padding: 4px;
+		background: var(--glass-bg); backdrop-filter: blur(20px);
+		border: 1px solid var(--glass-border);
+		box-shadow: 0 8px 32px color-mix(in srgb, var(--color-overlay, #000) 50%, transparent);
+		animation: ctx-pop 0.12s ease both;
+	}
+	.ctx-item {
+		width: 100%; text-align: left; padding: 8px 12px; border-radius: 6px;
+		font-size: 13px; color: var(--color-text); transition: background 0.1s;
+	}
+	.ctx-item:hover { background: color-mix(in srgb, var(--color-text) 6%, transparent); }
+	.ctx-danger { color: var(--color-error); }
+	.ctx-danger:hover { background: color-mix(in srgb, var(--color-error) 10%, transparent); }
+	@keyframes ctx-pop {
+		from { opacity: 0; transform: scale(0.95); }
+		to { opacity: 1; transform: scale(1); }
+	}
 	@media (max-width: 1023px) {
-		.sidebar { width: 100%; border-radius: 12px; }
+		.sidebar { width: 100%; border-radius: 16px; }
 	}
 </style>

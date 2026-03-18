@@ -91,7 +91,7 @@
 						type="text"
 						bind:value={editTitle}
 						class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
-						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 					/>
 				</div>
 				<div>
@@ -100,7 +100,7 @@
 						bind:value={editBody}
 						rows={10}
 						class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)] resize-y"
-						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 					></textarea>
 				</div>
 				<div class="flex items-center gap-4">
@@ -128,7 +128,7 @@
 				<div>
 					<div class="flex items-center gap-3 flex-wrap">
 						<h2 class="text-xl font-bold" style="color: var(--color-text);">{release.title}</h2>
-						<code class="text-xs px-2 py-0.5 rounded-lg" style="background: var(--color-surface-hover); color: var(--color-primary);">{release.tag_name}</code>
+						<code class="text-xs px-2 py-0.5 rounded-lg" style="background: rgba(255, 255, 255, 0.06); color: var(--color-primary);">{release.tag_name}</code>
 						{#if release.is_prerelease}
 							<span class="text-[0.625rem] px-2 py-0.5 rounded-full border" style="border-color: var(--color-warning); color: var(--color-warning);">Pre-release</span>
 						{/if}
@@ -145,13 +145,13 @@
 				{#if isOwner}
 					<div class="flex items-center gap-2 shrink-0">
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-							style="border-color: var(--color-border); color: var(--color-text);"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 							onclick={() => { editing = true; }}
 						>Edit</button>
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10"
-							style="border-color: var(--color-border); color: var(--color-error);"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
+							style="border-color: var(--glass-border); color: var(--color-error);"
 							onclick={handleDelete}
 							disabled={deleting}
 						>{deleting ? 'Deleting...' : 'Delete'}</button>
@@ -171,16 +171,16 @@
 				<div class="flex flex-col gap-1.5">
 					<a
 						href={repos.archiveUrl(owner, repo, release.tag_name, 'zip')}
-						class="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
 						Source code (zip)
 					</a>
 					<a
 						href={repos.archiveUrl(owner, repo, release.tag_name, 'tar.gz')}
-						class="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="flex items-center gap-2 text-sm px-4 py-2.5 rounded-xl border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<svg class="w-4 h-4 opacity-50" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" /></svg>
 						Source code (tar.gz)

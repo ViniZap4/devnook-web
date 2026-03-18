@@ -39,7 +39,7 @@
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading releases...</div>
 	{:else if items.length === 0}
-		<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+		<div class="card p-16 text-center">
 			<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
 			</svg>
@@ -49,7 +49,7 @@
 	{:else}
 		<div class="flex flex-col gap-5">
 			{#each items as release, i}
-				<div class="rounded-xl border p-6 relative" style="border-color: var(--color-border);">
+				<div class="card p-6 relative">
 					{#if i === 0 && !release.is_draft && !release.is_prerelease}
 						<div class="absolute -top-2.5 left-4">
 							<span class="text-[0.625rem] px-2.5 py-0.5 rounded-full font-medium" style="background-color: var(--color-success); color: white;">Latest</span>
@@ -59,7 +59,7 @@
 						<div class="min-w-0">
 							<div class="flex items-center gap-3 flex-wrap">
 								<a href="/{owner}/{repo}/releases/{release.id}" class="text-lg font-bold hover:underline" style="color: var(--color-text);">{release.title}</a>
-								<code class="text-xs px-2 py-0.5 rounded-lg" style="background: var(--color-surface-hover); color: var(--color-primary);">{release.tag_name}</code>
+								<code class="text-xs px-2 py-0.5 rounded-lg" style="background: rgba(255, 255, 255, 0.06); color: var(--color-primary);">{release.tag_name}</code>
 							</div>
 							<div class="flex items-center gap-2 mt-1.5 text-xs" style="color: var(--color-text-dim);">
 								<span>{release.author}</span>
@@ -79,7 +79,7 @@
 						</div>
 					</div>
 					{#if release.body}
-						<div class="mt-4 pt-4 border-t text-sm" style="border-color: var(--color-border); color: var(--color-text);">
+						<div class="mt-4 pt-4 border-t text-sm" style="border-color: var(--glass-border); color: var(--color-text);">
 							<MarkdownRenderer content={release.body} />
 						</div>
 					{/if}

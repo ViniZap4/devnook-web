@@ -11,10 +11,10 @@
 	});
 </script>
 
-<PageShell maxWidth="max-w-3xl">
-	<div class="flex flex-col gap-2 mb-8 pb-6 border-b border-[var(--color-border)]">
-		<div class="flex items-center gap-3">
-			<div class="w-10 h-10 rounded-xl bg-[var(--color-surface)] flex items-center justify-center">
+<PageShell width="narrow">
+	<div class="card p-6">
+		<div class="flex items-center gap-3 mb-6 pb-6 border-b" style="border-color: var(--glass-border);">
+			<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: rgba(255,255,255,0.06);">
 				<RepoIcon size={18} color="var(--color-text)" />
 			</div>
 			<div>
@@ -22,6 +22,6 @@
 				<p class="text-sm text-[var(--color-text)] opacity-30">A repository contains all project files, including the revision history.</p>
 			</div>
 		</div>
+		<CreateRepoForm />
 	</div>
-	<CreateRepoForm />
 </PageShell>

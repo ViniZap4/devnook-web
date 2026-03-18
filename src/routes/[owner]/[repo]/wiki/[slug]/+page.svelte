@@ -29,7 +29,7 @@
 			.replace(/^# (.+)$/gm, '<h1 class="text-xl font-bold mt-6 mb-3 gradient-text">$1</h1>')
 			.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>')
 			.replace(/\*(.+?)\*/g, '<em>$1</em>')
-			.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 rounded-md text-xs font-mono" style="background: var(--color-surface-hover); color: var(--color-primary);">$1</code>')
+			.replace(/`(.+?)`/g, '<code class="px-1.5 py-0.5 rounded-md text-xs font-mono" style="background: rgba(255, 255, 255, 0.06); color: var(--color-primary);">$1</code>')
 			.replace(/\[(.+?)\]\((.+?)\)/g, '<a href="$2" class="animated-link" style="color: var(--color-primary);">$1</a>')
 			.replace(/^\- (.+)$/gm, '<li class="ml-4 list-disc text-sm leading-relaxed" style="color: var(--color-text);">$1</li>')
 			.replace(/^\d+\. (.+)$/gm, '<li class="ml-4 list-decimal text-sm leading-relaxed" style="color: var(--color-text);">$1</li>')
@@ -68,7 +68,7 @@
 		</div>
 	{:else if notFound}
 		<div class="card p-16 text-center card-animate">
-			<div class="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-warning) 8%, transparent);">
+			<div class="w-14 h-14 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-warning-subtle);">
 				<svg class="w-7 h-7 opacity-30" style="color: var(--color-warning);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
 			</div>
 			<p class="text-sm font-semibold mb-1" style="color: var(--color-text);">Page not found</p>

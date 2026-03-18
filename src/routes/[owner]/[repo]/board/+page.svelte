@@ -35,7 +35,7 @@
 <div class="flex flex-col gap-6">
 	<div class="flex items-center justify-between page-header">
 		<div class="flex items-center gap-3">
-			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-info) 12%, transparent);">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 				<svg class="w-4.5 h-4.5" style="color: var(--color-info);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7m0 10a2 2 0 002 2h2a2 2 0 002-2V7a2 2 0 00-2-2h-2a2 2 0 00-2 2" /></svg>
 			</div>
 			<div>
@@ -76,7 +76,7 @@
 				<div class="glass-subtle rounded-xl px-4 py-3 flex items-center gap-2">
 					<div class="w-2 h-2 rounded-full live-dot" style="background: var(--color-success);"></div>
 					<span class="text-sm font-bold" style="color: var(--color-success);">Open</span>
-					<span class="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style="background: color-mix(in srgb, var(--color-success) 15%, transparent); color: var(--color-success);">{openIssues.length}</span>
+					<span class="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style="background: var(--color-success-subtle); color: var(--color-success);">{openIssues.length}</span>
 				</div>
 				{#each openIssues as issue, i}
 					<a
@@ -84,7 +84,7 @@
 						class="card card-hover p-3.5 card-animate stagger-{Math.min(i + 1, 6)} group"
 					>
 						<div class="flex items-start gap-2 mb-1.5">
-							<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 mt-0.5" style="background: color-mix(in srgb, var(--color-success) 10%, transparent); color: var(--color-success);">#{issue.number}</span>
+							<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 mt-0.5" style="background: var(--color-success-subtle); color: var(--color-success);">#{issue.number}</span>
 							<span class="text-sm font-medium group-hover:underline leading-snug" style="color: var(--color-text);">{issue.title}</span>
 						</div>
 						{#if issue.labels && issue.labels.length > 0}
@@ -92,7 +92,7 @@
 								{#each issue.labels as label}
 									<span
 										class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-										style="background: {getLabelColor(label)}18; color: {getLabelColor(label)}; border: 1px solid {getLabelColor(label)}30;"
+										style="background: color-mix(in srgb, {getLabelColor(label)} 10%, var(--color-surface)); color: {getLabelColor(label)}; border: 1px solid color-mix(in srgb, {getLabelColor(label)} 19%, var(--color-surface));"
 									>{label.name}</span>
 								{/each}
 							</div>
@@ -123,7 +123,7 @@
 				<div class="glass-subtle rounded-xl px-4 py-3 flex items-center gap-2">
 					<svg class="w-3.5 h-3.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2.5"><path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7" /></svg>
 					<span class="text-sm font-bold" style="color: var(--color-primary);">Closed</span>
-					<span class="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style="background: color-mix(in srgb, var(--color-primary) 15%, transparent); color: var(--color-primary);">{closedIssues.length}</span>
+					<span class="text-[10px] px-2 py-0.5 rounded-full ml-auto font-semibold" style="background: var(--color-primary-subtle); color: var(--color-primary);">{closedIssues.length}</span>
 				</div>
 				{#each closedIssues as issue, i}
 					<a
@@ -131,7 +131,7 @@
 						class="card card-hover p-3.5 card-animate stagger-{Math.min(i + 1, 6)} group"
 					>
 						<div class="flex items-start gap-2 mb-1.5">
-							<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 mt-0.5" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary);">#{issue.number}</span>
+							<span class="text-[10px] font-mono px-1.5 py-0.5 rounded-md shrink-0 mt-0.5" style="background: var(--color-primary-subtle); color: var(--color-primary);">#{issue.number}</span>
 							<span class="text-sm font-medium group-hover:underline leading-snug" style="color: var(--color-text);">{issue.title}</span>
 						</div>
 						{#if issue.labels && issue.labels.length > 0}
@@ -139,7 +139,7 @@
 								{#each issue.labels as label}
 									<span
 										class="px-2 py-0.5 rounded-full text-[10px] font-semibold"
-										style="background: {getLabelColor(label)}18; color: {getLabelColor(label)}; border: 1px solid {getLabelColor(label)}30;"
+										style="background: color-mix(in srgb, {getLabelColor(label)} 10%, var(--color-surface)); color: {getLabelColor(label)}; border: 1px solid color-mix(in srgb, {getLabelColor(label)} 19%, var(--color-surface));"
 									>{label.name}</span>
 								{/each}
 							</div>

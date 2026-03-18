@@ -56,7 +56,7 @@
 
 <div class="flex flex-col gap-6">
 	<div class="flex items-center gap-3 page-header">
-		<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-secondary) 12%, transparent);">
+		<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 			<svg class="w-4.5 h-4.5" style="color: var(--color-secondary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>
 		</div>
 		<div>
@@ -104,7 +104,7 @@
 					class="px-4 py-2 text-xs font-semibold rounded-lg transition-all duration-300"
 					style="
 						color: {activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {activeTab === tab.id ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+						background: {activeTab === tab.id ? 'var(--color-primary-subtle)' : 'transparent'};
 					"
 					onclick={() => activeTab = tab.id as typeof activeTab}
 				>{tab.label}</button>
@@ -120,9 +120,9 @@
 						{#each recentCommits.slice(0, 10) as commit}
 							<a
 								href="/{owner}/{repoName}/commits/{commit.hash}"
-								class="flex items-start gap-3 p-2 rounded-lg transition-all hover:bg-[var(--color-surface-hover)] group"
+								class="flex items-start gap-3 p-2 rounded-lg transition-all hover:bg-[rgba(255,255,255,0.06)] group"
 							>
-								<span class="font-mono text-[11px] shrink-0 mt-0.5 px-1.5 py-0.5 rounded-md group-hover:underline" style="color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 8%, transparent);">{commit.short_hash}</span>
+								<span class="font-mono text-[11px] shrink-0 mt-0.5 px-1.5 py-0.5 rounded-md group-hover:underline" style="color: var(--color-primary); background: var(--color-primary-subtle);">{commit.short_hash}</span>
 								<div class="min-w-0 flex-1">
 									<p class="text-xs truncate leading-relaxed" style="color: var(--color-text);">{commit.message.split('\n')[0]}</p>
 									<p class="text-[11px] mt-0.5" style="color: var(--color-text-dim); opacity: 0.6;">{commit.author}</p>
@@ -140,7 +140,7 @@
 					<div class="card p-5">
 						<h3 class="text-sm font-bold mb-3" style="color: var(--color-text);">Issue Breakdown</h3>
 						{#if totalIssues > 0}
-							<div class="w-full h-2.5 rounded-full overflow-hidden flex" style="background: var(--color-surface-hover);">
+							<div class="w-full h-2.5 rounded-full overflow-hidden flex" style="background: rgba(255, 255, 255, 0.06);">
 								<div class="h-full transition-all duration-700" style="width: {(openIssueCount / totalIssues) * 100}%; background: var(--color-success); border-radius: {closedIssueCount === 0 ? '9999px' : '9999px 0 0 9999px'};"></div>
 								<div class="h-full transition-all duration-700" style="width: {(closedIssueCount / totalIssues) * 100}%; background: var(--color-primary); border-radius: {openIssueCount === 0 ? '9999px' : '0 9999px 9999px 0'};"></div>
 							</div>
@@ -155,7 +155,7 @@
 					<div class="card p-5">
 						<h3 class="text-sm font-bold mb-3" style="color: var(--color-text);">Pull Request Breakdown</h3>
 						{#if totalPRs > 0}
-							<div class="w-full h-2.5 rounded-full overflow-hidden flex" style="background: var(--color-surface-hover);">
+							<div class="w-full h-2.5 rounded-full overflow-hidden flex" style="background: rgba(255, 255, 255, 0.06);">
 								<div class="h-full transition-all duration-700" style="width: {(openPRCount / totalPRs) * 100}%; background: var(--color-accent); border-radius: {mergedPRCount === 0 ? '9999px' : '9999px 0 0 9999px'};"></div>
 								<div class="h-full transition-all duration-700" style="width: {(mergedPRCount / totalPRs) * 100}%; background: var(--color-primary); border-radius: {openPRCount === 0 ? '9999px' : '0 9999px 9999px 0'};"></div>
 							</div>
@@ -177,7 +177,7 @@
 					<div class="card p-4 card-animate stagger-{Math.min(i + 1, 8)}">
 						<div class="flex items-center gap-3">
 							<span class="text-[11px] font-mono w-7 text-right font-bold" style="color: {i < 3 ? 'var(--color-primary)' : 'var(--color-text-dim)'};">#{i + 1}</span>
-							<div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 12%, transparent), color-mix(in srgb, var(--color-accent) 12%, transparent)); color: var(--color-primary);">
+							<div class="w-9 h-9 rounded-xl flex items-center justify-center text-xs font-bold shrink-0" style="background: linear-gradient(135deg, var(--color-primary-subtle), var(--color-primary-subtle)); color: var(--color-primary);">
 								{contributor.name[0].toUpperCase()}
 							</div>
 							<div class="flex-1 min-w-0">
@@ -185,7 +185,7 @@
 									<span class="text-sm font-semibold truncate" style="color: var(--color-text);">{contributor.name}</span>
 									<span class="text-[11px] shrink-0 ml-2 font-mono" style="color: var(--color-text-dim);">{contributor.commits} <span class="opacity-50">({pct.toFixed(1)}%)</span></span>
 								</div>
-								<div class="w-full h-1.5 rounded-full overflow-hidden" style="background: var(--color-surface-hover);">
+								<div class="w-full h-1.5 rounded-full overflow-hidden" style="background: rgba(255, 255, 255, 0.06);">
 									<div class="h-full rounded-full transition-all duration-700" style="width: {pct}%; background: linear-gradient(90deg, var(--color-primary), var(--color-accent));"></div>
 								</div>
 							</div>
@@ -221,7 +221,7 @@
 						{#each languages as lang, i}
 							<div class="card p-3.5 card-animate stagger-{Math.min(i + 1, 8)}">
 								<div class="flex items-center gap-2.5">
-									<span class="w-3.5 h-3.5 rounded-full shrink-0 ring-2 ring-offset-1" style="background: {lang.color}; --tw-ring-color: {lang.color}30; --tw-ring-offset-color: var(--color-background);"></span>
+									<span class="w-3.5 h-3.5 rounded-full shrink-0 ring-2 ring-offset-1" style="background: {lang.color}; --tw-ring-color: color-mix(in srgb, {lang.color} 19%, var(--color-surface)); --tw-ring-offset-color: var(--color-background);"></span>
 									<div class="min-w-0 flex-1">
 										<div class="flex items-center justify-between">
 											<span class="text-sm font-semibold truncate" style="color: var(--color-text);">{lang.name}</span>

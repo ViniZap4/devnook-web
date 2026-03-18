@@ -121,7 +121,7 @@
 					<div class="w-8 h-8 rounded-full" style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary));"></div>
 					<div class="absolute inset-0 w-8 h-8 rounded-full live-dot" style="background: var(--color-primary); opacity: 0.3;"></div>
 				</div>
-				<span class="font-bold text-4xl tracking-tight gradient-text-animated">Dev Nook</span>
+				<span class="font-bold text-4xl tracking-tight gradient-text">Dev Nook</span>
 			</div>
 			<p
 				class="text-lg leading-relaxed mb-12 transition-all duration-700 delay-100"
@@ -137,19 +137,19 @@
 				style="opacity: {mounted ? 1 : 0}; transform: {mounted ? 'translateY(0)' : 'translateY(20px)'};"
 			>
 				<div class="card-glow p-5 text-center group cursor-default">
-					<div class="transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1 mb-2" style="color: var(--color-primary);">
+					<div class="transition-transform duration-300 mb-2" style="color: var(--color-primary);">
 						<svg class="w-7 h-7 mx-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M2 2.5A2.5 2.5 0 0 1 4.5 0h8.75a.75.75 0 0 1 .75.75v12.5a.75.75 0 0 1-.75.75h-2.5a.75.75 0 0 1 0-1.5h1.75v-2h-8a1 1 0 0 0-.714 1.7.75.75 0 1 1-1.072 1.05A2.495 2.495 0 0 1 2 11.5Zm10.5-1h-8a1 1 0 0 0-1 1v6.708A2.486 2.486 0 0 1 4.5 9h8Z"/></svg>
 					</div>
 					<p class="text-xs font-medium" style="color: var(--color-text-dim);">Repositories</p>
 				</div>
 				<div class="card-glow p-5 text-center group cursor-default">
-					<div class="transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1 mb-2" style="color: var(--color-secondary);">
+					<div class="transition-transform duration-300 mb-2" style="color: var(--color-secondary);">
 						<svg class="w-7 h-7 mx-auto" viewBox="0 0 16 16" fill="currentColor"><path d="M8 9.5a1.5 1.5 0 1 0 0-3 1.5 1.5 0 0 0 0 3Z"/><path d="M8 0a8 8 0 1 1 0 16A8 8 0 0 1 8 0ZM1.5 8a6.5 6.5 0 1 0 13 0 6.5 6.5 0 0 0-13 0Z"/></svg>
 					</div>
 					<p class="text-xs font-medium" style="color: var(--color-text-dim);">Issues</p>
 				</div>
 				<div class="card-glow p-5 text-center group cursor-default">
-					<div class="transition-transform duration-300 group-hover:scale-110 group-hover:-translate-y-1 mb-2" style="color: var(--color-accent);">
+					<div class="transition-transform duration-300 mb-2" style="color: var(--color-accent);">
 						<svg class="w-7 h-7 mx-auto" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M18 18.72a9.094 9.094 0 003.741-.479 3 3 0 00-4.682-2.72m.94 3.198l.001.031c0 .225-.012.447-.037.666A11.944 11.944 0 0112 21c-2.17 0-4.207-.576-5.963-1.584A6.062 6.062 0 016 18.719m12 0a5.971 5.971 0 00-.941-3.197m0 0A5.995 5.995 0 0012 12.75a5.995 5.995 0 00-5.058 2.772m0 0a3 3 0 00-4.681 2.72 8.986 8.986 0 003.74.477m.94-3.197a5.971 5.971 0 00-.94 3.197M15 6.75a3 3 0 11-6 0 3 3 0 016 0zm6 3a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0zm-13.5 0a2.25 2.25 0 11-4.5 0 2.25 2.25 0 014.5 0z" /></svg>
 					</div>
 					<p class="text-xs font-medium" style="color: var(--color-text-dim);">Teams</p>
@@ -245,9 +245,8 @@
 	.auth-input {
 		width: 100%;
 		padding: 0.75rem 1rem;
-		background: color-mix(in srgb, var(--color-surface) 60%, transparent);
-		backdrop-filter: blur(8px);
-		border: 1px solid var(--color-border);
+		background: var(--glass-bg);
+		border: 1px solid var(--glass-border);
 		border-radius: 0.875rem;
 		color: var(--color-text);
 		font-size: 0.875rem;
@@ -259,8 +258,8 @@
 	}
 	.auth-input:focus {
 		border-color: var(--color-primary);
-		background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-		box-shadow: 0 0 0 3px color-mix(in srgb, var(--color-primary) 15%, transparent), 0 0 20px color-mix(in srgb, var(--color-primary) 8%, transparent);
+		background: var(--color-surface-hover);
+		box-shadow: 0 0 0 3px var(--primary-glow);
 		outline: none;
 		transform: translateY(-1px);
 	}
@@ -282,7 +281,7 @@
 	}
 	.auth-btn:hover:not(:disabled) {
 		transform: translateY(-2px);
-		box-shadow: 0 8px 24px color-mix(in srgb, var(--color-primary) 30%, transparent);
+		box-shadow: 0 8px 24px var(--primary-glow);
 	}
 	.auth-btn:active:not(:disabled) {
 		transform: translateY(0) scale(0.98);
@@ -294,15 +293,15 @@
 	.auth-error {
 		padding: 0.625rem 0.875rem;
 		border-radius: 0.875rem;
-		background: color-mix(in srgb, var(--color-error) 10%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-error) 20%, transparent);
+		background: var(--color-error-subtle);
+		border: 1px solid var(--color-error-subtle);
 		color: var(--color-error);
 		font-size: 0.875rem;
 	}
 	.auth-spinner {
 		width: 1rem;
 		height: 1rem;
-		border: 2px solid rgba(255,255,255,0.3);
+		border: 2px solid var(--color-border);
 		border-top-color: white;
 		border-radius: 50%;
 		animation: spin 0.6s linear infinite;

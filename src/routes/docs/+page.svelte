@@ -55,11 +55,11 @@
 	};
 </script>
 
-<PageShell maxWidth="max-w-5xl">
+<PageShell width="default">
 	<div class="flex flex-col gap-6">
 		<div class="flex items-center justify-between page-header">
 			<div class="flex items-center gap-3">
-				<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 6%, transparent);">
+				<div class="w-10 h-10 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
 					<svg class="w-5 h-5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
 				</div>
 				<div>
@@ -80,20 +80,26 @@
 		{#if showCreate}
 			<div class="card p-5 flex flex-col gap-3 animate-fade-up-sm">
 				<h3 class="text-sm font-semibold" style="color: var(--color-text);">Create Documentation Space</h3>
-				<input
-					type="text"
-					bind:value={newName}
-					placeholder="Space name..."
-					class="px-3 py-2 text-sm rounded-lg border bg-transparent"
-					style="border-color: var(--color-border); color: var(--color-text);"
-				/>
-				<input
-					type="text"
-					bind:value={newDesc}
-					placeholder="Description (optional)"
-					class="px-3 py-2 text-sm rounded-lg border bg-transparent"
-					style="border-color: var(--color-border); color: var(--color-text);"
-				/>
+				<div>
+					<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Space name</label>
+					<input
+						type="text"
+						bind:value={newName}
+						placeholder="Space name..."
+						class="w-full px-3 py-2.5 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
+					/>
+				</div>
+				<div>
+					<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Description</label>
+					<input
+						type="text"
+						bind:value={newDesc}
+						placeholder="Description (optional)"
+						class="w-full px-3 py-2.5 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
+					/>
+				</div>
 				<div class="flex items-center justify-end gap-2">
 					<button class="text-xs" style="color: var(--color-text-dim);" onclick={() => { showCreate = false; }}>Cancel</button>
 					<button
@@ -122,10 +128,10 @@
 					<a
 						href="/docs/{space.slug}"
 						class="card p-5 group transition-all duration-300"
-						style="animation: card-entrance 0.5s cubic-bezier(0.16, 1, 0.3, 1) both; animation-delay: {i * 60}ms;"
+						style="animation: fade-up 0.3s ease both;"
 					>
 						<div class="flex items-start gap-3">
-							<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-110" style="background: color-mix(in srgb, var(--color-primary) 6%, transparent);">
+							<div class="w-10 h-10 rounded-xl flex items-center justify-center shrink-0 transition-transform duration-300 group-hover:scale-105" style="background: var(--color-primary-subtle);">
 								{#if space.icon}
 									<span class="text-lg">{space.icon}</span>
 								{:else}
@@ -139,11 +145,11 @@
 								{/if}
 								<div class="flex items-center gap-2 mt-2">
 									{#if space.repo_owner}
-										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-info) 6%, transparent); color: var(--color-info);">{space.repo_owner}/{space.repo_name}</span>
+										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-info-subtle); color: var(--color-info);">{space.repo_owner}/{space.repo_name}</span>
 									{:else if space.org_name}
-										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-warning) 6%, transparent); color: var(--color-warning);">{space.org_name}</span>
+										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-warning-subtle); color: var(--color-warning);">{space.org_name}</span>
 									{:else}
-										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: var(--color-surface); color: var(--color-text-dim);">{space.owner_name}</span>
+										<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.03); color: var(--color-text-dim);">{space.owner_name}</span>
 									{/if}
 									<span class="text-[0.625rem]" style="color: var(--color-text-dim); opacity: 0.5;"><RelativeTime date={space.updated_at} /></span>
 								</div>

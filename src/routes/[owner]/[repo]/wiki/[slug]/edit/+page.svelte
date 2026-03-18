@@ -69,7 +69,7 @@
 	</div>
 
 	{#if error}
-		<div class="card px-4 py-3 text-sm animate-pop-in" style="background: color-mix(in srgb, var(--color-error) 8%, transparent); border-color: color-mix(in srgb, var(--color-error) 20%, transparent); color: var(--color-error);">
+		<div class="card px-4 py-3 text-sm animate-pop-in" style="background: var(--color-error-subtle); border-color: var(--color-error-subtle); color: var(--color-error);">
 			{error}
 		</div>
 	{/if}
@@ -88,7 +88,7 @@
 					bind:value={body}
 					rows="25"
 					class="w-full px-4 py-3 text-sm rounded-xl bg-transparent font-mono transition-all"
-					style="border: 1px solid var(--color-border); color: var(--color-text); resize: vertical;"
+					style="border: 1px solid var(--glass-border); color: var(--color-text); resize: vertical;"
 				></textarea>
 			</div>
 
@@ -115,7 +115,7 @@
 					onclick={deletePage}
 					disabled={saving}
 					class="px-4 py-2.5 text-sm font-medium rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98] disabled:opacity-40"
-					style="border: 1px solid color-mix(in srgb, var(--color-error) 30%, transparent); color: var(--color-error); background: color-mix(in srgb, var(--color-error) 5%, transparent);"
+					style="border: 1px solid var(--color-error-subtle); color: var(--color-error); background: var(--color-error-subtle);"
 				>
 					Delete Page
 				</button>

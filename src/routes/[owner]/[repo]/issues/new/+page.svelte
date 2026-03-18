@@ -82,7 +82,7 @@
 					bind:value={title}
 					placeholder="Issue title"
 					class="w-full px-4 py-2.5 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 					required
 				/>
 			</div>
@@ -96,7 +96,7 @@
 							class="px-2.5 py-1 text-[0.625rem] rounded-md transition-all duration-200"
 							style="
 								color: {!previewMode ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-								background: {!previewMode ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+								background: {!previewMode ? 'var(--color-primary-subtle)' : 'transparent'};
 								font-weight: {!previewMode ? '600' : '400'};
 							"
 							onclick={() => { previewMode = false; }}
@@ -106,7 +106,7 @@
 							class="px-2.5 py-1 text-[0.625rem] rounded-md transition-all duration-200"
 							style="
 								color: {previewMode ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-								background: {previewMode ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+								background: {previewMode ? 'var(--color-primary-subtle)' : 'transparent'};
 								font-weight: {previewMode ? '600' : '400'};
 							"
 							onclick={() => { previewMode = true; }}
@@ -115,7 +115,7 @@
 				</div>
 
 				{#if previewMode}
-					<div class="min-h-[200px] px-4 py-3 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border);">
+					<div class="card min-h-[200px] px-4 py-3 animate-fade-up-sm">
 						{#if body.trim()}
 							<MarkdownRenderer content={body} />
 						{:else}
@@ -129,7 +129,7 @@
 						placeholder="Describe the issue... (Markdown supported)"
 						rows="10"
 						class="w-full px-4 py-3 text-sm rounded-xl border bg-transparent font-mono transition-all duration-200 focus:border-[var(--color-primary)] resize-y"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					></textarea>
 				{/if}
 			</div>
@@ -158,7 +158,7 @@
 							<button
 								type="button"
 								class="flex items-center gap-2 text-xs px-2.5 py-2 rounded-lg w-full text-left hover-slide transition-all duration-200"
-								style="color: var(--color-text); background: {selectedLabels.includes(label.id) ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};"
+								style="color: var(--color-text); background: {selectedLabels.includes(label.id) ? 'var(--color-primary-subtle)' : 'transparent'};"
 								onclick={() => toggleLabel(label.id)}
 							>
 								<span class="w-3 h-3 rounded-full shrink-0 transition-transform duration-200" style="background-color: {label.color}; {selectedLabels.includes(label.id) ? 'transform: scale(1.2);' : ''}"></span>
@@ -179,7 +179,7 @@
 					<select
 						bind:value={selectedMilestone}
 						class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value={undefined}>None</option>
 						{#each repoMilestones as m}
@@ -197,7 +197,7 @@
 					bind:value={assignee}
 					placeholder="Username"
 					class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 			</div>
 		</div>

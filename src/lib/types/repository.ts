@@ -12,6 +12,7 @@ export interface Repository {
 	topics: string[];
 	stars_count: number;
 	forks_count: number;
+	language?: string;
 	org_id?: number;
 	created_at: string;
 	updated_at: string;

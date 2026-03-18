@@ -9,7 +9,7 @@
 	{#each issues as issue, i}
 		<div
 			class="row-animate"
-			style="animation-delay: {Math.min(i * 0.04, 0.4)}s; border-bottom: 1px solid var(--color-border);"
+			style="animation-delay: {Math.min(i * 0.04, 0.4)}s; border-bottom: 1px solid var(--glass-border);"
 		>
 			<IssueRow {issue} {owner} {repo} />
 		</div>

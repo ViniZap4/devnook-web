@@ -217,10 +217,10 @@
 						type="text"
 						bind:value={editTitle}
 						class="flex-1 text-xl font-bold px-2 py-1 rounded-lg border"
-						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 					/>
 					<button class="px-3 py-1 text-sm rounded-lg text-white" style="background-color: var(--color-primary);" onclick={saveTitle}>Save</button>
-					<button class="px-3 py-1 text-sm rounded-lg border" style="border-color: var(--color-border); color: var(--color-text-dim);" onclick={() => { editingTitle = false; }}>Cancel</button>
+					<button class="px-3 py-1 text-sm rounded-lg border" style="border-color: var(--glass-border); color: var(--color-text-dim);" onclick={() => { editingTitle = false; }}>Cancel</button>
 				</div>
 			{:else}
 				<div class="flex items-center gap-2">
@@ -235,26 +235,26 @@
 					style="background-color: {pr.state === 'merged' ? 'var(--color-secondary)' : pr.state === 'open' ? 'var(--color-success)' : 'var(--color-error)'};"
 				>{pr.state}</span>
 				<span style="color: var(--color-text-dim);">
-					{pr.author} wants to merge <code class="px-1.5 py-0.5 rounded text-xs" style="background: var(--color-surface); color: var(--color-primary);">{pr.head_branch}</code> into <code class="px-1.5 py-0.5 rounded text-xs" style="background: var(--color-surface); color: var(--color-primary);">{pr.base_branch}</code>
+					{pr.author} wants to merge <code class="px-1.5 py-0.5 rounded text-xs" style="background: rgba(255, 255, 255, 0.03); color: var(--color-primary);">{pr.head_branch}</code> into <code class="px-1.5 py-0.5 rounded text-xs" style="background: rgba(255, 255, 255, 0.03); color: var(--color-primary);">{pr.base_branch}</code>
 				</span>
 			</div>
 		</div>
 
 		<!-- Tabs -->
-		<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
+		<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--glass-border);">
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="{activeTab === 'conversation' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{activeTab === 'conversation' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => { activeTab = 'conversation'; }}
 			>Conversation</button>
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="{activeTab === 'diff' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{activeTab === 'diff' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => { activeTab = 'diff'; }}
 			>
 				Files changed
 				{#if diff}
-					<span class="ml-1 text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{diff.diff.length}</span>
+					<span class="ml-1 text-xs px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.03);">{diff.diff.length}</span>
 				{/if}
 			</button>
 		</div>
@@ -266,7 +266,7 @@
 						bind:value={editBodyText}
 						rows={8}
 						class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
-						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 					></textarea>
 					<div class="flex items-center gap-2">
 						<button onclick={saveBody} class="px-3 py-1.5 text-xs font-medium rounded-lg text-white" style="background-color: var(--color-primary);">Save</button>
@@ -279,7 +279,7 @@
 					{#if isOwner}
 						<button
 							class="absolute top-2 right-2 text-xs px-2 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity"
-							style="background: var(--color-surface); color: var(--color-primary);"
+							style="background: rgba(255, 255, 255, 0.03); color: var(--color-primary);"
 							onclick={() => { editBodyText = pr!.body; editingBody = true; }}
 						>Edit</button>
 					{/if}
@@ -309,7 +309,7 @@
 								<div class="flex items-center gap-2 text-sm mb-1">
 									<span class="font-medium" style="color: var(--color-text);">{review.author}</span>
 									<span class="text-xs px-1.5 py-0.5 rounded-full font-medium"
-										style="background: color-mix(in srgb, {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'} 8%, transparent); color: {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'};"
+										style="background: {review.state === 'approved' ? 'var(--color-success-subtle)' : review.state === 'changes_requested' ? 'var(--color-error-subtle)' : 'rgba(255, 255, 255, 0.06)'}; color: {review.state === 'approved' ? 'var(--color-success)' : review.state === 'changes_requested' ? 'var(--color-error)' : 'var(--color-text-dim)'};"
 									>
 										{review.state === 'approved' ? 'Approved' : review.state === 'changes_requested' ? 'Changes requested' : 'Commented'}
 									</span>
@@ -334,7 +334,7 @@
 							placeholder="Leave a review comment..."
 							rows={3}
 							class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
-							style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+							style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 						></textarea>
 						<div class="flex items-center gap-2 flex-wrap">
 							<button
@@ -353,7 +353,7 @@
 								onclick={() => { reviewState = 'comment'; submitReview(); }}
 								disabled={submittingReview || !reviewBody.trim()}
 								class="px-3 py-1.5 text-xs font-medium rounded-lg border disabled:opacity-40"
-								style="border-color: var(--color-border); color: var(--color-text);"
+								style="border-color: var(--glass-border); color: var(--color-text);"
 							>Comment</button>
 							<button
 								onclick={() => { showReviewForm = false; }}
@@ -365,8 +365,8 @@
 				{:else}
 					<button
 						onclick={() => { showReviewForm = true; }}
-						class="self-start px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="self-start px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>Add your review</button>
 				{/if}
 			{/if}
@@ -380,16 +380,16 @@
 						disabled={merging}
 					>{merging ? 'Merging...' : 'Merge Pull Request'}</button>
 					<button
-						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: var(--color-border); color: var(--color-error);"
+						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+						style="border-color: var(--glass-border); color: var(--color-error);"
 						onclick={closePR}
 					>Close</button>
 				</div>
 			{:else if pr.state === 'closed'}
 				<div class="flex items-center gap-3">
 					<button
-						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-						style="border-color: color-mix(in srgb, var(--color-success) 19%, transparent); color: var(--color-success);"
+						class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+						style="border-color: var(--color-success-subtle); color: var(--color-success);"
 						onclick={reopenPR}
 					>Reopen pull request</button>
 				</div>
@@ -425,7 +425,7 @@
 							<div class="flex items-center gap-2 text-xs mb-1.5" style="color: var(--color-text-dim);">
 								<span class="font-medium" style="color: var(--color-text);">{comment.author}</span>
 								commented on
-								<code class="px-1 py-0.5 rounded text-xs" style="background: var(--color-surface);">{comment.path}</code>
+								<code class="px-1 py-0.5 rounded text-xs" style="background: rgba(255, 255, 255, 0.03);">{comment.path}</code>
 								line {comment.line}
 								{#if comment.created_at}
 									· <RelativeTime date={comment.created_at} />
@@ -443,7 +443,7 @@
 					placeholder="Leave a comment..."
 					rows={4}
 					class="w-full px-4 py-2.5 text-sm rounded-lg border resize-y"
-					style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 				></textarea>
 				<button
 					type="submit"
@@ -462,15 +462,15 @@
 				<div class="flex flex-col gap-4">
 					{#each diff.diff as file}
 						{@const fileName = file.to_file || file.from_file}
-						<div class="rounded-lg border overflow-hidden" style="border-color: var(--color-border);">
-							<div class="px-4 py-2 text-xs font-mono font-medium border-b flex items-center justify-between" style="background: var(--color-surface); border-color: var(--color-border); color: var(--color-text);">
+						<div class="rounded-lg border overflow-hidden" style="border-color: var(--glass-border);">
+							<div class="px-4 py-2 text-xs font-mono font-medium border-b flex items-center justify-between" style="background: rgba(255, 255, 255, 0.03); border-color: var(--glass-border); color: var(--color-text);">
 								<span>{fileName}</span>
 								{#if inlineComments.filter(c => c.path === fileName).length > 0}
-									<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">{inlineComments.filter(c => c.path === fileName).length} comment{inlineComments.filter(c => c.path === fileName).length > 1 ? 's' : ''}</span>
+									<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-primary-subtle); color: var(--color-primary);">{inlineComments.filter(c => c.path === fileName).length} comment{inlineComments.filter(c => c.path === fileName).length > 1 ? 's' : ''}</span>
 								{/if}
 							</div>
 							{#each file.hunks as hunk}
-								<div class="text-xs font-mono px-4 py-1 border-b" style="background: color-mix(in srgb, var(--color-primary) 3%, transparent); border-color: var(--color-border); color: var(--color-primary);">
+								<div class="text-xs font-mono px-4 py-1 border-b" style="background: var(--color-primary-subtle); border-color: var(--glass-border); color: var(--color-primary);">
 									{hunk.header}
 								</div>
 								<div class="overflow-x-auto">
@@ -479,7 +479,7 @@
 										{@const lineNum = parseDiffLineNumber(hunk.header, line, lineIdx, hunk.lines)}
 										<div
 											class="group flex"
-											style="background: {type === 'add' ? 'color-mix(in srgb, var(--color-success) 6%, transparent)' : type === 'del' ? 'color-mix(in srgb, var(--color-error) 6%, transparent)' : 'transparent'};"
+											style="background: {type === 'add' ? 'var(--color-success-subtle)' : type === 'del' ? 'var(--color-error-subtle)' : 'transparent'};"
 										>
 											<!-- Line number + comment button -->
 											<div class="shrink-0 w-10 text-right pr-2 select-none relative" style="color: var(--color-text-dim); opacity: 0.4;">
@@ -504,7 +504,7 @@
 										{#if lineNum}
 											{@const lineComments = getInlineCommentsForLine(fileName, lineNum)}
 											{#each lineComments as lc}
-												<div class="border-y px-4 py-3 flex flex-col gap-1" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-primary) 3%, transparent);">
+												<div class="border-y px-4 py-3 flex flex-col gap-1" style="border-color: var(--glass-border); background: var(--color-primary-subtle);">
 													<div class="flex items-center gap-2 text-xs">
 														<span class="font-medium" style="color: var(--color-text);">{lc.author}</span>
 														<span style="color: var(--color-text-dim);"><RelativeTime date={lc.created_at} /></span>
@@ -517,13 +517,13 @@
 
 											<!-- Inline comment form -->
 											{#if inlineCommentFile === fileName && inlineCommentLine === lineNum}
-												<div class="border-y px-4 py-3 flex flex-col gap-2" style="border-color: color-mix(in srgb, var(--color-primary) 19%, transparent); background: color-mix(in srgb, var(--color-primary) 3%, transparent);">
+												<div class="border-y px-4 py-3 flex flex-col gap-2" style="border-color: var(--color-primary-subtle); background: var(--color-primary-subtle);">
 													<textarea
 														bind:value={inlineCommentBody}
 														placeholder="Write a comment..."
 														rows={3}
 														class="w-full px-3 py-2 text-xs rounded-lg border resize-y"
-														style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+														style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 													></textarea>
 													<div class="flex items-center gap-2">
 														<button
@@ -535,7 +535,7 @@
 														<button
 															onclick={cancelInlineComment}
 															class="px-3 py-1.5 text-xs rounded-lg border"
-															style="border-color: var(--color-border); color: var(--color-text-dim);"
+															style="border-color: var(--glass-border); color: var(--color-text-dim);"
 														>Cancel</button>
 													</div>
 												</div>

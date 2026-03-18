@@ -19,7 +19,7 @@
 <div class="card overflow-hidden content-reveal">
 	<div
 		class="flex items-center justify-between px-4 py-2.5 glass-subtle"
-		style="border-bottom: 1px solid var(--color-border);"
+		style="border-bottom: 1px solid var(--glass-border);"
 	>
 		<span class="text-xs font-medium" style="color: var(--color-text-dim);">
 			<span style="color: var(--color-primary);">{sorted.filter(e => e.type === 'tree').length}</span> directories,

@@ -56,7 +56,7 @@
 	<div class="flex items-center gap-3 flex-wrap">
 		<div class="flex flex-col gap-1">
 			<label class="text-xs font-medium" style="color: var(--color-text-dim);">Base</label>
-			<select bind:value={baseBranch} class="px-3 py-1.5 text-sm rounded-lg border" style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);">
+			<select bind:value={baseBranch} class="px-3 py-1.5 text-sm rounded-lg border" style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);">
 				{#each branches as b}
 					<option value={b.name}>{b.name}</option>
 				{/each}
@@ -65,7 +65,7 @@
 		<span class="mt-4" style="color: var(--color-text-dim);">←</span>
 		<div class="flex flex-col gap-1">
 			<label class="text-xs font-medium" style="color: var(--color-text-dim);">Compare</label>
-			<select bind:value={headBranch} class="px-3 py-1.5 text-sm rounded-lg border" style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);">
+			<select bind:value={headBranch} class="px-3 py-1.5 text-sm rounded-lg border" style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);">
 				<option value="">Select branch</option>
 				{#each branches as b}
 					<option value={b.name}>{b.name}</option>
@@ -80,14 +80,14 @@
 			bind:value={title}
 			placeholder="Pull request title"
 			class="w-full px-4 py-2.5 text-sm rounded-lg border"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		/>
 		<textarea
 			bind:value={body}
 			placeholder="Description (optional)"
 			rows={8}
 			class="w-full px-4 py-2.5 text-sm rounded-lg border resize-y"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		></textarea>
 		{#if error}
 			<p class="text-sm" style="color: var(--color-error);">{error}</p>

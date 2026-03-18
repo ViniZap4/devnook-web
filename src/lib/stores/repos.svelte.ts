@@ -19,7 +19,7 @@ export const reposStore = {
 		}
 	},
 
-	async create(data: { name: string; description: string; is_private: boolean }) {
+	async create(data: { name: string; description: string; is_private: boolean; default_branch?: string; auto_init?: boolean; gitignore_template?: string; license?: string }) {
 		const res = await api.create(data);
 		await this.load();
 		return res;

@@ -10,11 +10,11 @@
 
 <button
 	class="flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-xs transition-all"
-	style="border-color: var(--color-border); color: var(--color-text-dim);"
+	style="border-color: var(--glass-border); color: var(--color-text-dim);"
 	type="button"
 	onclick={toggle}
 	onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-	onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+	onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; }}
 	aria-label="Toggle theme"
 >
 	{#if isDark}

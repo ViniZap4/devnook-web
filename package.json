@@ -23,6 +23,7 @@
   "dependencies": {
     "@threlte/core": "^8.4.1",
     "@threlte/extras": "^9.8.1",
+    "highlight.js": "^11.11.1",
     "marked": "^17.0.4",
     "three": "^0.183.2"
   }

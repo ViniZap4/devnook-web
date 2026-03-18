@@ -54,13 +54,14 @@
 
 <style>
 	.modal-overlay {
-		background: rgba(0, 0, 0, 0.6);
-		backdrop-filter: blur(8px);
+		background-color: rgba(0, 0, 0, 0.6);
+		backdrop-filter: blur(4px);
+		-webkit-backdrop-filter: blur(4px);
 		animation: modal-overlay-in 0.25s ease both;
 	}
 
 	.modal-content-enter {
-		animation: modal-content-in 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+		animation: modal-content-in 0.25s ease both;
 	}
 
 	.modal-card {
@@ -68,11 +69,12 @@
 		max-width: 26rem;
 		margin: 1rem;
 		padding: 1.5rem;
-		border-radius: 1.25rem;
-		background-color: var(--color-background);
-		border: 1px solid var(--color-surface-hover);
-		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--color-surface) inset;
-		backdrop-filter: blur(32px) saturate(1.4);
+		border-radius: 1rem;
+		background: var(--glass-bg);
+		backdrop-filter: blur(24px);
+		-webkit-backdrop-filter: blur(24px);
+		border: 1px solid var(--glass-border);
+		box-shadow: 0 24px 64px rgba(0, 0, 0, 0.5), 0 0 0 1px var(--glass-border);
 	}
 	.close-btn {
 		display: flex;
@@ -87,7 +89,7 @@
 	}
 	.close-btn:hover {
 		opacity: 1;
-		background-color: var(--color-surface-hover);
+		background-color: rgba(255, 255, 255, 0.06);
 		transform: rotate(90deg);
 	}
 </style>

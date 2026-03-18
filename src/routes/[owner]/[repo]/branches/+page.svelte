@@ -80,11 +80,11 @@
 
 <div class="flex flex-col gap-5">
 	<div class="flex items-center justify-between gap-4">
-		<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
+		<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--glass-border);">
 			<a
 				href="/{owner}/{repoName}/branches"
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-				style="background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);"
+				style="background-color: var(--color-primary-subtle); color: var(--color-primary);"
 			>
 				<span class="flex items-center gap-2">
 					<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
@@ -124,14 +124,14 @@
 					bind:value={newBranchName}
 					placeholder="Branch name"
 					class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg border"
-					style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+					style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 				/>
 				<div class="flex items-center gap-2 text-xs" style="color: var(--color-text-dim);">
 					from
 					<select
 						bind:value={fromBranch}
 						class="px-2 py-1.5 text-sm rounded-lg border"
-						style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+						style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 					>
 						{#each branches as b}
 							<option value={b.name}>{b.name}</option>
@@ -152,8 +152,8 @@
 				<button
 					type="button"
 					onclick={() => { showCreate = false; error = ''; }}
-					class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					class="px-3 py-1.5 text-xs font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				>Cancel</button>
 			</div>
 		</form>
@@ -162,21 +162,21 @@
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading branches...</div>
 	{:else if branches.length === 0}
-		<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+		<div class="card p-16 text-center">
 			<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" />
 			</svg>
 			<p class="text-sm" style="color: var(--color-text-dim);">No branches found.</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
+		<div class="card overflow-hidden divide-y" style="divide-color: var(--glass-border);">
 			{#each branches as branch}
-				<div class="flex items-center justify-between px-5 py-3.5 hover:bg-[var(--color-surface)] transition-colors">
+				<div class="flex items-center justify-between px-5 py-3.5 hover:bg-[rgba(255,255,255,0.03)] transition-colors">
 					<div class="flex items-center gap-3">
 						<svg class="w-4 h-4 shrink-0" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
 						<span class="text-sm font-medium" style="color: var(--color-text);">{branch.name}</span>
 						{#if branch.is_default}
-							<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: color-mix(in srgb, var(--color-success) 12%, transparent); color: var(--color-success);">default</span>
+							<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: var(--color-success-subtle); color: var(--color-success);">default</span>
 						{/if}
 					</div>
 					{#if isOwner && !branch.is_default}

@@ -161,9 +161,10 @@
 		font-size: 0.75rem;
 		font-family: 'JetBrains Mono', monospace;
 		font-weight: 500;
-		backdrop-filter: blur(20px) saturate(1.5);
-		background: color-mix(in srgb, var(--color-surface) 80%, transparent);
-		border: 1px solid color-mix(in srgb, var(--color-border) 50%, transparent);
+		background: var(--glass-bg);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid var(--glass-border);
 		box-shadow: 0 4px 16px rgba(0, 0, 0, 0.2);
 		color: var(--color-text);
 		display: flex;
@@ -179,7 +180,7 @@
 		font-size: 0.625rem;
 		font-weight: 700;
 		letter-spacing: 0.05em;
-		background: color-mix(in srgb, var(--color-primary) 15%, transparent);
+		background: var(--color-primary-subtle);
 		color: var(--color-primary);
 	}
 

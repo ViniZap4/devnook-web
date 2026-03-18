@@ -84,10 +84,10 @@
 	}
 </script>
 
-<PageShell maxWidth="max-w-5xl">
+<PageShell width="default">
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
-		<div class="flex items-center justify-between pb-5 border-b" style="border-color: var(--color-border);">
+		<div class="flex items-center justify-between pb-5 border-b" style="border-color: var(--glass-border);">
 			<div>
 				<h1 class="text-xl font-bold" style="color: var(--color-text);">{orgName} — Settings</h1>
 				<p class="text-sm mt-1" style="color: var(--color-text-dim);">Manage organization members and settings</p>
@@ -107,10 +107,10 @@
 						{@const active = activeSection === section.id}
 						<button
 							class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
-							style="color: {active ? (section.id === 'danger' ? 'var(--color-error)' : 'var(--color-primary)') : 'var(--color-text-dim)'}; background: {active ? (section.id === 'danger' ? 'color-mix(in srgb, var(--color-error) 10%, transparent)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)') : 'transparent'}; font-weight: {active ? '600' : '400'};"
+							style="color: {active ? (section.id === 'danger' ? 'var(--color-error)' : 'var(--color-primary)') : 'var(--color-text-dim)'}; background: {active ? (section.id === 'danger' ? 'var(--color-error-subtle)' : 'var(--color-primary-subtle)') : 'transparent'}; font-weight: {active ? '600' : '400'};"
 							onclick={() => { activeSection = section.id; }}
-							onmouseenter={(e) => { if (!active) e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
-							onmouseleave={(e) => { if (!active) e.currentTarget.style.background = active ? (section.id === 'danger' ? 'color-mix(in srgb, var(--color-error) 10%, transparent)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)') : 'transparent'; }}
+							onmouseenter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
+							onmouseleave={(e) => { if (!active) e.currentTarget.style.background = active ? (section.id === 'danger' ? 'var(--color-error-subtle)' : 'var(--color-primary-subtle)') : 'transparent'; }}
 						>
 							{#if section.icon === 'settings'}
 								<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><path stroke-linecap="round" stroke-linejoin="round" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /></svg>
@@ -137,7 +137,7 @@
 										type="text"
 										bind:value={displayName}
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 								<div>
@@ -146,7 +146,7 @@
 										bind:value={description}
 										rows={3}
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)] resize-y"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									></textarea>
 								</div>
 								<div class="flex items-center gap-3">
@@ -180,7 +180,7 @@
 							<OrgMemberList {members} onRemove={removeMember} />
 						</div>
 					{:else if activeSection === 'danger'}
-						<div class="card p-6 animate-fade-up" style="border-color: color-mix(in srgb, var(--color-error) 30%, var(--color-border));">
+						<div class="card p-6 animate-fade-up" style="border-color: var(--color-error-subtle);">
 							<h2 class="text-sm font-semibold mb-1" style="color: var(--color-error);">Danger Zone</h2>
 							<p class="text-xs mb-6" style="color: var(--color-text-dim);">
 								Deleting an organization will permanently remove all its repositories and members.
@@ -191,12 +191,13 @@
 									bind:value={confirmDelete}
 									placeholder="Type organization name to confirm"
 									class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-error)]"
-									style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+									style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 								/>
 								<button
 									onclick={deleteOrg}
 									disabled={confirmDelete !== orgName || deleting}
-									class="px-4 py-2.5 text-sm font-medium rounded-xl bg-red-600 text-white hover:bg-red-700 transition-colors disabled:opacity-20 disabled:cursor-not-allowed"
+									class="px-4 py-2.5 text-sm font-medium rounded-xl text-white transition-colors disabled:opacity-20 disabled:cursor-not-allowed hover:brightness-110"
+								style="background: var(--color-error);"
 								>
 									{deleting ? 'Deleting...' : 'Delete this organization'}
 								</button>

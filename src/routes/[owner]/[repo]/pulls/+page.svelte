@@ -37,12 +37,12 @@
 
 <div class="flex flex-col gap-4">
 	<div class="flex items-center justify-between flex-wrap gap-3">
-		<div class="flex items-center gap-1 rounded-xl border p-1" style="border-color: var(--color-border);">
+		<div class="flex items-center gap-1 rounded-xl border p-1" style="border-color: var(--glass-border);">
 			<button
 				class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
 				style="
 					color: {stateFilter === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};
-					background: {stateFilter === 'open' ? 'color-mix(in srgb, var(--color-success) 8%, transparent)' : 'transparent'};
+					background: {stateFilter === 'open' ? 'var(--color-success-subtle)' : 'transparent'};
 					font-weight: {stateFilter === 'open' ? '600' : '400'};
 				"
 				onclick={() => switchState('open')}
@@ -54,7 +54,7 @@
 				class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-colors"
 				style="
 					color: {stateFilter === 'closed' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-					background: {stateFilter === 'closed' ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};
+					background: {stateFilter === 'closed' ? 'var(--color-primary-subtle)' : 'transparent'};
 					font-weight: {stateFilter === 'closed' ? '600' : '400'};
 				"
 				onclick={() => switchState('closed')}
@@ -76,7 +76,7 @@
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading pull requests...</div>
 	{:else if prs.length === 0}
-		<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+		<div class="card p-16 text-center">
 			<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4" />
 			</svg>
@@ -90,12 +90,12 @@
 			</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
+		<div class="card overflow-hidden">
 			{#each prs as pr, i}
 				<a
 					href="/{owner}/{repo}/pulls/{pr.number}"
-					class="flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}"
-					style="border-color: var(--color-border);"
+					class="flex items-start gap-3 px-4 py-3.5 transition-colors hover:bg-[rgba(255,255,255,0.03)] {i > 0 ? 'border-t' : ''}"
+					style="border-color: var(--glass-border);"
 				>
 					<div class="mt-0.5 shrink-0">
 						{#if pr.state === 'merged'}
@@ -111,9 +111,9 @@
 						<div class="flex items-center gap-2 mt-1 flex-wrap">
 							<span class="text-xs" style="color: var(--color-text-dim);">#{pr.number}</span>
 							<span class="text-xs" style="color: var(--color-text-dim);">by {pr.author}</span>
-							<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background-color: var(--color-surface-hover); color: var(--color-text-dim);">{pr.head_branch}</span>
+							<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background-color: rgba(255, 255, 255, 0.06); color: var(--color-text-dim);">{pr.head_branch}</span>
 							<svg class="w-3 h-3" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M14 5l7 7m0 0l-7 7m7-7H3" /></svg>
-							<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background-color: var(--color-surface-hover); color: var(--color-text-dim);">{pr.base_branch}</span>
+							<span class="text-xs px-1.5 py-0.5 rounded font-mono" style="background-color: rgba(255, 255, 255, 0.06); color: var(--color-text-dim);">{pr.base_branch}</span>
 							{#if pr.created_at}
 								<span class="text-xs" style="color: var(--color-text-dim); opacity: 0.6;"><RelativeTime date={pr.created_at} /></span>
 							{/if}

@@ -60,7 +60,7 @@
 			<a href="/{owner}/{repoName}" class="hover:underline" style="color: var(--color-primary);">{owner}/{repoName}</a>
 			<span style="color: var(--color-text-dim);">/</span>
 			<span style="color: var(--color-text);" class="font-medium">{filePath}</span>
-			<span class="px-2 py-0.5 rounded text-xs" style="background: var(--color-surface); color: var(--color-text-dim);">editing</span>
+			<span class="px-2 py-0.5 rounded text-xs" style="background: rgba(255, 255, 255, 0.03); color: var(--color-text-dim);">editing</span>
 		</div>
 
 		<textarea
@@ -68,7 +68,7 @@
 			rows={24}
 			spellcheck={false}
 			class="w-full px-4 py-3 text-sm font-mono rounded-lg border resize-y"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text); tab-size: 4;"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text); tab-size: 4;"
 		></textarea>
 
 		<div class="card p-4 flex flex-col gap-3">
@@ -78,11 +78,11 @@
 				bind:value={message}
 				placeholder="Update {fileName}"
 				class="w-full px-3 py-2 text-sm rounded-lg border"
-				style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+				style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 			/>
 			<div class="flex items-center gap-2 text-xs" style="color: var(--color-text-dim);">
 				<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 3v12m0 0a3 3 0 103 3V9a3 3 0 10-3-3m12 0a3 3 0 10-3 3v6" /></svg>
-				Commit to <code class="px-1 py-0.5 rounded" style="background: var(--color-surface);">{branch}</code>
+				Commit to <code class="px-1 py-0.5 rounded" style="background: rgba(255, 255, 255, 0.03);">{branch}</code>
 			</div>
 		</div>
 
@@ -99,8 +99,8 @@
 			>{saving ? 'Committing...' : 'Commit changes'}</button>
 			<a
 				href="/{owner}/{repoName}/blob/{ref}/{filePath}"
-				class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[var(--color-surface)]"
-				style="border-color: var(--color-border); color: var(--color-text);"
+				class="px-4 py-2 text-sm font-medium rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.03)]"
+				style="border-color: var(--glass-border); color: var(--color-text);"
 			>Cancel</a>
 		</div>
 	</form>

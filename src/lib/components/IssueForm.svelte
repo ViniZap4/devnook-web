@@ -25,7 +25,7 @@
 			type="text"
 			bind:value={title}
 			placeholder="Issue title"
-			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
+			class="w-full px-3 py-2 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 focus:border-[var(--color-primary)]"
 			required
 		/>
 	</div>
@@ -39,7 +39,7 @@
 			bind:value={body}
 			placeholder="Describe the issue..."
 			rows="8"
-			class="w-full px-4 py-3 text-sm rounded-lg border border-[var(--color-border)] bg-[var(--color-surface)] text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--color-primary)]"
+			class="w-full px-4 py-3 text-sm rounded-lg border border-[var(--glass-border)] bg-[#0f1629] text-[var(--color-text)] placeholder:opacity-30 resize-y focus:border-[var(--color-primary)]"
 		></textarea>
 	</div>
 

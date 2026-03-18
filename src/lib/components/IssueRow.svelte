@@ -10,10 +10,10 @@
 	href="/{owner}/{repo}/issues/{issue.number}"
 	class="flex items-start gap-3 px-5 py-3.5 hover-slide group transition-all duration-200"
 	style="background: transparent;"
-	onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 4%, transparent)'; }}
+	onmouseenter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
 	onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 >
-	<div class="mt-0.5 shrink-0 transition-transform duration-300 group-hover:scale-110">
+	<div class="mt-0.5 shrink-0 transition-transform duration-300 group-hover:scale-105">
 		<IssueIcon
 			size={16}
 			state={issue.state}
@@ -28,7 +28,7 @@
 			{#each issue.labels as label}
 				<span
 					class="inline-flex ml-1.5 text-[0.625rem] px-2 py-0.5 rounded-full align-middle font-medium transition-all duration-200 hover:scale-105"
-					style="background-color: {label.color}18; color: {label.color}; border: 1px solid {label.color}30;"
+					style="background-color: color-mix(in srgb, {label.color} 10%, var(--color-surface)); color: {label.color}; border: 1px solid color-mix(in srgb, {label.color} 19%, var(--color-surface));"
 				>{label.name}</span>
 			{/each}
 		{/if}

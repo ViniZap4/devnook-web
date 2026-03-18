@@ -117,8 +117,8 @@
 						type="text"
 						bind:value={newTitle}
 						placeholder="Page title..."
-						class="flex-1 px-3 py-2 text-sm rounded-lg border bg-transparent"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="flex-1 px-3 py-2.5 text-sm rounded-xl border bg-[#0f1629] transition-all duration-200 focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 						onkeydown={(e) => { if (e.key === 'Enter') createPage(); }}
 					/>
 					<button
@@ -141,10 +141,8 @@
 				{#snippet pageItem(p: DocPage, depth: number)}
 					<a
 						href="/docs/{spaceSlug}/{p.slug}"
-						class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group"
+						class="flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group hover:bg-[rgba(255,255,255,0.03)]"
 						style="padding-left: {16 + depth * 20}px;"
-						onmouseenter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
-						onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 					>
 						<span class="text-base shrink-0">{p.icon || '📄'}</span>
 						<div class="flex-1 min-w-0">
@@ -155,7 +153,7 @@
 							</div>
 						</div>
 						{#if !p.is_published}
-							<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full shrink-0" style="background: color-mix(in srgb, var(--color-warning) 6%, transparent); color: var(--color-warning);">Draft</span>
+							<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full shrink-0" style="background: var(--color-warning-subtle); color: var(--color-warning);">Draft</span>
 						{/if}
 					</a>
 					{#if p.children && p.children.length > 0}

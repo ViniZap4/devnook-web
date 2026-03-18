@@ -109,7 +109,7 @@
 	const renderedContent = $derived(docPage?.content ? marked(docPage.content) : '');
 </script>
 
-<PageShell maxWidth="max-w-4xl">
+<PageShell width="narrow">
 	{#if loading}
 		<div class="py-16 flex flex-col items-center gap-3">
 			<Spinner size="md" />
@@ -129,9 +129,9 @@
 				<!-- Editor -->
 				<div class="card overflow-hidden">
 					<!-- Editor toolbar -->
-					<div class="flex items-center justify-between px-4 py-2 border-b" style="border-color: var(--color-border); background: var(--color-surface);">
+					<div class="flex items-center justify-between px-4 py-2 border-b" style="border-color: var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<div class="flex items-center gap-3">
-							<span class="text-[0.625rem] px-2 py-0.5 rounded font-mono font-bold" style="background: {vimMode === 'insert' ? 'color-mix(in srgb, var(--color-success) 12%, transparent)' : 'color-mix(in srgb, var(--color-primary) 12%, transparent)'}; color: {vimMode === 'insert' ? 'var(--color-success)' : 'var(--color-primary)'};">
+							<span class="text-[0.625rem] px-2 py-0.5 rounded font-mono font-bold" style="background: {vimMode === 'insert' ? 'var(--color-success-subtle)' : 'var(--color-primary-subtle)'}; color: {vimMode === 'insert' ? 'var(--color-success)' : 'var(--color-primary)'};">
 								{vimMode === 'insert' ? 'INSERT' : 'NORMAL'}
 							</span>
 							<span class="text-[0.625rem]" style="color: var(--color-text-dim);">
@@ -153,8 +153,8 @@
 					<input
 						type="text"
 						bind:value={editTitle}
-						class="w-full px-6 py-4 text-2xl font-bold bg-transparent border-b"
-						style="border-color: var(--color-separator); color: var(--color-text);"
+						class="w-full px-6 py-4 text-2xl font-bold bg-[#0f1629] border-b rounded-xl transition-all duration-200 focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 						placeholder="Page title..."
 					/>
 
@@ -162,7 +162,7 @@
 					<textarea
 						bind:value={editContent}
 						onkeydown={handleEditorKeydown}
-						class="w-full px-6 py-4 text-sm font-mono bg-transparent resize-none leading-relaxed"
+						class="w-full px-6 py-4 text-sm font-mono bg-[#0a0e18] resize-none leading-relaxed"
 						style="color: var(--color-text); min-height: 500px; {vimMode === 'normal' ? 'caret-color: var(--color-primary); caret-shape: block;' : ''}"
 						placeholder="Write in Markdown... (vim keybindings supported)"
 						spellcheck={vimMode === 'insert'}
@@ -171,7 +171,7 @@
 			{:else}
 				<!-- View mode -->
 				<div class="card overflow-hidden">
-					<div class="flex items-center justify-between px-6 py-3 border-b" style="border-color: var(--color-border); background: var(--color-surface);">
+					<div class="flex items-center justify-between px-6 py-3 border-b" style="border-color: var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<div class="flex items-center gap-3 text-xs" style="color: var(--color-text-dim);">
 							<span>by {docPage.author_username}</span>
 							<span style="opacity: 0.3;">&middot;</span>
@@ -183,7 +183,7 @@
 						</div>
 						<button
 							class="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium rounded-lg transition-all hover:scale-[1.02]"
-							style="color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 6%, transparent);"
+							style="color: var(--color-primary); background: var(--color-primary-subtle);"
 							onclick={startEditing}
 						>
 							<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" /></svg>
@@ -217,15 +217,15 @@
 	.doc-content :global(h3) { font-size: 1.125rem; font-weight: 600; margin-top: 1.5rem; margin-bottom: 0.5rem; color: var(--color-text); }
 	.doc-content :global(p) { margin-bottom: 1rem; line-height: 1.75; color: var(--color-text); }
 	.doc-content :global(a) { color: var(--color-primary); text-decoration: underline; }
-	.doc-content :global(code) { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; padding: 2px 6px; border-radius: 4px; background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text); }
-	.doc-content :global(pre) { padding: 1rem; border-radius: 0.75rem; background: var(--color-surface); border: 1px solid var(--color-border); overflow-x: auto; margin-bottom: 1rem; }
+	.doc-content :global(code) { font-family: 'JetBrains Mono', monospace; font-size: 0.85em; padding: 2px 6px; border-radius: 4px; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); color: var(--color-text); }
+	.doc-content :global(pre) { padding: 1rem; border-radius: 0.75rem; background: rgba(255, 255, 255, 0.03); border: 1px solid var(--glass-border); overflow-x: auto; margin-bottom: 1rem; }
 	.doc-content :global(pre code) { padding: 0; border: none; background: transparent; }
 	.doc-content :global(ul), .doc-content :global(ol) { padding-left: 1.5rem; margin-bottom: 1rem; color: var(--color-text); }
 	.doc-content :global(li) { margin-bottom: 0.25rem; }
 	.doc-content :global(blockquote) { border-left: 3px solid var(--color-primary); padding-left: 1rem; margin-bottom: 1rem; color: var(--color-text-dim); font-style: italic; }
-	.doc-content :global(hr) { border: none; border-top: 1px solid var(--color-separator); margin: 2rem 0; }
+	.doc-content :global(hr) { border: none; border-top: 1px solid var(--glass-border); margin: 2rem 0; }
 	.doc-content :global(table) { width: 100%; border-collapse: collapse; margin-bottom: 1rem; }
-	.doc-content :global(th), .doc-content :global(td) { padding: 0.5rem 0.75rem; border: 1px solid var(--color-border); text-align: left; font-size: 0.875rem; }
-	.doc-content :global(th) { background: var(--color-surface); font-weight: 600; }
+	.doc-content :global(th), .doc-content :global(td) { padding: 0.5rem 0.75rem; border: 1px solid var(--glass-border); text-align: left; font-size: 0.875rem; }
+	.doc-content :global(th) { background: rgba(255, 255, 255, 0.03); font-weight: 600; }
 	.doc-content :global(img) { max-width: 100%; border-radius: 0.5rem; }
 </style>

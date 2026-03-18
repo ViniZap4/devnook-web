@@ -5,8 +5,8 @@
 	let { name, content }: { name: string; content: string } = $props();
 </script>
 
-<div class="rounded-lg border border-[var(--color-border)] overflow-hidden">
-	<div class="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--color-border)] bg-[var(--color-surface)]">
+<div class="rounded-lg border border-[var(--glass-border)] overflow-hidden">
+	<div class="flex items-center gap-2 px-4 py-2.5 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.03)]">
 		<FileIcon size={14} />
 		<span class="text-sm text-[var(--color-text)] font-medium">{name}</span>
 	</div>

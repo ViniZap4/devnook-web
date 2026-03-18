@@ -46,7 +46,7 @@
 	<form onsubmit={handleSubmit} class="flex flex-col gap-4">
 		<div>
 			<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Tag</label>
-			<select bind:value={tagName} class="w-full px-3 py-2 text-sm rounded-lg border" style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);">
+			<select bind:value={tagName} class="w-full px-3 py-2 text-sm rounded-lg border" style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);">
 				<option value="">Select a tag</option>
 				{#each tags as tag}
 					<option value={tag.name}>{tag.name}</option>
@@ -58,14 +58,14 @@
 			bind:value={title}
 			placeholder="Release title"
 			class="w-full px-4 py-2.5 text-sm rounded-lg border"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		/>
 		<textarea
 			bind:value={body}
 			placeholder="Describe this release..."
 			rows={8}
 			class="w-full px-4 py-2.5 text-sm rounded-lg border resize-y"
-			style="border-color: var(--color-border); background-color: var(--color-surface); color: var(--color-text);"
+			style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
 		></textarea>
 		<div class="flex items-center gap-4">
 			<label class="flex items-center gap-2 text-sm" style="color: var(--color-text);">

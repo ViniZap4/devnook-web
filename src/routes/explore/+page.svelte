@@ -7,23 +7,65 @@
 	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
+	import Avatar from '$lib/components/Avatar.svelte';
 
 	let repos = $state<Repository[]>([]);
 	let loading = $state(true);
 	let search = $state('');
 	let sort = $state('updated');
+	let language = $state('');
 	let currentPage = $state(1);
 	let totalPages = $state(1);
 	let totalCount = $state(0);
-	let visible = $state(false);
-
 	let debounceTimer: ReturnType<typeof setTimeout>;
+
+	const langColors: Record<string, string> = {
+		Go: '#00add8',
+		JavaScript: '#f1e05a',
+		TypeScript: '#3178c6',
+		Python: '#3572a5',
+		Rust: '#dea584',
+		Java: '#b07219',
+		Ruby: '#701516',
+		Swift: '#f05138',
+		'C++': '#f34b7d',
+		Other: '#8b8b8b'
+	};
+
+	const languages = ['Go', 'JavaScript', 'TypeScript', 'Python', 'Rust', 'Java', 'Ruby', 'Swift', 'C++', 'Other'];
+
+	type CategoryTab = {
+		id: string;
+		label: string;
+		sort: string;
+	};
+
+	const categoryTabs: CategoryTab[] = [
+		{ id: 'all', label: 'All', sort: 'updated' },
+		{ id: 'trending', label: 'Trending', sort: 'stars' },
+		{ id: 'most-starred', label: 'Most Starred', sort: 'stars' },
+		{ id: 'recently-created', label: 'Recently Created', sort: 'created' },
+		{ id: 'recently-updated', label: 'Recently Updated', sort: 'updated' }
+	];
+
+	let activeTab = $state('all');
+
+	const uniqueOwners = $derived(new Set(repos.map((r) => r.owner)).size);
+
+	function getLangColor(lang?: string): string {
+		if (!lang) return '#8b8b8b';
+		return langColors[lang] || '#8b8b8b';
+	}
 
 	async function loadRepos() {
 		loading = true;
-		visible = false;
 		try {
-			const result = await explore.repos({ page: currentPage, q: search || undefined, sort });
+			const result = await explore.repos({
+				page: currentPage,
+				q: search || undefined,
+				sort,
+				language: language || undefined
+			});
 			repos = result.repos;
 			totalPages = result.total_pages;
 			totalCount = result.total_count;
@@ -31,7 +73,6 @@
 			repos = [];
 		} finally {
 			loading = false;
-			requestAnimationFrame(() => { visible = true; });
 		}
 	}
 
@@ -43,8 +84,19 @@
 		}, 300);
 	}
 
-	function changeSort(s: string) {
-		sort = s;
+	function selectTab(tab: CategoryTab) {
+		activeTab = tab.id;
+		sort = tab.sort;
+		currentPage = 1;
+		loadRepos();
+	}
+
+	function selectLanguage(lang: string) {
+		if (language === lang) {
+			language = '';
+		} else {
+			language = lang;
+		}
 		currentPage = 1;
 		loadRepos();
 	}
@@ -54,49 +106,109 @@
 
 <PageShell>
 	<div class="flex flex-col gap-6">
-		<!-- Header -->
-		<div class="flex items-center justify-between animate-fade-up">
-			<div>
-				<h1 class="text-2xl font-bold gradient-text">Explore</h1>
-				<p class="text-sm mt-1" style="color: var(--color-text-dim);">Discover public repositories</p>
-			</div>
-			{#if !loading}
-				<span
-					class="text-sm font-medium px-3 py-1.5 rounded-lg transition-all duration-300"
-					style="background-color: var(--color-surface); color: var(--color-text-dim); border: 1px solid var(--color-border);"
-				>
-					{totalCount} {totalCount === 1 ? 'repository' : 'repositories'}
-				</span>
-			{/if}
-		</div>
+		<!-- Hero Section -->
+		<div class="text-center py-8 animate-fade-up">
+			<h1 class="text-3xl sm:text-4xl font-extrabold gradient-text tracking-tight">
+				Explore Repositories
+			</h1>
+			<p class="text-sm mt-3" style="color: var(--color-text-dim);">
+				{#if !loading}
+					Discover {totalCount} public {totalCount === 1 ? 'repository' : 'repositories'} across
+					the platform
+				{:else}
+					Discover public repositories across the platform
+				{/if}
+			</p>
 
-		<!-- Filters -->
-		<div class="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 animate-fade-up stagger-1">
-			<div class="flex-1 relative group">
-				<svg class="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 transition-colors duration-200 group-focus-within:text-[var(--color-primary)]" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+			<!-- Search -->
+			<div class="max-w-2xl mx-auto mt-6 relative group">
+				<svg
+					class="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 transition-colors duration-200 group-focus-within:text-[var(--color-primary)]"
+					style="color: var(--color-text-dim);"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					stroke-width="2"
+				>
 					<circle cx="11" cy="11" r="8" /><path d="m21 21-4.3-4.3" />
 				</svg>
 				<input
 					type="text"
 					bind:value={search}
 					oninput={onSearchInput}
-					placeholder="Search repositories..."
-					class="w-full pl-10 pr-4 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-surface) 70%, transparent); backdrop-filter: blur(12px); color: var(--color-text);"
+					placeholder="Search repositories by name, description, or topic..."
+					class="w-full pl-12 pr-4 py-3.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
+					style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 				/>
 			</div>
-			<div class="flex items-center gap-1 rounded-xl p-1 glass-subtle">
-				{#each [['updated', 'Recent'], ['created', 'Newest'], ['name', 'Name']] as [val, label]}
+		</div>
+
+		<!-- Stats Banner -->
+		{#if !loading}
+			<div
+				class="card flex items-center justify-center gap-3 text-xs py-2.5 px-4 animate-fade-up stagger-1"
+				style="color: var(--color-text-dim);"
+			>
+				<span class="flex items-center gap-1.5">
+					<svg class="w-3.5 h-3.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+					</svg>
+					<strong style="color: var(--color-text);">{totalCount}</strong> total repositories
+				</span>
+				<span style="color: var(--glass-border);">&#183;</span>
+				<span class="flex items-center gap-1.5">
+					<svg class="w-3.5 h-3.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0z" />
+					</svg>
+					<strong style="color: var(--color-text);">{uniqueOwners}</strong> contributors
+				</span>
+			</div>
+		{/if}
+
+		<!-- Category Tabs -->
+		<div class="card p-1 animate-fade-up stagger-2">
+			<div
+				class="flex items-center gap-1 overflow-x-auto"
+				style="scrollbar-width: none;"
+			>
+				{#each categoryTabs as tab}
 					<button
-						class="px-3 py-1.5 text-xs rounded-lg transition-all duration-200"
+						class="px-4 py-2 text-xs rounded-lg transition-all duration-200 whitespace-nowrap"
 						style="
-							color: {sort === val ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-							background: {sort === val ? 'color-mix(in srgb, var(--color-primary) 6%, transparent)' : 'transparent'};
-							font-weight: {sort === val ? '600' : '400'};
+							color: {activeTab === tab.id ? 'var(--color-primary)' : 'var(--color-text-dim)'};
+							background: {activeTab === tab.id ? 'var(--color-primary-subtle)' : 'transparent'};
+							font-weight: {activeTab === tab.id ? '600' : '400'};
 						"
-						onclick={() => changeSort(val)}
+						onclick={() => selectTab(tab)}
 					>
-						{label}
+						{tab.label}
+					</button>
+				{/each}
+			</div>
+		</div>
+
+		<!-- Language Filter -->
+		<div class="card p-3 animate-fade-up stagger-3">
+			<div
+				class="flex items-center gap-2 overflow-x-auto pb-0"
+				style="scrollbar-width: none;"
+			>
+				{#each languages as lang}
+					<button
+						class="flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-full border transition-all duration-200 whitespace-nowrap shrink-0"
+						style="
+							border-color: {language === lang ? 'var(--color-primary)' : 'var(--glass-border)'};
+							background: {language === lang ? 'var(--color-primary)' : 'rgba(255, 255, 255, 0.06)'};
+							color: {language === lang ? '#fff' : 'var(--color-text-dim)'};
+							font-weight: {language === lang ? '600' : '400'};
+						"
+						onclick={() => selectLanguage(lang)}
+					>
+						<span
+							class="w-2 h-2 rounded-full shrink-0"
+							style="background-color: {getLangColor(lang)};"
+						></span>
+						{lang}
 					</button>
 				{/each}
 			</div>
@@ -104,88 +216,169 @@
 
 		<!-- List -->
 		{#if loading}
-			<div class="flex flex-col gap-3">
-				{#each Array(5) as _, i}
-					<div class="rounded-xl border p-5 skeleton-loading" style="border-color: var(--color-border); animation-delay: {i * 100}ms;">
-						<div class="flex flex-col gap-2">
-							<Skeleton width="40%" height="16px" />
-							<Skeleton width="70%" height="12px" />
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
+				{#each Array(6) as _, i}
+					<div class="card p-5 skeleton-loading" style="animation-delay: {i * 80}ms;">
+						<div class="flex flex-col gap-3">
+							<div class="flex items-center gap-3">
+								<Skeleton width="32px" height="32px" rounded="rounded-full" />
+								<div class="flex-1">
+									<Skeleton width="60%" height="14px" />
+									<div class="mt-1.5"><Skeleton width="40%" height="10px" /></div>
+								</div>
+							</div>
+							<Skeleton width="90%" height="12px" />
+							<Skeleton width="50%" height="12px" />
 						</div>
 					</div>
 				{/each}
 			</div>
 		{:else if repos.length === 0}
-			<div class="rounded-xl border p-16 text-center animate-fade-in" style="border-color: var(--color-border);">
-				<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
-					<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+			<div class="card p-16 text-center animate-fade-in">
+				<svg
+					class="w-12 h-12 mx-auto mb-4 opacity-15"
+					style="color: var(--color-text);"
+					fill="none"
+					viewBox="0 0 24 24"
+					stroke="currentColor"
+					stroke-width="1.5"
+				>
+					<path
+						stroke-linecap="round"
+						stroke-linejoin="round"
+						d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z"
+					/>
 				</svg>
 				<p class="text-sm" style="color: var(--color-text-dim);">
-					{search ? 'No repositories match your search.' : 'No public repositories yet.'}
+					{search
+						? 'No repositories match your search.'
+						: language
+							? `No repositories found for ${language}.`
+							: 'No public repositories yet.'}
 				</p>
 			</div>
 		{:else}
-			<div class="rounded-xl border overflow-hidden divide-y animate-fade-up stagger-2" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
+			<div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-2">
 				{#each repos as repo, i}
 					<a
 						href="/{repo.owner}/{repo.name}"
-						class="flex items-start gap-4 px-5 py-4 transition-all duration-200 group"
-						style="
-							opacity: {visible ? 1 : 0};
-							transform: {visible ? 'translateY(0)' : 'translateY(8px)'};
-							transition-delay: {i * 40}ms;
-						"
-						onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface-hover)'; }}
-						onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+						class="card group flex flex-col gap-3 p-5 transition-all duration-200 hover:scale-[1.015] hover:border-[var(--color-primary-subtle)] animate-fade-up"
+						style="animation-delay: {Math.min(i * 50, 400)}ms;"
 					>
-						<div class="shrink-0 mt-1 opacity-40 group-hover:opacity-70 transition-all duration-200 group-hover:scale-110">
-							{#if repo.is_private}
-								<LockIcon size={16} />
-							{:else}
-								<RepoIcon size={16} />
-							{/if}
-						</div>
-						<div class="min-w-0 flex-1">
-							<div class="flex items-center gap-2 flex-wrap">
-								<span class="text-sm" style="color: var(--color-text-dim);">{repo.owner}</span>
-								<span style="color: var(--color-text); opacity: 0.15;">/</span>
-								<span class="text-sm font-bold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
-								{#if repo.is_private}
-									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border border-yellow-500/20 text-yellow-500/60">Private</span>
-								{/if}
-								{#if repo.is_fork}
-									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border" style="border-color: var(--color-border); color: var(--color-text-dim);">Fork</span>
-								{/if}
-							</div>
-							{#if repo.description}
-								<p class="text-sm mt-1.5 line-clamp-2" style="color: var(--color-text-dim);">{repo.description}</p>
-							{/if}
-							{#if repo.topics && repo.topics.length > 0}
-								<div class="flex flex-wrap gap-1.5 mt-2">
-									{#each repo.topics.slice(0, 5) as topic}
-										<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium transition-colors duration-200" style="background-color: color-mix(in srgb, var(--color-primary) 7%, transparent); color: var(--color-primary);">{topic}</span>
-									{/each}
+						<!-- Card Header -->
+						<div class="flex items-center gap-3">
+							<Avatar username={repo.owner} size={32} />
+							<div class="min-w-0 flex-1">
+								<div class="flex items-center gap-2 flex-wrap">
+									<span class="text-xs truncate" style="color: var(--color-text-dim);">
+										{repo.owner}
+									</span>
+									<span style="color: var(--color-text); opacity: 0.15;">/</span>
+									<span
+										class="text-sm font-bold truncate group-hover:underline"
+										style="color: var(--color-primary);"
+									>
+										{repo.name}
+									</span>
 								</div>
-							{/if}
-							<div class="flex items-center gap-4 mt-2.5">
-								{#if repo.stars_count}
-									<span class="flex items-center gap-1 text-xs" style="color: var(--color-text-dim);">
-										<svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
-										{repo.stars_count}
-									</span>
-								{/if}
-								{#if repo.forks_count}
-									<span class="flex items-center gap-1 text-xs" style="color: var(--color-text-dim);">
-										<svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor"><path d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"/></svg>
-										{repo.forks_count}
-									</span>
-								{/if}
-								<span class="text-xs" style="color: var(--color-text-dim); opacity: 0.6;">
-									Updated <RelativeTime date={repo.updated_at} />
-								</span>
-								<span class="text-xs px-1.5 py-0.5 rounded" style="background-color: var(--color-surface-hover); color: var(--color-text-dim);">
-									{repo.default_branch}
-								</span>
+								<div class="flex items-center gap-1.5 mt-0.5">
+									{#if repo.is_private}
+										<span
+											class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium"
+											style="background: var(--color-warning-subtle); border: 1px solid color-mix(in srgb, var(--color-warning) 30%, transparent); color: var(--color-warning);"
+										>
+											Private
+										</span>
+									{/if}
+									{#if repo.is_fork}
+										<span
+											class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium"
+											style="background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); color: var(--color-text-dim);"
+										>
+											Fork
+										</span>
+									{/if}
+								</div>
 							</div>
+							<div class="shrink-0 opacity-30 group-hover:opacity-60 transition-opacity duration-200">
+								{#if repo.is_private}
+									<LockIcon size={16} />
+								{:else}
+									<RepoIcon size={16} />
+								{/if}
+							</div>
+						</div>
+
+						<!-- Description -->
+						{#if repo.description}
+							<p class="text-xs leading-relaxed line-clamp-2" style="color: var(--color-text-dim);">
+								{repo.description}
+							</p>
+						{:else}
+							<p class="text-xs italic" style="color: var(--color-text-dim); opacity: 0.5;">
+								No description
+							</p>
+						{/if}
+
+						<!-- Topics -->
+						{#if repo.topics && repo.topics.length > 0}
+							<div class="flex flex-wrap gap-1.5">
+								{#each repo.topics.slice(0, 4) as topic}
+									<span
+										class="text-[0.625rem] px-2 py-0.5 rounded-full font-medium"
+										style="background-color: var(--color-primary-subtle); color: var(--color-primary);"
+									>
+										{topic}
+									</span>
+								{/each}
+								{#if repo.topics.length > 4}
+									<span
+										class="text-[0.625rem] px-2 py-0.5 rounded-full"
+										style="color: var(--color-text-dim);"
+									>
+										+{repo.topics.length - 4}
+									</span>
+								{/if}
+							</div>
+						{/if}
+
+						<!-- Footer Stats -->
+						<div
+							class="flex items-center gap-3 pt-2 mt-auto border-t text-xs"
+							style="border-color: var(--glass-border); color: var(--color-text-dim);"
+						>
+							{#if repo.language}
+								<span class="flex items-center gap-1.5">
+									<span
+										class="w-2.5 h-2.5 rounded-full shrink-0"
+										style="background-color: {getLangColor(repo.language)};"
+									></span>
+									{repo.language}
+								</span>
+							{/if}
+							{#if repo.stars_count}
+								<span class="flex items-center gap-1">
+									<svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+										<path
+											d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"
+										/>
+									</svg>
+									{repo.stars_count}
+								</span>
+							{/if}
+							{#if repo.forks_count}
+								<span class="flex items-center gap-1">
+									<svg class="w-3.5 h-3.5" viewBox="0 0 16 16" fill="currentColor">
+										<path
+											d="M5 5.372v.878c0 .414.336.75.75.75h4.5a.75.75 0 0 0 .75-.75v-.878a2.25 2.25 0 1 1 1.5 0v.878a2.25 2.25 0 0 1-2.25 2.25h-1.5v2.128a2.251 2.251 0 1 1-1.5 0V8.5h-1.5A2.25 2.25 0 0 1 3.5 6.25v-.878a2.25 2.25 0 1 1 1.5 0ZM5 3.25a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Zm6.75.75a.75.75 0 1 0 0-1.5.75.75 0 0 0 0 1.5Zm-3 8.75a.75.75 0 1 0-1.5 0 .75.75 0 0 0 1.5 0Z"
+										/>
+									</svg>
+									{repo.forks_count}
+								</span>
+							{/if}
+							<span class="ml-auto">
+								<RelativeTime date={repo.updated_at} />
+							</span>
 						</div>
 					</a>
 				{/each}
@@ -195,21 +388,30 @@
 			{#if totalPages > 1}
 				<div class="flex items-center justify-center gap-3 mt-2">
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--color-primary-subtle)] disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 						disabled={currentPage <= 1}
-						onclick={() => { currentPage--; loadRepos(); }}
+						onclick={() => {
+							currentPage--;
+							loadRepos();
+						}}
 					>
 						Previous
 					</button>
-					<span class="text-sm font-medium px-3 py-1 rounded-lg" style="color: var(--color-text-dim); background: var(--color-surface);">
+					<span
+						class="text-sm font-medium px-3 py-1 rounded-lg"
+						style="color: var(--color-text-dim); background: rgba(255,255,255,0.03);"
+					>
 						{currentPage} / {totalPages}
 					</span>
 					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[var(--color-surface)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] disabled:opacity-20 disabled:cursor-not-allowed active:scale-[0.97]"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--color-primary-subtle)] disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 						disabled={currentPage >= totalPages}
-						onclick={() => { currentPage++; loadRepos(); }}
+						onclick={() => {
+							currentPage++;
+							loadRepos();
+						}}
 					>
 						Next
 					</button>

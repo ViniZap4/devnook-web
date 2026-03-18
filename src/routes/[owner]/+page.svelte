@@ -182,7 +182,7 @@
 	{:else if user}
 		<div class="grid grid-cols-1 lg:grid-cols-[280px_1fr] gap-8">
 			<!-- Profile sidebar -->
-			<aside class="flex flex-col gap-5">
+			<aside class="profile-aside">
 				<div class="flex items-center lg:flex-col lg:items-start gap-5">
 					<Avatar username={user.username} size={96} />
 					<div>
@@ -199,7 +199,7 @@
 									{userStatus.message}
 								</span>
 								{#if userStatus.busy}
-									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium" style="background: color-mix(in srgb, var(--color-warning) 15%, transparent); color: var(--color-warning);">Busy</span>
+									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium" style="background: var(--color-warning-subtle); color: var(--color-warning);">Busy</span>
 								{/if}
 							</div>
 						{/if}
@@ -210,7 +210,7 @@
 					<div class="flex items-center gap-2 w-full">
 						<button
 							class="flex-1 flex items-center justify-center gap-1.5 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-200 hover:scale-[1.02] disabled:opacity-50"
-							style="background: {following ? 'var(--color-surface)' : 'var(--color-primary)'}; color: {following ? 'var(--color-text)' : 'white'}; border: 1px solid {following ? 'var(--color-border)' : 'transparent'};"
+							style="background: {following ? 'rgba(255,255,255,0.06)' : 'var(--color-primary)'}; color: {following ? 'var(--color-text)' : 'white'}; border: 1px solid {following ? 'var(--glass-border)' : 'transparent'};"
 							onclick={toggleFollow}
 							disabled={followLoading}
 						>
@@ -225,7 +225,7 @@
 						<a
 							href="/messages?user={user.username}"
 							class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-[1.02]"
-							style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-dim);"
+							style="background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: var(--color-text-dim);"
 						>
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" /></svg>
 						</a>
@@ -233,17 +233,17 @@
 						<div class="relative">
 							<button
 								class="flex items-center justify-center w-10 h-10 rounded-xl transition-all duration-200 hover:scale-[1.02]"
-								style="background: var(--color-surface); border: 1px solid var(--color-border); color: var(--color-text-dim);"
+								style="background: rgba(255,255,255,0.06); border: 1px solid var(--glass-border); color: var(--color-text-dim);"
 								onclick={() => { showMoreMenu = !showMoreMenu; }}
 							>
 								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 5v.01M12 12v.01M12 19v.01" /></svg>
 							</button>
 							{#if showMoreMenu}
-								<div class="absolute right-0 top-12 w-48 rounded-xl border overflow-hidden shadow-lg z-20" style="background: var(--color-surface); border-color: var(--color-border);">
+								<div class="absolute right-0 top-12 w-48 rounded-xl border overflow-hidden shadow-lg z-20" style="background: var(--glass-bg); border-color: var(--glass-border); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 									<button
 										class="w-full flex items-center gap-2.5 px-4 py-2.5 text-sm text-left transition-colors"
 										style="color: {blocked ? 'var(--color-text)' : 'var(--color-error)'};"
-										onmouseenter={(e) => { e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
+										onmouseenter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.03)'; }}
 										onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 										onclick={toggleBlock}
 										disabled={blockLoading}
@@ -304,20 +304,20 @@
 			</aside>
 
 			<!-- Repos -->
-			<div>
-				<div class="flex items-center gap-1 mb-5 pb-4 border-b rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
+			<div class="min-w-0">
+				<div class="flex items-center gap-1 mb-5 rounded-xl p-1 self-start overflow-x-auto scrollbar-none" style="background: var(--glass-bg); border: 1px solid var(--glass-border); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);">
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'repos' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'repos' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('repos')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
 						Repositories
-						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{repos.length}</span>
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.06);">{repos.length}</span>
 					</button>
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'starred' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'starred' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('starred')}
 					>
 						<svg class="w-4 h-4" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
@@ -326,45 +326,45 @@
 					{#if orgs.length > 0}
 						<button
 							class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-							style="{tab === 'orgs' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+							style="{tab === 'orgs' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 							onclick={() => switchTab('orgs')}
 						>
 							<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" /></svg>
 							Organizations
-							<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{orgs.length}</span>
+							<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.06);">{orgs.length}</span>
 						</button>
 					{/if}
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'followers' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'followers' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('followers')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
 						Followers
-						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{followerCount}</span>
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.06);">{followerCount}</span>
 					</button>
 					<button
 						class="px-4 py-2 text-sm rounded-lg font-medium transition-colors flex items-center gap-2"
-						style="{tab === 'following' ? 'background-color: color-mix(in srgb, var(--color-primary) 6%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+						style="{tab === 'following' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 						onclick={() => switchTab('following')}
 					>
 						<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M18 9v3m0 0v3m0-3h3m-3 0h-3m-2-5a4 4 0 11-8 0 4 4 0 018 0zM3 20a6 6 0 0112 0v1H3v-1z" /></svg>
 						Following
-						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: var(--color-surface);">{followingCount}</span>
+						<span class="text-xs px-1.5 py-0.5 rounded-full" style="background: rgba(255, 255, 255, 0.06);">{followingCount}</span>
 					</button>
 				</div>
 
 				{#if tab === 'followers' || tab === 'following'}
 				{@const people = tab === 'followers' ? followersList : followingList}
 				{#if people.length === 0}
-					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+					<div class="card p-16 text-center">
 						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
 						<p class="text-sm" style="color: var(--color-text-dim);">No {tab} yet.</p>
 					</div>
 				{:else}
-					<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); divide-color: var(--color-border);">
+					<div class="card overflow-hidden divide-y" style="divide-color: var(--glass-border);">
 						{#each people as person}
-							<a href="/{person.username}" class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[var(--color-surface)] group">
+							<a href="/{person.username}" class="flex items-center gap-3 px-5 py-3.5 transition-colors hover:bg-[rgba(255,255,255,0.03)] group">
 								<Avatar username={person.username} size={36} />
 								<div class="flex-1 min-w-0">
 									<span class="text-sm font-semibold group-hover:underline block truncate" style="color: var(--color-text);">{person.full_name || person.username}</span>
@@ -379,15 +379,15 @@
 				{/if}
 			{:else if tab === 'orgs'}
 				{#if orgs.length === 0}
-					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+					<div class="card p-16 text-center">
 						<p class="text-sm" style="color: var(--color-text-dim);">No organizations.</p>
 					</div>
 				{:else}
 					<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
 						{#each orgs as org}
-							<a href="/orgs/{org.name}" class="card p-4 hover:bg-[var(--color-surface)] transition-colors">
+							<a href="/orgs/{org.name}" class="card p-4 hover:bg-[rgba(255,255,255,0.03)] transition-colors">
 								<div class="flex items-center gap-3">
-									<div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style="background: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);">
+									<div class="w-10 h-10 rounded-lg flex items-center justify-center text-sm font-bold" style="background: var(--color-primary-subtle); color: var(--color-primary);">
 										{org.name.charAt(0).toUpperCase()}
 									</div>
 									<div class="min-w-0">
@@ -402,7 +402,7 @@
 					</div>
 				{/if}
 			{:else if displayedRepos.length === 0}
-					<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+					<div class="card p-16 text-center">
 						<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 						</svg>
@@ -411,9 +411,9 @@
 						</p>
 					</div>
 				{:else}
-					<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
+					<div class="card overflow-hidden divide-y" style="divide-color: var(--glass-border);">
 						{#each displayedRepos as repo}
-							<a href="/{repo.owner}/{repo.name}" class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-[var(--color-surface)] group">
+							<a href="/{repo.owner}/{repo.name}" class="flex items-start gap-3 px-5 py-4 transition-colors hover:bg-[rgba(255,255,255,0.03)] group">
 								<div class="shrink-0 mt-0.5 opacity-40 group-hover:opacity-70 transition-opacity">
 									{#if repo.is_private}
 										<LockIcon size={16} />
@@ -425,7 +425,7 @@
 									<div class="flex items-center gap-2">
 										<span class="text-sm font-semibold group-hover:underline" style="color: var(--color-primary);">{repo.name}</span>
 										{#if repo.is_private}
-											<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border border-yellow-500/20 text-yellow-500/60">Private</span>
+											<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full" style="border: 1px solid var(--color-warning-subtle); color: var(--color-warning);">Private</span>
 										{/if}
 									</div>
 									{#if repo.description}
@@ -451,3 +451,24 @@
 		</div>
 	{/if}
 </PageShell>
+
+<style>
+	.profile-aside {
+		display: flex;
+		flex-direction: column;
+		gap: 1.25rem;
+		padding: 1.5rem;
+		border-radius: 16px;
+		background: var(--glass-bg);
+		backdrop-filter: blur(16px);
+		-webkit-backdrop-filter: blur(16px);
+		border: 1px solid var(--glass-border);
+		align-self: start;
+	}
+	.scrollbar-none {
+		scrollbar-width: none;
+	}
+	.scrollbar-none::-webkit-scrollbar {
+		display: none;
+	}
+</style>

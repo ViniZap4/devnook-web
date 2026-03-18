@@ -31,7 +31,7 @@
 </script>
 
 <div class="flex flex-col gap-5">
-	<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--color-border);">
+	<div class="flex items-center gap-1 rounded-xl border p-1 self-start" style="border-color: var(--glass-border);">
 		<a
 			href="/{owner}/{repo}/branches"
 			class="px-4 py-2 text-sm rounded-lg transition-colors"
@@ -45,7 +45,7 @@
 		<a
 			href="/{owner}/{repo}/tags"
 			class="px-4 py-2 text-sm rounded-lg font-medium transition-colors"
-			style="background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);"
+			style="background-color: var(--color-primary-subtle); color: var(--color-primary);"
 		>
 			<span class="flex items-center gap-2">
 				<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" /></svg>
@@ -57,16 +57,16 @@
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading tags...</div>
 	{:else if tags.length === 0}
-		<div class="rounded-xl border p-16 text-center" style="border-color: var(--color-border);">
+		<div class="card p-16 text-center">
 			<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
 			</svg>
 			<p class="text-sm" style="color: var(--color-text-dim);">No tags yet.</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
+		<div class="card overflow-hidden">
 			{#each tags as tag, i}
-				<div class="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}" style="border-color: var(--color-border);">
+				<div class="flex items-center justify-between px-5 py-3.5 transition-colors hover:bg-[rgba(255,255,255,0.03)] {i > 0 ? 'border-t' : ''}" style="border-color: var(--glass-border);">
 					<div class="flex items-center gap-3">
 						<svg class="w-4 h-4 shrink-0" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 							<path stroke-linecap="round" stroke-linejoin="round" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z" />
@@ -79,7 +79,7 @@
 						</div>
 					</div>
 					<div class="flex items-center gap-3 text-xs shrink-0" style="color: var(--color-text-dim);">
-						<code class="px-2 py-0.5 rounded-lg" style="background: var(--color-surface-hover);">{tag.hash?.slice(0, 7)}</code>
+						<code class="px-2 py-0.5 rounded-lg" style="background: rgba(255, 255, 255, 0.06);">{tag.hash?.slice(0, 7)}</code>
 						{#if tag.date}
 							<RelativeTime date={tag.date} />
 						{/if}

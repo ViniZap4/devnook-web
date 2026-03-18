@@ -1,43 +1,15 @@
 <script lang="ts">
-	import FloatingNav from './FloatingNav.svelte';
-	import Footer from './Footer.svelte';
-	import BackgroundEffect from './BackgroundEffect.svelte';
 	import type { Snippet } from 'svelte';
-	import { onMount } from 'svelte';
-	import { browser } from '$app/environment';
+	import AppLayout from './AppLayout.svelte';
 
-	let { children, maxWidth = 'max-w-[1400px]' }: { children: Snippet; maxWidth?: string } = $props();
-
-	let mouseX = $state(0);
-	let mouseY = $state(0);
-	let showSpotlight = $state(false);
-
-	onMount(() => {
-		if (window.matchMedia('(pointer: fine)').matches) {
-			showSpotlight = true;
-		}
-	});
-
-	function handleMouseMove(e: MouseEvent) {
-		mouseX = e.clientX;
-		mouseY = e.clientY;
-	}
+	type ContentWidth = 'narrow' | 'default' | 'wide' | 'full';
+	let { children, rightPanel, width = 'default' as ContentWidth }: {
+		children: Snippet;
+		rightPanel?: Snippet;
+		width?: ContentWidth;
+	} = $props();
 </script>
 
-<!-- svelte-ignore a11y_no_static_element_interactions -->
-<div class="min-h-screen flex flex-col relative" style="background-color: var(--color-background);" onmousemove={handleMouseMove}>
-	<BackgroundEffect {mouseX} {mouseY} />
-
-	{#if showSpotlight && browser}
-		<div class="spotlight" style="transform: translate(calc({mouseX}px - 50%), calc({mouseY}px - 50%));"></div>
-	{/if}
-
-	<div class="relative flex flex-col min-h-screen" style="z-index: 1;">
-		<main class="{maxWidth} mx-auto px-4 sm:px-6 pt-20 pb-8 w-full flex-1">
-			{@render children()}
-		</main>
-		<Footer />
-	</div>
-
-	<FloatingNav />
-</div>
+<AppLayout {width} {rightPanel}>
+	{@render children()}
+</AppLayout>

@@ -26,7 +26,7 @@
 			<a href="/dashboard" class="btn-glow px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-all hover:scale-[1.02] active:scale-[0.98]" style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));">
 				Go to Dashboard
 			</a>
-			<a href="/explore" class="px-5 py-2.5 text-sm font-medium rounded-xl border transition-all hover:bg-[var(--color-surface)] active:scale-[0.98]" style="color: var(--color-text-dim); border-color: var(--color-border);">
+			<a href="/explore" class="px-5 py-2.5 text-sm font-medium rounded-xl border transition-all hover:bg-[rgba(255,255,255,0.03)] active:scale-[0.98]" style="color: var(--color-text-dim); border-color: var(--glass-border);">
 				Explore
 			</a>
 		</div>

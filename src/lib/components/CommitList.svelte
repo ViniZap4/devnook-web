@@ -5,12 +5,24 @@
 	let { commits, owner = '', repo = '' }: { commits: Commit[]; owner?: string; repo?: string } = $props();
 </script>
 
-<div class="rounded-xl border overflow-hidden divide-y" style="border-color: var(--color-border); --tw-divide-opacity: 1; divide-color: var(--color-border);">
-	{#each commits as commit}
-		<CommitRow {commit} {owner} {repo} />
-	{:else}
-		<div class="p-8 text-center text-[var(--color-text)] opacity-40">
-			No commits yet.
-		</div>
-	{/each}
+<div class="card overflow-hidden">
+	<div class="relative">
+		{#if commits.length > 0}
+			<!-- Vertical graph line -->
+			<div
+				class="absolute left-[23px] top-0 bottom-0 w-[2px] z-0"
+				style="background: linear-gradient(to bottom, transparent, var(--color-primary), var(--color-primary), transparent); opacity: 0.3;"
+			></div>
+		{/if}
+
+		{#each commits as commit, i}
+			<div class="relative z-10" class:border-t={i > 0} style={i > 0 ? 'border-color: var(--glass-border);' : ''}>
+				<CommitRow {commit} {owner} {repo} showGraphDot />
+			</div>
+		{:else}
+			<div class="p-8 text-center text-[var(--color-text)] opacity-40">
+				No commits yet.
+			</div>
+		{/each}
+	</div>
 </div>

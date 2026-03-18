@@ -77,13 +77,13 @@
 				{repo.owner}
 			</a>
 			<span class="text-lg opacity-15" style="color: var(--color-text);">/</span>
-			<span class="text-lg font-bold truncate gradient-text">{repo.name}</span>
+			<span class="text-lg truncate" style="color: var(--color-text); font-weight: 700;">{repo.name}</span>
 			<span
 				class="text-[0.625rem] px-2.5 py-0.5 rounded-full shrink-0 transition-all duration-300"
 				style="
-					background: {repo.is_private ? 'color-mix(in srgb, var(--color-warning) 10%, transparent)' : 'color-mix(in srgb, var(--color-success) 8%, transparent)'};
+					background: {repo.is_private ? 'var(--color-warning-subtle)' : 'var(--color-success-subtle)'};
 					color: {repo.is_private ? 'var(--color-warning)' : 'var(--color-text-dim)'};
-					border: 1px solid {repo.is_private ? 'color-mix(in srgb, var(--color-warning) 20%, transparent)' : 'var(--color-border)'};
+					border: 1px solid {repo.is_private ? 'var(--color-warning-subtle)' : 'var(--glass-border)'};
 				"
 			>
 				{repo.is_private ? 'Private' : 'Public'}
@@ -91,7 +91,7 @@
 			{#if repo.is_fork}
 				<span
 					class="text-[0.625rem] px-2.5 py-0.5 rounded-full shrink-0"
-					style="background: color-mix(in srgb, var(--color-info) 8%, transparent); color: var(--color-info); border: 1px solid color-mix(in srgb, var(--color-info) 20%, transparent);"
+					style="background: var(--color-info-subtle); color: var(--color-info); border: 1px solid var(--color-info-subtle);"
 				>Fork</span>
 			{/if}
 		</div>
@@ -136,7 +136,7 @@
 							href={repos.archiveUrl(repo.owner, repo.name, repo.default_branch || 'main', 'zip')}
 							class="flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-all duration-200 hover-slide"
 							style="color: var(--color-text);"
-							onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 8%, transparent)'; }}
+							onmouseenter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
 							onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 						>
 							<svg class="w-3 h-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
@@ -146,7 +146,7 @@
 							href={repos.archiveUrl(repo.owner, repo.name, repo.default_branch || 'main', 'tar.gz')}
 							class="flex items-center gap-2 px-3 py-2 text-xs rounded-lg transition-all duration-200 hover-slide"
 							style="color: var(--color-text);"
-							onmouseenter={(e) => { e.currentTarget.style.background = 'color-mix(in srgb, var(--color-primary) 8%, transparent)'; }}
+							onmouseenter={(e) => { e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
 							onmouseleave={(e) => { e.currentTarget.style.background = 'transparent'; }}
 						>
 							<svg class="w-3 h-3 opacity-40" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10" /></svg>
@@ -174,7 +174,7 @@
 			{#each repo.topics as topic}
 				<span
 					class="text-[0.625rem] px-2.5 py-0.5 rounded-full font-medium transition-all duration-200 hover:scale-105 press-scale cursor-default"
-					style="background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);"
+					style="background: var(--color-primary-subtle); color: var(--color-primary); border: 1px solid var(--color-primary-subtle);"
 				>
 					{topic}
 				</span>

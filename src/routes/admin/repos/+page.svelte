@@ -67,26 +67,27 @@
 			bind:value={search}
 			oninput={handleSearchInput}
 			placeholder="Search repositories..."
-			class="w-full px-4 py-2.5 text-sm rounded-xl border bg-transparent transition-colors focus:border-[var(--color-primary)]"
-			style="border-color: var(--color-border); color: var(--color-text);"
+			class="w-full px-4 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
+			style="border-color: var(--glass-border); color: var(--color-text); background: #0f1629;"
 		/>
 	</div>
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading repositories...</div>
 	{:else if repos.length === 0}
-		<div class="rounded-xl border p-12 text-center" style="border-color: var(--color-border);">
+		<div class="rounded-xl border p-12 text-center" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 			</svg>
 			<p class="text-sm" style="color: var(--color-text-dim);">{search ? 'No repositories match your search.' : 'No repositories found.'}</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
+		<div class="overflow-x-auto -mx-4 sm:mx-0">
+		<div class="rounded-xl border overflow-hidden min-w-[500px] sm:min-w-full" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			{#each repos as repo, i}
 				<div
-					class="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}"
-					style="border-color: var(--color-border);"
+					class="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[rgba(255,255,255,0.03)] {i > 0 ? 'border-t' : ''}"
+					style="border-color: var(--glass-border);"
 				>
 					<div class="shrink-0 opacity-40">
 						{#if repo.is_private}
@@ -101,10 +102,10 @@
 								{repo.owner}/{repo.name}
 							</a>
 							{#if repo.is_private}
-								<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border border-yellow-500/20 text-yellow-500/60">Private</span>
+								<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full" style="border: 1px solid var(--color-warning-subtle); color: var(--color-warning);">Private</span>
 							{/if}
 							{#if repo.is_fork}
-								<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border" style="border-color: var(--color-border); color: var(--color-text-dim);">Fork</span>
+								<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full border" style="border-color: var(--glass-border); color: var(--color-text-dim);">Fork</span>
 							{/if}
 						</div>
 						{#if repo.description}
@@ -122,8 +123,8 @@
 							<RelativeTime date={repo.updated_at} />
 						</span>
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10"
-							style="border-color: var(--color-border); color: var(--color-error);"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
+							style="border-color: var(--glass-border); color: var(--color-error);"
 							onclick={() => deleteRepo(repo.owner, repo.name)}
 						>
 							Delete
@@ -132,19 +133,20 @@
 				</div>
 			{/each}
 		</div>
+		</div>
 
 		{#if totalPages > 1}
 			<div class="flex items-center justify-center gap-3">
 				<button
-					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[var(--color-surface)] disabled:opacity-20"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-20"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 					disabled={currentPage <= 1}
 					onclick={() => { currentPage--; loadRepos(); }}
 				>Previous</button>
 				<span class="text-sm" style="color: var(--color-text-dim);">{currentPage} / {totalPages}</span>
 				<button
-					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[var(--color-surface)] disabled:opacity-20"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-20"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 					disabled={currentPage >= totalPages}
 					onclick={() => { currentPage++; loadRepos(); }}
 				>Next</button>

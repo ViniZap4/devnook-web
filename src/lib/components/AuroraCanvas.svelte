@@ -6,9 +6,10 @@
 	let observer: MutationObserver | null = null;
 
 	const bands = [
-		{ baseY: 0.22, amp: 0.07, freq: 1.5, speed: 0.15, width: 0.18, colorVar: '--color-primary' },
-		{ baseY: 0.35, amp: 0.09, freq: 1.0, speed: 0.10, width: 0.22, colorVar: '--color-accent' },
-		{ baseY: 0.28, amp: 0.05, freq: 2.0, speed: 0.20, width: 0.14, colorVar: '--color-secondary' },
+		{ baseY: 0.18, amp: 0.06, freq: 1.3, speed: 0.08, width: 0.20, colorVar: '--color-primary' },
+		{ baseY: 0.32, amp: 0.08, freq: 0.8, speed: 0.06, width: 0.24, colorVar: '--color-accent' },
+		{ baseY: 0.25, amp: 0.05, freq: 1.8, speed: 0.10, width: 0.16, colorVar: '--color-secondary' },
+		{ baseY: 0.45, amp: 0.05, freq: 1.1, speed: 0.07, width: 0.18, colorVar: '--color-primary' },
 	];
 
 	// Cache colors to avoid getComputedStyle() per frame
@@ -17,7 +18,7 @@
 	function refreshColors() {
 		const style = getComputedStyle(document.documentElement);
 		for (const band of bands) {
-			cachedColors[band.colorVar] = style.getPropertyValue(band.colorVar).trim() || '#6366f1';
+			cachedColors[band.colorVar] = style.getPropertyValue(band.colorVar).trim() || '#8B5CF6';
 		}
 	}
 
@@ -34,13 +35,14 @@
 		ctx.clearRect(0, 0, w, h);
 
 		for (const band of bands) {
-			const color = cachedColors[band.colorVar] || '#6366f1';
+			const color = cachedColors[band.colorVar] || '#8B5CF6';
 			const grad = ctx.createLinearGradient(0, 0, w, 0);
 			grad.addColorStop(0, hexToRgba(color, 0));
-			grad.addColorStop(0.15, hexToRgba(color, 0.06));
-			grad.addColorStop(0.4, hexToRgba(color, 0.12));
-			grad.addColorStop(0.6, hexToRgba(color, 0.12));
-			grad.addColorStop(0.85, hexToRgba(color, 0.06));
+			grad.addColorStop(0.1, hexToRgba(color, 0.10));
+			grad.addColorStop(0.3, hexToRgba(color, 0.22));
+			grad.addColorStop(0.5, hexToRgba(color, 0.26));
+			grad.addColorStop(0.7, hexToRgba(color, 0.22));
+			grad.addColorStop(0.9, hexToRgba(color, 0.10));
 			grad.addColorStop(1, hexToRgba(color, 0));
 
 			ctx.fillStyle = grad;
@@ -111,5 +113,5 @@
 <canvas
 	bind:this={canvas}
 	class="fixed inset-0 pointer-events-none"
-	style="z-index: 0; width: 100vw; height: 100vh; filter: blur(40px);"
+	style="z-index: 0; width: 100vw; height: 100vh; filter: blur(18px);"
 ></canvas>

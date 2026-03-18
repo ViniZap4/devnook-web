@@ -11,7 +11,6 @@
 	let items = $state<Notification[]>([]);
 	let loading = $state(true);
 	let filter = $state<'unread' | 'all'>('unread');
-	let visible = $state(false);
 	let markingAll = $state(false);
 
 	onMount(async () => {
@@ -21,14 +20,12 @@
 
 	async function load() {
 		loading = true;
-		visible = false;
 		try {
 			items = await notifications.list(filter === 'unread' ? true : undefined);
 		} catch {
 			// ignore
 		} finally {
 			loading = false;
-			requestAnimationFrame(() => { visible = true; });
 		}
 	}
 
@@ -67,7 +64,7 @@
 	}
 </script>
 
-<PageShell maxWidth="max-w-4xl">
+<PageShell width="narrow">
 	<div class="flex flex-col gap-6">
 		<div class="flex items-center justify-between animate-fade-up">
 			<div class="flex items-center gap-3">
@@ -81,8 +78,8 @@
 			</div>
 			{#if items.length > 0 && filter === 'unread'}
 				<button
-					class="text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 hover:bg-[var(--color-surface)] active:scale-[0.97]"
-					style="border-color: var(--color-border); color: var(--color-primary);"
+					class="text-xs font-medium px-3 py-1.5 rounded-lg border transition-all duration-200 hover:bg-[rgba(255,255,255,0.03)] active:scale-[0.97]"
+					style="border-color: var(--glass-border); color: var(--color-primary);"
 					onclick={markAllRead}
 					disabled={markingAll}
 				>
@@ -91,15 +88,15 @@
 			{/if}
 		</div>
 
-		<div class="flex items-center gap-1 rounded-xl border p-1 self-start animate-fade-up stagger-1" style="border-color: var(--color-border);">
+		<div class="flex items-center gap-1 rounded-xl border p-1 self-start animate-fade-up stagger-1" style="border-color: var(--glass-border);">
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200"
-				style="{filter === 'unread' ? 'background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{filter === 'unread' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => switchFilter('unread')}
 			>Unread</button>
 			<button
 				class="px-4 py-2 text-sm rounded-lg font-medium transition-all duration-200"
-				style="{filter === 'all' ? 'background-color: color-mix(in srgb, var(--color-primary) 8%, transparent); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
+				style="{filter === 'all' ? 'background-color: var(--color-primary-subtle); color: var(--color-primary);' : 'color: var(--color-text-dim);'}"
 				onclick={() => switchFilter('all')}
 			>All</button>
 		</div>
@@ -110,7 +107,7 @@
 				<span class="text-xs" style="color: var(--color-text-dim);">Loading notifications...</span>
 			</div>
 		{:else if items.length === 0}
-			<div class="rounded-xl border p-16 text-center animate-fade-in" style="border-color: var(--color-border);">
+			<div class="card p-16 text-center animate-fade-in">
 				<svg class="w-12 h-12 mx-auto mb-4 opacity-15" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M14.857 17.082a23.848 23.848 0 005.454-1.31A8.967 8.967 0 0118 9.75v-.7V9A6 6 0 006 9v.75a8.967 8.967 0 01-2.312 6.022c1.733.64 3.56 1.085 5.455 1.31m5.714 0a24.255 24.255 0 01-5.714 0m5.714 0a3 3 0 11-5.714 0" />
 				</svg>
@@ -122,20 +119,13 @@
 				</p>
 			</div>
 		{:else}
-			<div class="rounded-xl border overflow-hidden divide-y animate-fade-up stagger-2" style="border-color: var(--color-border); divide-color: var(--color-border);">
+			<div class="card overflow-hidden divide-y animate-fade-up stagger-2" style="divide-color: var(--glass-border);">
 				{#each items as item, i}
 					{@const meta = typeIcon(item.type)}
 					<div
-						class="flex items-start gap-3 px-5 py-3.5 transition-all duration-200 group"
-						style="
-							opacity: {visible ? 1 : 0};
-							transform: {visible ? 'translateX(0)' : 'translateX(12px)'};
-							transition-delay: {i * 40}ms;
-						"
-						onmouseenter={(e) => { e.currentTarget.style.backgroundColor = 'var(--color-surface)'; }}
-						onmouseleave={(e) => { e.currentTarget.style.backgroundColor = 'transparent'; }}
+						class="flex items-start gap-3 px-5 py-3.5 transition-colors duration-150 group hover:bg-[rgba(255,255,255,0.03)]"
 					>
-						<div class="mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-110">
+						<div class="mt-0.5 shrink-0 transition-transform duration-200 group-hover:scale-105">
 							<svg class="w-4 h-4" style="color: {meta.color};" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								{@html meta.svg}
 							</svg>
@@ -146,7 +136,7 @@
 								<p class="text-xs mt-0.5 leading-relaxed" style="color: var(--color-text-dim);">{item.body}</p>
 							{/if}
 							<div class="flex items-center gap-1.5 mt-0.5">
-								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: color-mix(in srgb, {meta.color} 12%, transparent); color: {meta.color};">{meta.label}</span>
+								<span class="text-[0.625rem] px-1.5 py-0.5 rounded-full font-medium" style="background-color: rgba(255, 255, 255, 0.06); color: {meta.color};">{meta.label}</span>
 								{#if item.created_at}
 									<span class="text-xs" style="color: var(--color-text-dim);"><RelativeTime date={item.created_at} /></span>
 								{/if}
@@ -154,8 +144,8 @@
 						</div>
 						{#if filter === 'unread'}
 							<button
-								class="text-xs shrink-0 px-2.5 py-1 rounded-lg border transition-all duration-200 hover:bg-[var(--color-surface-hover)] hover:border-[color-mix(in_srgb,var(--color-primary)_19%,transparent)] active:scale-[0.95] opacity-0 group-hover:opacity-100"
-								style="border-color: var(--color-border); color: var(--color-text-dim);"
+								class="text-xs shrink-0 px-2.5 py-1 rounded-lg border transition-all duration-200 hover:bg-[rgba(255,255,255,0.06)] hover:border-[var(--color-primary-subtle)] active:scale-[0.95] opacity-0 group-hover:opacity-100"
+								style="border-color: var(--glass-border); color: var(--color-text-dim);"
 								onclick={() => markRead(item.id)}
 							>Done</button>
 						{/if}

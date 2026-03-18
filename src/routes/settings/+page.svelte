@@ -137,7 +137,7 @@
 	}
 </script>
 
-<PageShell maxWidth="max-w-5xl">
+<PageShell width="default">
 	<div class="flex flex-col gap-6">
 		<!-- Header -->
 		<div class="flex items-center justify-between pb-5 border-b animate-fade-up" style="border-color: var(--color-separator);">
@@ -149,15 +149,15 @@
 
 		<div class="grid grid-cols-1 lg:grid-cols-[220px_1fr] gap-8">
 			<!-- Sidebar -->
-			<nav class="flex flex-col gap-0.5">
+			<nav class="card p-2 flex flex-col gap-0.5 self-start">
 				{#each sections as section}
 					{@const active = activeSection === section.id}
 					<button
 						class="w-full flex items-center gap-3 px-3 py-2.5 rounded-xl text-sm transition-all"
-						style="color: {active ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {active ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'}; font-weight: {active ? '600' : '400'};"
+						style="color: {active ? 'var(--color-primary)' : 'var(--color-text-dim)'}; background: {active ? 'var(--color-primary-subtle)' : 'transparent'}; font-weight: {active ? '600' : '400'};"
 						onclick={() => { activeSection = section.id; }}
-						onmouseenter={(e) => { if (!active) e.currentTarget.style.background = 'var(--color-surface-hover)'; }}
-						onmouseleave={(e) => { if (!active) e.currentTarget.style.background = active ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'; }}
+						onmouseenter={(e) => { if (!active) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)'; }}
+						onmouseleave={(e) => { if (!active) e.currentTarget.style.background = active ? 'var(--color-primary-subtle)' : 'transparent'; }}
 					>
 						{#if section.icon === 'user'}
 							<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
@@ -179,7 +179,7 @@
 			<div class="min-w-0">
 				{#if activeSection === 'profile'}
 					<div class="card p-6 animate-fade-up">
-						<div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color: var(--color-border);">
+						<div class="flex items-center gap-4 mb-6 pb-6 border-b" style="border-color: var(--glass-border);">
 							<Avatar username={userStore.user?.username ?? '?'} size={56} />
 							<div>
 								<p class="font-semibold text-sm" style="color: var(--color-text);">@{userStore.user?.username}</p>
@@ -197,7 +197,7 @@
 										type="text"
 										bind:value={fullName}
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 								<div>
@@ -207,7 +207,7 @@
 										type="email"
 										bind:value={email}
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 							</div>
@@ -219,7 +219,7 @@
 									rows={3}
 									placeholder="Tell us about yourself..."
 									class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)] resize-y"
-									style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+									style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 								></textarea>
 							</div>
 							<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -231,7 +231,7 @@
 										bind:value={location}
 										placeholder="City, Country"
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 								<div>
@@ -242,7 +242,7 @@
 										bind:value={website}
 										placeholder="https://..."
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 							</div>
@@ -268,11 +268,11 @@
 
 						<!-- Current status preview -->
 						{#if statusEmoji || statusMessage}
-							<div class="flex items-center gap-2 mb-5 px-3 py-2.5 rounded-xl" style="background: color-mix(in srgb, var(--color-surface) 60%, transparent); border: 1px solid var(--color-border);">
+							<div class="flex items-center gap-2 mb-5 px-3 py-2.5 rounded-xl" style="background: rgba(255,255,255,0.03); border: 1px solid var(--glass-border);">
 								{#if statusEmoji}<span class="text-lg">{statusEmoji}</span>{/if}
 								<span class="text-sm" style="color: var(--color-text);">{statusMessage || 'No message'}</span>
 								{#if statusBusy}
-									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium ml-auto" style="background: color-mix(in srgb, var(--color-warning) 15%, transparent); color: var(--color-warning);">Busy</span>
+									<span class="text-[0.5625rem] px-1.5 py-0.5 rounded-full font-medium ml-auto" style="background: var(--color-warning-subtle); color: var(--color-warning);">Busy</span>
 								{/if}
 							</div>
 						{/if}
@@ -284,7 +284,7 @@
 								{#each statusPresets as preset}
 									<button
 										class="flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs transition-all duration-200 hover:scale-[1.02]"
-										style="border: 1px solid var(--color-border); color: var(--color-text); background: {statusMessage === preset.message ? 'color-mix(in srgb, var(--color-primary) 10%, transparent)' : 'transparent'};"
+										style="border: 1px solid var(--glass-border); color: var(--color-text); background: {statusMessage === preset.message ? 'var(--color-primary-subtle)' : 'transparent'};"
 										onclick={() => { statusEmoji = preset.emoji; statusMessage = preset.message; statusBusy = preset.busy || false; }}
 									>
 										<span>{preset.emoji}</span>
@@ -305,7 +305,7 @@
 										placeholder="😊"
 										maxlength="2"
 										class="w-full px-3 py-2.5 text-sm text-center rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 								<div>
@@ -316,7 +316,7 @@
 										placeholder="Working on something cool..."
 										maxlength="80"
 										class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]"
-										style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);"
+										style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
 									/>
 								</div>
 							</div>
@@ -325,7 +325,7 @@
 							<label class="flex items-center gap-3 cursor-pointer">
 								<div class="relative">
 									<input type="checkbox" bind:checked={statusBusy} class="sr-only peer" />
-									<div class="w-9 h-5 rounded-full transition-colors duration-200 peer-checked:bg-[var(--color-warning)]" style="background: var(--color-border);"></div>
+									<div class="w-9 h-5 rounded-full transition-colors duration-200 peer-checked:bg-[var(--color-warning)]" style="background: var(--glass-border);"></div>
 									<div class="absolute left-0.5 top-0.5 w-4 h-4 bg-white rounded-full transition-transform duration-200 peer-checked:translate-x-4"></div>
 								</div>
 								<div>
@@ -346,7 +346,7 @@
 										onclick={handleStatusClear}
 										disabled={savingStatus}
 										class="px-4 py-2.5 text-sm rounded-xl border transition-all duration-200 hover:scale-[1.02]"
-										style="border-color: var(--color-border); color: var(--color-text-dim);"
+										style="border-color: var(--glass-border); color: var(--color-text-dim);"
 									>Clear status</button>
 								{/if}
 							</div>
@@ -359,15 +359,15 @@
 						<form onsubmit={handlePasswordChange} class="flex flex-col gap-4 max-w-sm">
 							<div>
 								<label for="old-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Current password</label>
-								<input id="old-pass" type="password" bind:value={oldPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
+								<input id="old-pass" type="password" bind:value={oldPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);" />
 							</div>
 							<div>
 								<label for="new-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">New password</label>
-								<input id="new-pass" type="password" bind:value={newPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
+								<input id="new-pass" type="password" bind:value={newPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);" />
 							</div>
 							<div>
 								<label for="confirm-pass" class="block text-xs font-medium mb-2" style="color: var(--color-text-dim);">Confirm new password</label>
-								<input id="confirm-pass" type="password" bind:value={confirmPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-background) 80%, transparent); backdrop-filter: blur(8px); color: var(--color-text);" />
+								<input id="confirm-pass" type="password" bind:value={confirmPassword} class="w-full px-3.5 py-2.5 text-sm rounded-xl border transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);" />
 							</div>
 							{#if passwordError}
 								<p class="text-xs animate-fade-in" style="color: var(--color-error);">{passwordError}</p>
@@ -397,9 +397,9 @@
 							<a
 								href="/settings/keys"
 								class="shrink-0 px-4 py-2 text-sm font-medium rounded-xl border transition-all duration-200 hover:scale-[1.02] active:scale-[0.98]"
-								style="border-color: var(--color-border); color: var(--color-text); background: color-mix(in srgb, var(--color-surface) 60%, transparent);"
+								style="border-color: var(--glass-border); color: var(--color-text); background: rgba(255,255,255,0.03);"
 								onmouseenter={(e) => { e.currentTarget.style.borderColor = 'var(--color-primary)'; }}
-								onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--color-border)'; }}
+								onmouseleave={(e) => { e.currentTarget.style.borderColor = 'var(--glass-border)'; }}
 							>
 								Manage Keys
 							</a>

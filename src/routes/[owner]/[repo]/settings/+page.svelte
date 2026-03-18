@@ -299,7 +299,7 @@
 					class="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all duration-200 w-full text-left"
 					style="
 						color: {active ? (section.id === 'danger' ? 'var(--color-error)' : 'var(--color-primary)') : 'var(--color-text-dim)'};
-						background: {active ? (section.id === 'danger' ? 'color-mix(in srgb, var(--color-error) 10%, transparent)' : 'color-mix(in srgb, var(--color-primary) 10%, transparent)') : 'transparent'};
+						background: {active ? (section.id === 'danger' ? 'var(--color-error-subtle)' : 'var(--color-primary-subtle)') : 'transparent'};
 						font-weight: {active ? '600' : '400'};
 					"
 					onclick={() => { activeSection = section.id; }}
@@ -330,7 +330,7 @@
 		{#if activeSection === 'general'}
 			<section class="card p-6 card-animate">
 				<div class="flex items-center gap-3 mb-6">
-					<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent);">
+					<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
 						<svg class="w-4.5 h-4.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
 					</div>
 					<div>
@@ -341,22 +341,22 @@
 				<form onsubmit={handleSave} class="flex flex-col gap-4 max-w-lg">
 					<div>
 						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Description</label>
-						<input type="text" bind:value={description} class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+						<input type="text" bind:value={description} class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Website</label>
-						<input type="text" bind:value={website} placeholder="https://..." class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+						<input type="text" bind:value={website} placeholder="https://..." class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Default branch</label>
-						<input type="text" bind:value={defaultBranch} class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+						<input type="text" bind:value={defaultBranch} class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 					</div>
 					<div>
 						<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Topics (comma-separated)</label>
-						<input type="text" bind:value={topicsInput} placeholder="go, web, api" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+						<input type="text" bind:value={topicsInput} placeholder="go, web, api" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 					</div>
 					<!-- Visibility toggle -->
-					<div class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200" style="border-color: var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+					<div class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200" style="border-color: var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<div class="flex items-center gap-3">
 							{#if isPrivate}
 								<svg class="w-5 h-5" style="color: var(--color-warning);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
@@ -377,7 +377,7 @@
 							onclick={() => { if (confirm('Make this repository ' + (isPrivate ? 'public' : 'private') + '?')) isPrivate = !isPrivate; }}
 						>
 							<span
-								class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
+								class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease"
 								style="transform: translateX({isPrivate ? '20px' : '0'});"
 							></span>
 						</button>
@@ -393,7 +393,7 @@
 			<section class="card p-6 card-animate">
 				<div class="flex items-center justify-between mb-6">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-secondary) 10%, transparent);">
+						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 							<svg class="w-4.5 h-4.5" style="color: var(--color-secondary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
 						</div>
 						<div>
@@ -412,14 +412,14 @@
 				</div>
 
 				{#if showCollabForm}
-					<form onsubmit={addCollaborator} class="flex items-end gap-3 mb-6 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+					<form onsubmit={addCollaborator} class="flex items-end gap-3 mb-6 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<div class="flex-1">
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Username</label>
-							<input type="text" bind:value={collabUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+							<input type="text" bind:value={collabUsername} placeholder="Username" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 						</div>
 						<div>
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Permission</label>
-							<select bind:value={collabPermission} class="px-3 py-2 text-sm rounded-xl border bg-transparent" style="border-color: var(--color-border); color: var(--color-text);">
+							<select bind:value={collabPermission} class="px-3 py-2 text-sm rounded-xl border bg-transparent" style="border-color: var(--glass-border); color: var(--color-text);">
 								<option value="read">Read</option>
 								<option value="write">Write</option>
 								<option value="admin">Admin</option>
@@ -431,7 +431,7 @@
 
 				{#if collaborators.length === 0}
 					<div class="text-center py-8">
-						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-secondary) 8%, transparent);">
+						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 							<svg class="w-6 h-6 opacity-40" style="color: var(--color-secondary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" /></svg>
 						</div>
 						<p class="text-sm" style="color: var(--color-text-dim);">No collaborators yet</p>
@@ -441,8 +441,8 @@
 					<div class="flex flex-col gap-2">
 						{#each collaborators as collab, i}
 							<div
-								class="flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] group"
-								style="border-color: var(--color-border); animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 40}ms;"
+								class="flex items-center justify-between p-3.5 rounded-xl border transition-all duration-200 hover:border-[var(--color-primary-subtle)] group"
+								style="border-color: var(--glass-border); animation: fade-up 0.3s ease both; animation-delay: {i * 40}ms;"
 							>
 								<div class="flex items-center gap-3">
 									<Avatar username={collab.username} size={32} />
@@ -454,9 +454,9 @@
 									</div>
 								</div>
 								<div class="flex items-center gap-3">
-									<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-semibold" style="background: color-mix(in srgb, {permissionColor(collab.permission)} 10%, transparent); color: {permissionColor(collab.permission)};">{collab.permission}</span>
+									<span class="text-[0.625rem] px-2 py-0.5 rounded-full font-semibold" style="background: color-mix(in srgb, {permissionColor(collab.permission)} 10%, var(--color-surface)); color: {permissionColor(collab.permission)};">{collab.permission}</span>
 									<button
-										class="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-2 py-1 rounded-lg hover:bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)]"
+										class="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-2 py-1 rounded-lg hover:bg-[var(--color-error-subtle)]"
 										style="color: var(--color-error);"
 										onclick={() => removeCollaborator(collab.username)}
 									>Remove</button>
@@ -472,7 +472,7 @@
 			<section class="card p-6 card-animate">
 				<div class="flex items-center justify-between mb-6">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-info) 10%, transparent);">
+						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 							<svg class="w-4.5 h-4.5" style="color: var(--color-info);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
 						</div>
 						<div>
@@ -491,18 +491,18 @@
 				</div>
 
 				{#if showHookForm}
-					<form onsubmit={addHook} class="flex flex-col gap-3 mb-6 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+					<form onsubmit={addHook} class="flex flex-col gap-3 mb-6 p-4 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<div>
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Payload URL</label>
-							<input type="url" bind:value={hookUrl} placeholder="https://example.com/webhook" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+							<input type="url" bind:value={hookUrl} placeholder="https://example.com/webhook" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 						</div>
 						<div>
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Secret (optional)</label>
-							<input type="text" bind:value={hookSecret} placeholder="Secret key" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+							<input type="text" bind:value={hookSecret} placeholder="Secret key" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 						</div>
 						<div>
 							<label class="block text-xs font-medium mb-1.5" style="color: var(--color-text-dim);">Events (comma-separated)</label>
-							<input type="text" bind:value={hookEvents} placeholder="push, issues, pull_request" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--color-border); color: var(--color-text);" />
+							<input type="text" bind:value={hookEvents} placeholder="push, issues, pull_request" class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]" style="border-color: var(--glass-border); color: var(--color-text);" />
 						</div>
 						<button type="submit" disabled={hookSubmitting || !hookUrl} class="self-start btn-glow px-4 py-2 text-sm font-medium rounded-xl text-white disabled:opacity-40" style="background: linear-gradient(135deg, var(--color-info), var(--color-primary));">{hookSubmitting ? 'Adding...' : 'Add Webhook'}</button>
 					</form>
@@ -510,7 +510,7 @@
 
 				{#if hooks.length === 0 && !showHookForm}
 					<div class="text-center py-8">
-						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-info) 8%, transparent);">
+						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: var(--color-info-subtle);">
 							<svg class="w-6 h-6 opacity-40" style="color: var(--color-info);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" /></svg>
 						</div>
 						<p class="text-sm" style="color: var(--color-text-dim);">No webhooks configured</p>
@@ -520,8 +520,8 @@
 					<div class="flex flex-col gap-2">
 						{#each hooks as hook, i}
 							<div
-								class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] group"
-								style="border-color: var(--color-border); animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 40}ms;"
+								class="flex items-center justify-between p-4 rounded-xl border transition-all duration-200 hover:border-[var(--color-primary-subtle)] group"
+								style="border-color: var(--glass-border); animation: fade-up 0.3s ease both; animation-delay: {i * 40}ms;"
 							>
 								<div class="min-w-0">
 									<div class="flex items-center gap-2">
@@ -530,12 +530,12 @@
 									</div>
 									<div class="flex flex-wrap gap-1.5 mt-1.5">
 										{#each hook.events as event}
-											<span class="text-[0.625rem] px-1.5 py-0.5 rounded-md font-medium" style="background: color-mix(in srgb, var(--color-info) 8%, transparent); color: var(--color-info);">{event}</span>
+											<span class="text-[0.625rem] px-1.5 py-0.5 rounded-md font-medium" style="background: var(--color-info-subtle); color: var(--color-info);">{event}</span>
 										{/each}
 									</div>
 								</div>
 								<button
-									class="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-2.5 py-1 rounded-lg hover:bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)]"
+									class="text-xs opacity-0 group-hover:opacity-100 transition-opacity duration-200 px-2.5 py-1 rounded-lg hover:bg-[var(--color-error-subtle)]"
 									style="color: var(--color-error);"
 									onclick={() => deleteHook(hook.id)}
 								>Delete</button>
@@ -550,12 +550,12 @@
 			<section class="card p-6 card-animate">
 				<div class="flex items-center justify-between mb-6">
 					<div class="flex items-center gap-3">
-						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-success) 10%, transparent);">
+						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-success-subtle);">
 							<svg class="w-4.5 h-4.5" style="color: var(--color-success);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
 						</div>
 						<div>
 							<h3 class="font-semibold text-sm" style="color: var(--color-text);">Branch Protection Rules</h3>
-							<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Define rules by pattern (e.g. <code class="px-1 py-0.5 rounded text-[0.625rem]" style="background: var(--color-surface);">main</code>, <code class="px-1 py-0.5 rounded text-[0.625rem]" style="background: var(--color-surface);">release/*</code>)</p>
+							<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Define rules by pattern (e.g. <code class="px-1 py-0.5 rounded text-[0.625rem]" style="background: rgba(255, 255, 255, 0.03);">main</code>, <code class="px-1 py-0.5 rounded text-[0.625rem]" style="background: rgba(255, 255, 255, 0.03);">release/*</code>)</p>
 						</div>
 					</div>
 					<button
@@ -569,7 +569,7 @@
 				</div>
 
 				{#if showRuleForm}
-					<form onsubmit={saveRule} class="mb-6 p-5 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--color-border); background: color-mix(in srgb, var(--color-surface) 50%, transparent);">
+					<form onsubmit={saveRule} class="mb-6 p-5 rounded-xl animate-fade-up-sm" style="border: 1px solid var(--glass-border); background: rgba(255, 255, 255, 0.03);">
 						<h4 class="text-sm font-semibold mb-4" style="color: var(--color-text);">{editingRule ? 'Edit Rule' : 'New Branch Protection Rule'}</h4>
 
 						<div class="flex flex-col gap-5">
@@ -581,14 +581,14 @@
 									bind:value={rulePattern}
 									placeholder="main, release/*, develop"
 									class="w-full px-3 py-2 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-									style="border-color: var(--color-border); color: var(--color-text);"
+									style="border-color: var(--glass-border); color: var(--color-text);"
 									required
 								/>
 								<p class="text-[0.625rem] mt-1" style="color: var(--color-text-dim);">Use * as wildcard. e.g. release/* matches release/v1, release/v2</p>
 							</div>
 
 							<!-- Require PR -->
-							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--color-border);">
+							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--glass-border);">
 								<label class="flex items-center justify-between cursor-pointer">
 									<div>
 										<p class="text-sm font-medium" style="color: var(--color-text);">Require pull request</p>
@@ -597,15 +597,15 @@
 									<button
 										type="button"
 										class="relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0"
-										style="background-color: {ruleRequirePR ? 'var(--color-primary)' : 'var(--color-border)'};"
+										style="background-color: {ruleRequirePR ? 'var(--color-primary)' : 'var(--glass-border)'};"
 										onclick={() => { ruleRequirePR = !ruleRequirePR; }}
 									>
-										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style="transform: translateX({ruleRequirePR ? '20px' : '0'});"></span>
+										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease" style="transform: translateX({ruleRequirePR ? '20px' : '0'});"></span>
 									</button>
 								</label>
 
 								{#if ruleRequirePR}
-									<div class="pl-4 flex flex-col gap-3 animate-fade-up-sm" style="border-left: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);">
+									<div class="pl-4 flex flex-col gap-3 animate-fade-up-sm" style="border-left: 2px solid var(--color-primary-subtle);">
 										<div class="flex items-center justify-between">
 											<label class="text-xs" style="color: var(--color-text-dim);">Required approvals</label>
 											<input
@@ -614,7 +614,7 @@
 												min="1"
 												max="10"
 												class="w-16 px-2 py-1 text-xs rounded-lg border bg-transparent text-center"
-												style="border-color: var(--color-border); color: var(--color-text);"
+												style="border-color: var(--glass-border); color: var(--color-text);"
 											/>
 										</div>
 										<label class="flex items-center gap-2 cursor-pointer">
@@ -626,7 +626,7 @@
 							</div>
 
 							<!-- Status checks -->
-							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--color-border);">
+							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--glass-border);">
 								<label class="flex items-center justify-between cursor-pointer">
 									<div>
 										<p class="text-sm font-medium" style="color: var(--color-text);">Require status checks</p>
@@ -635,28 +635,28 @@
 									<button
 										type="button"
 										class="relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0"
-										style="background-color: {ruleRequireStatusChecks ? 'var(--color-primary)' : 'var(--color-border)'};"
+										style="background-color: {ruleRequireStatusChecks ? 'var(--color-primary)' : 'var(--glass-border)'};"
 										onclick={() => { ruleRequireStatusChecks = !ruleRequireStatusChecks; }}
 									>
-										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style="transform: translateX({ruleRequireStatusChecks ? '20px' : '0'});"></span>
+										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease" style="transform: translateX({ruleRequireStatusChecks ? '20px' : '0'});"></span>
 									</button>
 								</label>
 								{#if ruleRequireStatusChecks}
-									<div class="pl-4 animate-fade-up-sm" style="border-left: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);">
+									<div class="pl-4 animate-fade-up-sm" style="border-left: 2px solid var(--color-primary-subtle);">
 										<label class="text-xs" style="color: var(--color-text-dim);">Required checks (comma-separated)</label>
 										<input
 											type="text"
 											bind:value={ruleStatusChecks}
 											placeholder="ci/build, ci/test, lint"
 											class="w-full mt-1 px-3 py-2 text-xs rounded-lg border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-											style="border-color: var(--color-border); color: var(--color-text);"
+											style="border-color: var(--glass-border); color: var(--color-text);"
 										/>
 									</div>
 								{/if}
 							</div>
 
 							<!-- Merge types -->
-							<div class="p-4 rounded-xl" style="border: 1px solid var(--color-border);">
+							<div class="p-4 rounded-xl" style="border: 1px solid var(--glass-border);">
 								<p class="text-sm font-medium mb-3" style="color: var(--color-text);">Allowed merge types</p>
 								<div class="flex flex-wrap gap-2">
 									{#each [
@@ -668,8 +668,8 @@
 											type="button"
 											class="flex flex-col px-4 py-2.5 rounded-xl text-left transition-all duration-200 press-scale"
 											style="
-												border: 1px solid {ruleMergeTypes.includes(type.key) ? 'var(--color-primary)' : 'var(--color-border)'};
-												background: {ruleMergeTypes.includes(type.key) ? 'color-mix(in srgb, var(--color-primary) 8%, transparent)' : 'transparent'};
+												border: 1px solid {ruleMergeTypes.includes(type.key) ? 'var(--color-primary)' : 'var(--glass-border)'};
+												background: {ruleMergeTypes.includes(type.key) ? 'var(--color-primary-subtle)' : 'transparent'};
 											"
 											onclick={() => toggleMergeType(type.key)}
 										>
@@ -681,7 +681,7 @@
 							</div>
 
 							<!-- Restrict pushes -->
-							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--color-border);">
+							<div class="flex flex-col gap-3 p-4 rounded-xl" style="border: 1px solid var(--glass-border);">
 								<label class="flex items-center justify-between cursor-pointer">
 									<div>
 										<p class="text-sm font-medium" style="color: var(--color-text);">Restrict who can push</p>
@@ -690,28 +690,28 @@
 									<button
 										type="button"
 										class="relative w-11 h-6 rounded-full transition-colors duration-300 shrink-0"
-										style="background-color: {ruleRestrictPushes ? 'var(--color-primary)' : 'var(--color-border)'};"
+										style="background-color: {ruleRestrictPushes ? 'var(--color-primary)' : 'var(--glass-border)'};"
 										onclick={() => { ruleRestrictPushes = !ruleRestrictPushes; }}
 									>
-										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease-[cubic-bezier(0.34,1.56,0.64,1)]" style="transform: translateX({ruleRestrictPushes ? '20px' : '0'});"></span>
+										<span class="absolute top-0.5 left-0.5 w-5 h-5 rounded-full bg-white shadow-sm transition-transform duration-300 ease" style="transform: translateX({ruleRestrictPushes ? '20px' : '0'});"></span>
 									</button>
 								</label>
 								{#if ruleRestrictPushes}
-									<div class="pl-4 animate-fade-up-sm" style="border-left: 2px solid color-mix(in srgb, var(--color-primary) 30%, transparent);">
+									<div class="pl-4 animate-fade-up-sm" style="border-left: 2px solid var(--color-primary-subtle);">
 										<label class="text-xs" style="color: var(--color-text-dim);">Allowed users (comma-separated usernames)</label>
 										<input
 											type="text"
 											bind:value={ruleAllowedPushUsers}
 											placeholder="admin, lead-dev"
 											class="w-full mt-1 px-3 py-2 text-xs rounded-lg border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)]"
-											style="border-color: var(--color-border); color: var(--color-text);"
+											style="border-color: var(--glass-border); color: var(--color-text);"
 										/>
 									</div>
 								{/if}
 							</div>
 
 							<!-- Additional options -->
-							<div class="flex flex-col gap-2 p-4 rounded-xl" style="border: 1px solid var(--color-border);">
+							<div class="flex flex-col gap-2 p-4 rounded-xl" style="border: 1px solid var(--glass-border);">
 								<p class="text-sm font-medium mb-1" style="color: var(--color-text);">Additional restrictions</p>
 								<label class="flex items-center gap-2 cursor-pointer">
 									<input type="checkbox" bind:checked={ruleLinearHistory} class="accent-[var(--color-primary)]" />
@@ -747,7 +747,7 @@
 
 				{#if rules.length === 0 && !showRuleForm}
 					<div class="text-center py-8">
-						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-success) 8%, transparent);">
+						<div class="w-12 h-12 mx-auto mb-3 rounded-xl flex items-center justify-center" style="background: var(--color-success-subtle);">
 							<svg class="w-6 h-6 opacity-40" style="color: var(--color-success);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
 						</div>
 						<p class="text-sm" style="color: var(--color-text-dim);">No branch protection rules</p>
@@ -757,30 +757,30 @@
 					<div class="flex flex-col gap-3">
 						{#each rules as rule, i}
 							<div
-								class="flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:border-[color-mix(in_srgb,var(--color-primary)_20%,transparent)] group"
-								style="border: 1px solid var(--color-border); animation: fade-slide-in-sm 0.3s ease both; animation-delay: {i * 40}ms;"
+								class="flex items-center justify-between p-4 rounded-xl transition-all duration-200 hover:border-[var(--color-primary-subtle)] group"
+								style="border: 1px solid var(--glass-border); animation: fade-up 0.3s ease both; animation-delay: {i * 40}ms;"
 							>
 								<div class="flex items-center gap-3 min-w-0">
-									<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background: color-mix(in srgb, var(--color-success) 10%, transparent);">
+									<div class="w-8 h-8 rounded-lg flex items-center justify-center shrink-0" style="background: var(--color-success-subtle);">
 										<svg class="w-4 h-4" style="color: var(--color-success);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75m-3-7.036A11.959 11.959 0 013.598 6 11.99 11.99 0 003 9.749c0 5.592 3.824 10.29 9 11.623 5.176-1.332 9-6.03 9-11.622 0-1.31-.21-2.571-.598-3.751h-.152c-3.196 0-6.1-1.248-8.25-3.285z" /></svg>
 									</div>
 									<div class="min-w-0">
 										<p class="text-sm font-mono font-semibold" style="color: var(--color-text);">{rule.pattern}</p>
 										<div class="flex flex-wrap gap-1.5 mt-1">
 											{#if rule.require_pull_request}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary);">PR required ({rule.required_approvals} approval{rule.required_approvals !== 1 ? 's' : ''})</span>
+												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-primary-subtle); color: var(--color-primary);">PR required ({rule.required_approvals} approval{rule.required_approvals !== 1 ? 's' : ''})</span>
 											{/if}
 											{#if rule.require_status_checks}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-success) 10%, transparent); color: var(--color-success);">Status checks</span>
+												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-success-subtle); color: var(--color-success);">Status checks</span>
 											{/if}
 											{#if rule.restrict_pushes}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-warning) 10%, transparent); color: var(--color-warning);">Push restricted</span>
+												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-warning-subtle); color: var(--color-warning);">Push restricted</span>
 											{/if}
 											{#if !rule.allow_force_push}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-error) 10%, transparent); color: var(--color-error);">No force push</span>
+												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-error-subtle); color: var(--color-error);">No force push</span>
 											{/if}
 											{#if rule.allowed_merge_types && rule.allowed_merge_types.length < 3}
-												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: color-mix(in srgb, var(--color-info) 10%, transparent); color: var(--color-info);">{rule.allowed_merge_types.join(', ')}</span>
+												<span class="text-[0.625rem] px-2 py-0.5 rounded-full" style="background: var(--color-info-subtle); color: var(--color-info);">{rule.allowed_merge_types.join(', ')}</span>
 											{/if}
 										</div>
 									</div>
@@ -792,7 +792,7 @@
 										onclick={() => startEditRule(rule)}
 									>Edit</button>
 									<button
-										class="text-xs px-2.5 py-1 rounded-lg hover:bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)]"
+										class="text-xs px-2.5 py-1 rounded-lg hover:bg-[var(--color-error-subtle)]"
 										style="color: var(--color-error);"
 										onclick={() => deleteRule(rule.id)}
 									>Delete</button>
@@ -806,9 +806,9 @@
 		<!-- Danger Zone -->
 		{:else if activeSection === 'danger'}
 			<section class="card-animate">
-				<div class="rounded-2xl border p-6" style="border-color: color-mix(in srgb, var(--color-error) 25%, transparent);">
+				<div class="rounded-2xl border p-6" style="border-color: var(--color-error-subtle);">
 					<div class="flex items-center gap-3 mb-6">
-						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-error) 10%, transparent);">
+						<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-error-subtle);">
 							<svg class="w-4.5 h-4.5" style="color: var(--color-error);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
 						</div>
 						<div>
@@ -818,7 +818,7 @@
 					</div>
 
 					<!-- Transfer -->
-					<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border mb-4 gap-3" style="border-color: var(--color-border);">
+					<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border mb-4 gap-3" style="border-color: var(--glass-border);">
 						<div>
 							<p class="text-sm font-medium" style="color: var(--color-text);">Transfer ownership</p>
 							<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Transfer this repository to another user.</p>
@@ -829,19 +829,19 @@
 								bind:value={transferOwner}
 								placeholder="New owner"
 								class="px-3 py-1.5 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-error)] w-32"
-								style="border-color: var(--color-border); color: var(--color-text);"
+								style="border-color: var(--glass-border); color: var(--color-text);"
 							/>
 							<button
 								onclick={handleTransfer}
 								disabled={!transferOwner || transferring}
-								class="px-3 py-1.5 text-sm font-medium rounded-xl border transition-all duration-200 hover:bg-[color-mix(in_srgb,var(--color-error)_10%,transparent)] disabled:opacity-30"
-								style="border-color: var(--color-border); color: var(--color-error);"
+								class="px-3 py-1.5 text-sm font-medium rounded-xl border transition-all duration-200 hover:bg-[var(--color-error-subtle)] disabled:opacity-30"
+								style="border-color: var(--glass-border); color: var(--color-error);"
 							>{transferring ? 'Transferring...' : 'Transfer'}</button>
 						</div>
 					</div>
 
 					<!-- Delete -->
-					<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-3" style="border-color: var(--color-border);">
+					<div class="flex flex-col sm:flex-row items-start sm:items-center justify-between p-4 rounded-xl border gap-3" style="border-color: var(--glass-border);">
 						<div>
 							<p class="text-sm font-medium" style="color: var(--color-text);">Delete this repository</p>
 							<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Once deleted, there is no going back.</p>
@@ -852,7 +852,7 @@
 								bind:value={confirmName}
 								placeholder="Type name to confirm"
 								class="px-3 py-1.5 text-sm rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-error)] w-40"
-								style="border-color: var(--color-border); color: var(--color-text);"
+								style="border-color: var(--glass-border); color: var(--color-text);"
 							/>
 							<button
 								onclick={handleDelete}

@@ -56,28 +56,29 @@
 			type="text"
 			bind:value={search}
 			placeholder="Search organizations..."
-			class="w-full px-4 py-2.5 text-sm rounded-xl border bg-transparent transition-colors focus:border-[var(--color-primary)]"
-			style="border-color: var(--color-border); color: var(--color-text);"
+			class="w-full px-4 py-2.5 text-sm rounded-xl border transition-colors focus:border-[var(--color-primary)]"
+			style="border-color: var(--glass-border); color: var(--color-text); background: #0f1629;"
 		/>
 	</div>
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading organizations...</div>
 	{:else if filtered.length === 0}
-		<div class="rounded-xl border p-12 text-center" style="border-color: var(--color-border);">
+		<div class="rounded-xl border p-12 text-center" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 				<path stroke-linecap="round" stroke-linejoin="round" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
 			</svg>
 			<p class="text-sm" style="color: var(--color-text-dim);">{search ? 'No organizations match your search.' : 'No organizations found.'}</p>
 		</div>
 	{:else}
-		<div class="rounded-xl border overflow-hidden" style="border-color: var(--color-border);">
+		<div class="overflow-x-auto -mx-4 sm:mx-0">
+		<div class="rounded-xl border overflow-hidden min-w-[450px] sm:min-w-full" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			{#each filtered as org, i}
 				<div
-					class="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[var(--color-surface)] {i > 0 ? 'border-t' : ''}"
-					style="border-color: var(--color-border);"
+					class="flex items-center gap-4 px-4 py-3.5 transition-colors hover:bg-[rgba(255,255,255,0.03)] {i > 0 ? 'border-t' : ''}"
+					style="border-color: var(--glass-border);"
 				>
-					<div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: var(--color-surface-hover);">
+					<div class="w-10 h-10 rounded-lg flex items-center justify-center shrink-0" style="background-color: rgba(255, 255, 255, 0.06);">
 						<OrgIcon size={18} color="var(--color-text-dim)" />
 					</div>
 					<div class="flex-1 min-w-0">
@@ -98,8 +99,8 @@
 							</span>
 						{/if}
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-red-500/10"
-							style="border-color: var(--color-border); color: var(--color-error);"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
+							style="border-color: var(--glass-border); color: var(--color-error);"
 							onclick={() => deleteOrg(org.name)}
 						>
 							Delete
@@ -107,6 +108,7 @@
 					</div>
 				</div>
 			{/each}
+		</div>
 		</div>
 	{/if}
 </div>

@@ -82,7 +82,7 @@
 					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-300"
 					style="
 						color: {stateFilter === 'open' ? 'var(--color-success)' : 'var(--color-text-dim)'};
-						background: {stateFilter === 'open' ? 'color-mix(in srgb, var(--color-success) 12%, transparent)' : 'transparent'};
+						background: {stateFilter === 'open' ? 'var(--color-success-subtle)' : 'transparent'};
 						font-weight: {stateFilter === 'open' ? '600' : '400'};
 					"
 					onclick={() => switchState('open')}
@@ -94,7 +94,7 @@
 					class="flex items-center gap-2 px-3 py-1.5 text-sm rounded-lg transition-all duration-300"
 					style="
 						color: {stateFilter === 'closed' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
-						background: {stateFilter === 'closed' ? 'color-mix(in srgb, var(--color-primary) 12%, transparent)' : 'transparent'};
+						background: {stateFilter === 'closed' ? 'var(--color-primary-subtle)' : 'transparent'};
 						font-weight: {stateFilter === 'closed' ? '600' : '400'};
 					"
 					onclick={() => switchState('closed')}
@@ -144,14 +144,14 @@
 					oninput={handleSearchInput}
 					placeholder="Search issues..."
 					class="flex-1 min-w-[200px] px-3 py-2 text-sm rounded-lg border bg-transparent transition-colors focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				{#if repoLabels.length > 0}
 					<select
 						bind:value={labelFilter}
 						onchange={applyFilter}
 						class="px-3 py-2 text-sm rounded-lg border bg-transparent transition-colors"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="">All labels</option>
 						{#each repoLabels as label}
@@ -164,7 +164,7 @@
 						bind:value={milestoneFilter}
 						onchange={applyFilter}
 						class="px-3 py-2 text-sm rounded-lg border bg-transparent transition-colors"
-						style="border-color: var(--color-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="">All milestones</option>
 						{#each repoMilestones as m}
@@ -177,7 +177,7 @@
 					bind:value={assigneeFilter}
 					placeholder="Assignee username"
 					class="px-3 py-2 text-sm rounded-lg border bg-transparent transition-colors focus:border-[var(--color-primary)]"
-					style="border-color: var(--color-border); color: var(--color-text); width: 150px;"
+					style="border-color: var(--glass-border); color: var(--color-text); width: 150px;"
 					onchange={applyFilter}
 				/>
 			</div>
@@ -193,7 +193,7 @@
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading issues...</div>
 	{:else if issuesStore.issues.length === 0}
 		<div class="card p-16 text-center card-animate">
-			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: color-mix(in srgb, var(--color-success) 8%, transparent);">
+			<div class="w-16 h-16 mx-auto mb-4 rounded-2xl flex items-center justify-center" style="background: var(--color-success-subtle);">
 				<svg class="w-8 h-8 opacity-30" style="color: var(--color-success);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
 					<circle cx="12" cy="12" r="10" /><path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4m0 4h.01" />
 				</svg>

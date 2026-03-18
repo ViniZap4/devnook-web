@@ -6,7 +6,7 @@
 </script>
 
 <div class="flex items-center gap-4">
-	<div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-105" style="background: linear-gradient(135deg, color-mix(in srgb, var(--color-primary) 15%, transparent), color-mix(in srgb, var(--color-secondary) 10%, transparent)); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent);">
+	<div class="w-14 h-14 rounded-2xl flex items-center justify-center shrink-0 transition-transform duration-300 hover:scale-105" style="background: var(--color-primary-subtle); border: 1px solid var(--glass-border);">
 		<OrgIcon size={24} color="var(--color-primary)" />
 	</div>
 	<div>

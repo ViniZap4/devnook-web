@@ -36,7 +36,7 @@
 					</div>
 					<div class="flex items-center gap-2 text-xs shrink-0" style="color: var(--color-text-dim);">
 						<span>{c.commits} commit{c.commits !== 1 ? 's' : ''}</span>
-						<div class="w-16 h-1.5 rounded-full overflow-hidden" style="background-color: var(--color-border);">
+						<div class="w-16 h-1.5 rounded-full overflow-hidden" style="background-color: var(--glass-border);">
 							<div class="h-full rounded-full" style="width: {(c.commits / totalCommits * 100).toFixed(0)}%; background-color: var(--color-primary);"></div>
 						</div>
 					</div>

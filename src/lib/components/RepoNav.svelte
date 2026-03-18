@@ -6,8 +6,10 @@
 	let { owner, repo }: { owner: string; repo: string } = $props();
 
 	let navContainer = $state<HTMLElement>();
+	let scrollEl = $state<HTMLElement>();
 	let indicatorStyle = $state('opacity: 0;');
 	let mounted = $state(false);
+	let scrollable = $state(false);
 
 	const tabs = $derived([
 		{ label: 'Code', href: `/${owner}/${repo}`, icon: 'code', match: (p: string) => p === `/${owner}/${repo}` || p.startsWith(`/${owner}/${repo}/tree`) || p.startsWith(`/${owner}/${repo}/blob`) || p.startsWith(`/${owner}/${repo}/blame`) },
@@ -22,6 +24,12 @@
 
 	const settingsActive = $derived($page.url.pathname.startsWith(`/${owner}/${repo}/settings`));
 	let activeIndex = $derived(tabs.findIndex(t => t.match($page.url.pathname)));
+
+	function checkScrollable() {
+		if (scrollEl) {
+			scrollable = scrollEl.scrollWidth > scrollEl.clientWidth;
+		}
+	}
 
 	function updateIndicator() {
 		if (!navContainer) return;
@@ -38,6 +46,8 @@
 
 		// Auto-scroll active tab into view on mobile
 		target.scrollIntoView({ behavior: 'smooth', inline: 'nearest', block: 'nearest' });
+
+		checkScrollable();
 	}
 
 	onMount(() => {
@@ -56,15 +66,21 @@
 			tick().then(updateIndicator);
 		}
 	});
+
+	function handleResize() {
+		updateIndicator();
+		checkScrollable();
+	}
 </script>
 
-<svelte:window onresize={updateIndicator} />
+<svelte:window onresize={handleResize} />
 
-<nav bind:this={navContainer} class="flex items-center gap-0.5 overflow-x-auto glass-subtle rounded-xl p-1 relative scrollbar-none">
+<nav bind:this={navContainer} class="glass-subtle rounded-xl p-1 relative">
+<div bind:this={scrollEl} class="flex items-center gap-0.5 overflow-x-auto scrollbar-none" class:repo-nav-scroll={scrollable}>
 	{#if mounted}
 		<div
 			class="absolute rounded-lg pointer-events-none z-0"
-			style="{indicatorStyle} background: color-mix(in srgb, var(--color-primary) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-primary) 15%, transparent); transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, height 0.25s ease, opacity 0.2s ease;"
+			style="{indicatorStyle} background: rgba(255, 255, 255, 0.06); border: 1px solid var(--glass-border); transition: left 0.3s cubic-bezier(0.16, 1, 0.3, 1), top 0.3s cubic-bezier(0.16, 1, 0.3, 1), width 0.25s ease, height 0.25s ease, opacity 0.2s ease;"
 			aria-hidden="true"
 		></div>
 	{/if}
@@ -116,6 +132,7 @@
 		<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
 		<span class="hidden sm:inline">Settings</span>
 	</a>
+</div>
 </nav>
 
 <style>
@@ -124,5 +141,9 @@
 	}
 	.scrollbar-none::-webkit-scrollbar {
 		display: none;
+	}
+	.repo-nav-scroll {
+		mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
+		-webkit-mask-image: linear-gradient(to right, transparent, black 1.5rem, black calc(100% - 1.5rem), transparent);
 	}
 </style>
