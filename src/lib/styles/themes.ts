@@ -1,5 +1,5 @@
 export type ThemeMode = 'dark' | 'light' | 'auto';
-export type BackgroundEffect = 'none' | 'mesh' | 'particles' | 'aurora' | 'orbs';
+export type BackgroundEffect = 'none' | 'particles' | 'grid' | 'waves' | 'orbs' | 'constellation' | 'dna' | 'aurora' | 'tunnel' | 'fireflies' | 'matrix';
 
 export interface Theme {
 	name: string;
@@ -564,10 +564,10 @@ export function loadThemeSettings(): ThemeSettings {
 			// corrupted
 		}
 	}
-	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'orbs' };
+	return { mode: 'dark', darkName: 'default-dark', lightName: 'default-light', backgroundEffect: 'particles' };
 }
 
-export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'orbs'): void {
+export function saveThemeSettings(mode: ThemeMode, darkName: string, lightName: string, backgroundEffect: BackgroundEffect = 'particles'): void {
 	localStorage.setItem(SETTINGS_KEY, JSON.stringify({ mode, darkName, lightName, backgroundEffect }));
 }
 
