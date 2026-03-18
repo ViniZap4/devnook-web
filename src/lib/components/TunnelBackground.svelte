@@ -77,7 +77,7 @@
 
       const mat = mesh.material as THREE.MeshBasicMaterial;
       mat.color.lerp(targetColor, 0.05);
-      mat.opacity = 0.12 + depthFactor * 0.12;
+      mat.opacity = 0.2 + depthFactor * 0.25;
     }
   });
 </script>
@@ -88,11 +88,11 @@
       bind:ref={ringRefs[i]}
       position.z={ring.z}
     >
-      <T.TorusGeometry args={[5, 0.04, 8, 6]} />
+      <T.TorusGeometry args={[8, 0.06, 12, 8]} />
       <T.MeshBasicMaterial
         color={accentColor}
         transparent
-        opacity={0.15}
+        opacity={0.3}
         wireframe
       />
     </T.Mesh>

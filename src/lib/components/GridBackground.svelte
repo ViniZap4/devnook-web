@@ -64,7 +64,7 @@
           attach="attributes.position"
         />
       </T.BufferGeometry>
-      <T.LineBasicMaterial color={accentColor} transparent opacity={0.15} />
+      <T.LineBasicMaterial color={accentColor} transparent opacity={0.3} />
     </T.Line>
   {/each}
 
@@ -78,7 +78,7 @@
           attach="attributes.position"
         />
       </T.BufferGeometry>
-      <T.LineBasicMaterial color={accentColor} transparent opacity={0.15} />
+      <T.LineBasicMaterial color={accentColor} transparent opacity={0.3} />
     </T.Line>
   {/each}
 
@@ -92,7 +92,7 @@
           attach="attributes.position"
         />
       </T.BufferGeometry>
-      <T.LineBasicMaterial color={accentColor} transparent opacity={0.35} />
+      <T.LineBasicMaterial color={accentColor} transparent opacity={0.55} />
     </T.Line>
   {/each}
 </T.Group>

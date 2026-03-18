@@ -24,10 +24,10 @@
   }
 
   const ribbons: Ribbon[] = [
-    { width: 80, height: 15, segW: 64, segH: 8, y: 6, z: 5, opacity: 0.14, speed: 0.4, phase: 0, amplitude: 3.5 },
-    { width: 70, height: 12, segW: 56, segH: 8, y: 2, z: 0, opacity: 0.10, speed: 0.3, phase: 1.5, amplitude: 4.0 },
-    { width: 60, height: 10, segW: 48, segH: 6, y: -2, z: -5, opacity: 0.16, speed: 0.5, phase: 3.0, amplitude: 3.0 },
-    { width: 75, height: 14, segW: 60, segH: 8, y: 10, z: -10, opacity: 0.12, speed: 0.35, phase: 4.5, amplitude: 3.8 },
+    { width: 80, height: 15, segW: 64, segH: 8, y: 6, z: 10, opacity: 0.25, speed: 0.4, phase: 0, amplitude: 4.5 },
+    { width: 70, height: 12, segW: 56, segH: 8, y: 2, z: 5, opacity: 0.20, speed: 0.3, phase: 1.5, amplitude: 5.0 },
+    { width: 60, height: 10, segW: 48, segH: 6, y: -2, z: 0, opacity: 0.28, speed: 0.5, phase: 3.0, amplitude: 4.0 },
+    { width: 75, height: 14, segW: 60, segH: 8, y: 10, z: -5, opacity: 0.22, speed: 0.35, phase: 4.5, amplitude: 4.8 },
   ];
 
   let ribbonRefs = $state<(THREE.Mesh | undefined)[]>([undefined, undefined, undefined, undefined]);

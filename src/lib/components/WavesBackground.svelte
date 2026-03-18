@@ -69,6 +69,6 @@
     color={accentColor}
     wireframe
     transparent
-    opacity={0.18}
+    opacity={0.35}
   />
 </T.Mesh>

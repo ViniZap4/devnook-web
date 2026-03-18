@@ -15,7 +15,7 @@
   let time = 0;
 
   const NODE_COUNT = 60;
-  const MAX_DISTANCE = 12;
+  const MAX_DISTANCE = 16;
 
   interface Node {
     x: number;
@@ -130,11 +130,11 @@
 
 <T.Group bind:ref={groupRef}>
   <T.InstancedMesh bind:ref={meshRef} args={[undefined, undefined, NODE_COUNT]} frustumCulled={false}>
-    <T.SphereGeometry args={[0.15, 8, 8]} />
-    <T.MeshBasicMaterial color={accentColor} transparent opacity={0.7} />
+    <T.SphereGeometry args={[0.3, 8, 8]} />
+    <T.MeshBasicMaterial color={accentColor} transparent opacity={0.85} />
   </T.InstancedMesh>
 
   <T.LineSegments bind:ref={lineRef} geometry={lineGeometry} frustumCulled={false}>
-    <T.LineBasicMaterial color={accentColor} transparent opacity={0.15} />
+    <T.LineBasicMaterial color={accentColor} transparent opacity={0.3} />
   </T.LineSegments>
 </T.Group>

@@ -12,11 +12,11 @@
   let mouseY = 0;
   let time = 0;
 
-  const COLUMNS = 20;
-  const DROPS_PER_COL = 10;
+  const COLUMNS = 25;
+  const DROPS_PER_COL = 12;
   const TOTAL = COLUMNS * DROPS_PER_COL;
-  const SPREAD_X = 50;
-  const HEIGHT = 40;
+  const SPREAD_X = 60;
+  const HEIGHT = 50;
   const FALL_SPEED_BASE = 0.08;
 
   interface Drop {
@@ -101,6 +101,6 @@
 </script>
 
 <T.InstancedMesh bind:ref={meshRef} args={[undefined, undefined, TOTAL]} frustumCulled={false}>
-  <T.BoxGeometry args={[0.25, 0.25, 0.25]} />
-  <T.MeshBasicMaterial color={accentColor} transparent opacity={0.6} />
+  <T.BoxGeometry args={[0.4, 0.4, 0.4]} />
+  <T.MeshBasicMaterial color={accentColor} transparent opacity={0.8} />
 </T.InstancedMesh>

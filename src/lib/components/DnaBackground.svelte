@@ -13,10 +13,10 @@
   let mouseY = 0;
   let time = 0;
 
-  const NODES_PER_STRAND = 40;
+  const NODES_PER_STRAND = 50;
   const TOTAL_NODES = NODES_PER_STRAND * 2;
-  const HELIX_RADIUS = 4;
-  const HELIX_HEIGHT = 40;
+  const HELIX_RADIUS = 8;
+  const HELIX_HEIGHT = 60;
   const RUNG_INTERVAL = 3;
 
   // Count rungs
@@ -64,7 +64,7 @@
       const az = Math.sin(angle) * HELIX_RADIUS;
       const ay = y + tiltY * 2;
 
-      dummy.position.set(ax, ay, az - 15);
+      dummy.position.set(ax, ay, az - 5);
       dummy.scale.setScalar(0.8 + Math.sin(angle * 0.5) * 0.2);
       dummy.updateMatrix();
       meshRef.setMatrixAt(i, dummy.matrix);
@@ -74,7 +74,7 @@
       const bz = Math.sin(angle + Math.PI) * HELIX_RADIUS;
       const by = y + tiltY * 2;
 
-      dummy.position.set(bx, by, bz - 15);
+      dummy.position.set(bx, by, bz - 5);
       dummy.scale.setScalar(0.8 + Math.sin(angle * 0.5 + Math.PI) * 0.2);
       dummy.updateMatrix();
       meshRef.setMatrixAt(NODES_PER_STRAND + i, dummy.matrix);
@@ -84,10 +84,10 @@
         const idx = rungIdx * 6;
         rungPositions[idx] = ax;
         rungPositions[idx + 1] = ay;
-        rungPositions[idx + 2] = az - 15;
+        rungPositions[idx + 2] = az - 5;
         rungPositions[idx + 3] = bx;
         rungPositions[idx + 4] = by;
-        rungPositions[idx + 5] = bz - 15;
+        rungPositions[idx + 5] = bz - 5;
         rungIdx++;
       }
     }
@@ -104,11 +104,11 @@
 
 <T.Group>
   <T.InstancedMesh bind:ref={meshRef} args={[undefined, undefined, TOTAL_NODES]} frustumCulled={false}>
-    <T.SphereGeometry args={[0.2, 8, 8]} />
-    <T.MeshBasicMaterial color={accentColor} transparent opacity={0.6} />
+    <T.SphereGeometry args={[0.4, 8, 8]} />
+    <T.MeshBasicMaterial color={accentColor} transparent opacity={0.8} />
   </T.InstancedMesh>
 
   <T.LineSegments bind:ref={lineRef} geometry={rungGeometry} frustumCulled={false}>
-    <T.LineBasicMaterial color={accentColor} transparent opacity={0.2} />
+    <T.LineBasicMaterial color={accentColor} transparent opacity={0.4} />
   </T.LineSegments>
 </T.Group>

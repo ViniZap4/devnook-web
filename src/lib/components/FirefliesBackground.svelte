@@ -114,6 +114,6 @@
 </script>
 
 <T.InstancedMesh bind:ref={meshRef} args={[undefined, undefined, FLY_COUNT]} frustumCulled={false}>
-  <T.SphereGeometry args={[0.15, 8, 8]} />
-  <T.MeshBasicMaterial color={accentColor} transparent opacity={0.7} />
+  <T.SphereGeometry args={[0.25, 8, 8]} />
+  <T.MeshBasicMaterial color={accentColor} transparent opacity={0.85} />
 </T.InstancedMesh>
