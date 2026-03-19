@@ -27,7 +27,7 @@
 	--color-success-subtle: #0f1c20;
 	--color-info-subtle: #101c2d;
 	--color-glow: var(--color-primary);
-	--glass-bg: rgba(13, 20, 32, 0.8);
+	--glass-bg: rgba(13, 20, 32, 0.92);
 	--glass-border: rgba(255, 255, 255, 0.08);
 	--glass-border-hover: rgba(255, 255, 255, 0.14);
 	--primary-glow: rgba(6, 182, 212, 0.15);
@@ -330,33 +330,33 @@
 
 @utility glass {
 	background: var(--glass-bg);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
 }
 
 @utility glass-strong {
 	background: var(--glass-bg);
-	backdrop-filter: blur(24px);
-	-webkit-backdrop-filter: blur(24px);
+	backdrop-filter: blur(32px);
+	-webkit-backdrop-filter: blur(32px);
 	border: 1px solid var(--glass-border);
-	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+	box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
 }
 
 @utility glass-subtle {
 	background: var(--glass-bg);
-	backdrop-filter: blur(12px);
-	-webkit-backdrop-filter: blur(12px);
+	backdrop-filter: blur(16px);
+	-webkit-backdrop-filter: blur(16px);
 	border: 1px solid var(--glass-border);
 }
 
 @utility card {
 	@apply rounded-2xl;
 	background: var(--glass-bg);
-	backdrop-filter: blur(16px);
-	-webkit-backdrop-filter: blur(16px);
+	backdrop-filter: blur(20px);
+	-webkit-backdrop-filter: blur(20px);
 	border: 1px solid var(--glass-border);
-	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+	box-shadow: 0 4px 16px rgba(0, 0, 0, 0.12);
 	transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 

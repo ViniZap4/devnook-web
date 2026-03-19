@@ -1,18 +1,26 @@
 <script lang="ts">
 	import { onMount } from 'svelte';
 	import { admin } from '$lib/services/api';
-	import type { AdminStats } from '$lib/services/api';
+	import type { AdminStats, AdminAnalytics } from '$lib/services/api';
+	import AdminChart from '$lib/components/AdminChart.svelte';
 
 	let stats = $state<AdminStats | null>(null);
+	let analytics = $state<AdminAnalytics | null>(null);
 	let loading = $state(true);
+	let error = $state('');
 
 	onMount(async () => {
 		try {
 			stats = await admin.stats();
 		} catch {
-			// ignore
+			error = 'Failed to load stats';
 		} finally {
 			loading = false;
+		}
+		try {
+			analytics = await admin.analytics();
+		} catch {
+			// analytics is optional — dashboard still works without it
 		}
 	});
 </script>
@@ -20,11 +28,16 @@
 <div class="flex flex-col gap-8">
 	<div>
 		<h1 class="text-2xl font-bold" style="color: var(--color-text);">Dashboard</h1>
-		<p class="text-sm mt-1" style="color: var(--color-text-dim);">System overview and statistics</p>
+		<p class="text-sm mt-1" style="color: var(--color-text-dim);">System overview and analytics</p>
 	</div>
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading...</div>
+	{:else if error}
+		<div class="rounded-xl border p-6 text-center" style="border-color: var(--color-error-subtle); background: var(--color-error-subtle);">
+			<p class="text-sm" style="color: var(--color-error);">{error}</p>
+			<button class="text-xs mt-2 underline" style="color: var(--color-error);" onclick={() => location.reload()}>Retry</button>
+		</div>
 	{:else if stats}
 		<!-- Stats Grid -->
 		<div class="grid grid-cols-2 lg:grid-cols-4 gap-4">
@@ -82,6 +95,34 @@
 			</div>
 		</div>
 
+		<!-- Activity Metrics -->
+		{#if analytics}
+			<div class="grid grid-cols-3 gap-4">
+				<div class="rounded-xl border p-4 flex flex-col items-center gap-1" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+					<span class="text-2xl font-bold" style="color: var(--color-primary);">{analytics.active_today}</span>
+					<span class="text-[0.6875rem]" style="color: var(--color-text-dim);">Active today</span>
+				</div>
+				<div class="rounded-xl border p-4 flex flex-col items-center gap-1" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+					<span class="text-2xl font-bold" style="color: var(--color-success);">{analytics.new_this_week}</span>
+					<span class="text-[0.6875rem]" style="color: var(--color-text-dim);">New this week</span>
+				</div>
+				<div class="rounded-xl border p-4 flex flex-col items-center gap-1" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
+					<span class="text-2xl font-bold" style="color: var(--color-info);">{analytics.new_this_month}</span>
+					<span class="text-[0.6875rem]" style="color: var(--color-text-dim);">New this month</span>
+				</div>
+			</div>
+
+			<!-- Growth Charts -->
+			<div>
+				<h2 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--color-text-dim);">Growth (Last 30 Days)</h2>
+				<div class="grid grid-cols-1 lg:grid-cols-3 gap-4">
+					<AdminChart data={analytics.user_growth} label="User Signups" color="var(--color-info)" />
+					<AdminChart data={analytics.repo_growth} label="New Repositories" color="var(--color-success)" />
+					<AdminChart data={analytics.issue_growth} label="Issues Created" color="var(--color-error)" />
+				</div>
+			</div>
+		{/if}
+
 		<!-- Quick Actions -->
 		<div>
 			<h2 class="text-sm font-semibold uppercase tracking-wider mb-4" style="color: var(--color-text-dim);">Quick Actions</h2>
@@ -94,7 +135,7 @@
 					</div>
 					<div>
 						<p class="text-sm font-medium" style="color: var(--color-text);">Manage Users</p>
-						<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Add, edit, or remove user accounts</p>
+						<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Roles, permissions, and accounts</p>
 					</div>
 				</a>
 				<a href="/admin/repos" class="rounded-xl border p-4 flex items-center gap-3 transition-all hover:border-[rgba(255,255,255,0.12)]" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">

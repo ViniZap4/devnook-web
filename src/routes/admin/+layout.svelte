@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import PageShell from '$lib/components/PageShell.svelte';
@@ -8,7 +7,8 @@
 
 	let { children }: { children: Snippet } = $props();
 
-	onMount(() => {
+	$effect(() => {
+		void $page.url.pathname;
 		if (!userStore.isLoggedIn || !userStore.user?.is_admin) {
 			goto('/dashboard');
 		}

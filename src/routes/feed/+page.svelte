@@ -12,11 +12,17 @@
 	import TrendingRepos from '$lib/components/TrendingRepos.svelte';
 	import SuggestedDevelopers from '$lib/components/SuggestedDevelopers.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 
 	let feedPosts = $state<Post[]>([]);
 	let loading = $state(true);
 	let tab = $state('foryou');
 	let posting = $state(false);
+	let currentPage = $state(1);
+	let totalCount = $state(0);
+
+	const PER_PAGE = 20;
+	const totalPages = $derived(Math.max(1, Math.ceil(totalCount / PER_PAGE)));
 
 	const feedTabs = [
 		{ id: 'foryou', label: 'For You' },
@@ -24,19 +30,37 @@
 		{ id: 'global', label: 'Global' },
 	];
 
-	onMount(async () => {
+	let prevTab = tab;
+	let fetchId = 0;
+
+	onMount(() => {
 		if (!userStore.isLoggedIn) { goto('/'); return; }
-		await loadAll();
+		loadFeed();
 	});
 
-	async function loadAll() {
+	$effect(() => {
+		const _tab = tab;
+		if (_tab !== prevTab) {
+			prevTab = _tab;
+			currentPage = 1;
+			loadFeed();
+		}
+	});
+
+	async function loadFeed() {
 		loading = true;
+		const id = ++fetchId;
 		try {
-			const result = await posts.feed();
+			const tabType = tab === 'foryou' ? undefined : tab;
+			const result = await posts.feed({ page: currentPage, type: tabType });
+			if (id !== fetchId) return;
 			feedPosts = result.posts;
+			totalCount = result.total_count;
 		} catch {
+			if (id !== fetchId) return;
 			feedPosts = [];
 		} finally {
+			if (id !== fetchId) return;
 			loading = false;
 		}
 	}
@@ -55,10 +79,15 @@
 				payload.repo_name = name;
 			}
 			await posts.create(payload);
-			const result = await posts.feed();
-			feedPosts = result.posts;
+			currentPage = 1;
+			await loadFeed();
 		} catch { /* ignore */ }
 		finally { posting = false; }
+	}
+
+	function handlePageChange(p: number) {
+		currentPage = p;
+		loadFeed();
 	}
 
 	async function toggleLike(post: Post) {
@@ -150,6 +179,7 @@
 						</div>
 					{/each}
 				</div>
+				<Pagination page={currentPage} {totalPages} onPageChange={handlePageChange} />
 			{/if}
 		</div>
 

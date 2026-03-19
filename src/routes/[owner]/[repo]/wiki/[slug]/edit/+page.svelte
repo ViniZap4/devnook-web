@@ -1,7 +1,6 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 
 	const owner = $derived($page.params.owner!);
@@ -12,16 +11,27 @@
 	let loading = $state(true);
 	let saving = $state(false);
 	let error = $state('');
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			const blob = await repos.blob(owner, repoName, 'main', `wiki/${slug}.md`);
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const _slug = slug;
+		const id = ++fetchId;
+
+		loading = true;
+		error = '';
+
+		repos.blob(_owner, _repo, 'main', `wiki/${_slug}.md`).then(blob => {
+			if (id !== fetchId) return;
 			body = blob.content;
-		} catch {
+		}).catch(() => {
+			if (id !== fetchId) return;
 			error = 'Page not found';
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	async function savePage() {

@@ -2,12 +2,15 @@
 	import { onMount } from 'svelte';
 	import { admin, repos as reposApi } from '$lib/services/api';
 	import type { Repository } from '$lib/types/repository';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import RepoIcon from '$lib/assets/icons/RepoIcon.svelte';
 	import LockIcon from '$lib/assets/icons/LockIcon.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 
 	let repos = $state<Repository[]>([]);
 	let loading = $state(true);
+	let error = $state('');
 	let search = $state('');
 	let currentPage = $state(1);
 	let totalPages = $state(1);
@@ -16,12 +19,14 @@
 
 	async function loadRepos() {
 		loading = true;
+		error = '';
 		try {
 			const result = await admin.listRepos({ page: currentPage, q: search || undefined });
 			repos = result.repos;
 			totalPages = result.total_pages;
 			totalCount = result.total_count;
 		} catch {
+			error = 'Failed to load repositories';
 			repos = [];
 		} finally {
 			loading = false;
@@ -38,14 +43,24 @@
 		}, 300);
 	}
 
+	async function toggleVisibility(repo: Repository) {
+		try {
+			await reposApi.update(repo.owner, repo.name, { is_private: !repo.is_private });
+			toastStore.success(`${repo.owner}/${repo.name} is now ${repo.is_private ? 'public' : 'private'}`);
+			await loadRepos();
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update visibility');
+		}
+	}
+
 	async function deleteRepo(owner: string, name: string) {
 		if (!confirm(`Delete repository "${owner}/${name}"? This action cannot be undone.`)) return;
 		try {
 			await reposApi.remove(owner, name);
-			repos = repos.filter(r => !(r.owner === owner && r.name === name));
-			totalCount--;
-		} catch {
-			// ignore
+			toastStore.success(`Deleted ${owner}/${name}`);
+			await loadRepos();
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to delete repository');
 		}
 	}
 </script>
@@ -55,7 +70,11 @@
 		<div>
 			<h1 class="text-2xl font-bold" style="color: var(--color-text);">Repositories</h1>
 			<p class="text-sm mt-1" style="color: var(--color-text-dim);">
-				{totalCount} {totalCount === 1 ? 'repository' : 'repositories'} total
+				{#if search}
+					{totalCount} {totalCount === 1 ? 'result' : 'results'} for "{search}"
+				{:else}
+					{totalCount} {totalCount === 1 ? 'repository' : 'repositories'} total
+				{/if}
 			</p>
 		</div>
 	</div>
@@ -74,6 +93,11 @@
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading repositories...</div>
+	{:else if error}
+		<div class="rounded-xl border p-8 text-center" style="border-color: var(--color-error-subtle); background: var(--color-error-subtle);">
+			<p class="text-sm" style="color: var(--color-error);">{error}</p>
+			<button class="text-xs mt-2 underline" style="color: var(--color-error);" onclick={loadRepos}>Retry</button>
+		</div>
 	{:else if repos.length === 0}
 		<div class="rounded-xl border p-12 text-center" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -112,7 +136,7 @@
 							<p class="text-xs truncate mt-0.5" style="color: var(--color-text-dim);">{repo.description}</p>
 						{/if}
 					</div>
-					<div class="flex items-center gap-3 shrink-0">
+					<div class="flex items-center gap-2 shrink-0">
 						{#if repo.stars_count}
 							<span class="flex items-center gap-1 text-xs" style="color: var(--color-text-dim);">
 								<svg class="w-3 h-3" viewBox="0 0 16 16" fill="currentColor"><path d="M8 .25a.75.75 0 0 1 .673.418l1.882 3.815 4.21.612a.75.75 0 0 1 .416 1.279l-3.046 2.97.719 4.192a.75.75 0 0 1-1.088.791L8 12.347l-3.766 1.98a.75.75 0 0 1-1.088-.79l.72-4.194L.818 6.374a.75.75 0 0 1 .416-1.28l4.21-.611L7.327.668A.75.75 0 0 1 8 .25Z"/></svg>
@@ -123,7 +147,15 @@
 							<RelativeTime date={repo.updated_at} />
 						</span>
 						<button
-							class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
+							class="text-xs px-2.5 py-1.5 rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+							style="border-color: var(--glass-border); color: var(--color-text-dim);"
+							onclick={() => toggleVisibility(repo)}
+							title="Toggle visibility"
+						>
+							{repo.is_private ? 'Make Public' : 'Make Private'}
+						</button>
+						<button
+							class="text-xs px-2.5 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
 							style="border-color: var(--glass-border); color: var(--color-error);"
 							onclick={() => deleteRepo(repo.owner, repo.name)}
 						>
@@ -135,22 +167,6 @@
 		</div>
 		</div>
 
-		{#if totalPages > 1}
-			<div class="flex items-center justify-center gap-3">
-				<button
-					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-20"
-					style="border-color: var(--glass-border); color: var(--color-text);"
-					disabled={currentPage <= 1}
-					onclick={() => { currentPage--; loadRepos(); }}
-				>Previous</button>
-				<span class="text-sm" style="color: var(--color-text-dim);">{currentPage} / {totalPages}</span>
-				<button
-					class="px-4 py-2 text-sm rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.05)] disabled:opacity-20"
-					style="border-color: var(--glass-border); color: var(--color-text);"
-					disabled={currentPage >= totalPages}
-					onclick={() => { currentPage++; loadRepos(); }}
-				>Next</button>
-			</div>
-		{/if}
+		<Pagination page={currentPage} {totalPages} onPageChange={(p) => { currentPage = p; loadRepos(); }} />
 	{/if}
 </div>

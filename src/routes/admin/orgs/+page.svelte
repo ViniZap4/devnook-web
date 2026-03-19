@@ -2,11 +2,13 @@
 	import { onMount } from 'svelte';
 	import { admin, orgs as orgsApi } from '$lib/services/api';
 	import type { Organization } from '$lib/types/organization';
+	import { toastStore } from '$lib/stores/toast.svelte';
 	import OrgIcon from '$lib/assets/icons/OrgIcon.svelte';
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 
 	let orgsList = $state<Organization[]>([]);
 	let loading = $state(true);
+	let error = $state('');
 	let search = $state('');
 
 	const filtered = $derived(
@@ -19,23 +21,29 @@
 			: orgsList
 	);
 
-	onMount(async () => {
+	onMount(loadOrgs);
+
+	async function loadOrgs() {
+		loading = true;
+		error = '';
 		try {
 			orgsList = await admin.listOrgs();
 		} catch {
-			// ignore
+			error = 'Failed to load organizations';
+			orgsList = [];
 		} finally {
 			loading = false;
 		}
-	});
+	}
 
 	async function deleteOrg(name: string) {
 		if (!confirm(`Delete organization "${name}"? This action cannot be undone.`)) return;
 		try {
 			await orgsApi.remove(name);
+			toastStore.success(`Deleted organization ${name}`);
 			orgsList = orgsList.filter(o => o.name !== name);
-		} catch {
-			// ignore
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to delete organization');
 		}
 	}
 </script>
@@ -63,6 +71,11 @@
 
 	{#if loading}
 		<div class="py-12 text-center text-sm" style="color: var(--color-text-dim);">Loading organizations...</div>
+	{:else if error}
+		<div class="rounded-xl border p-8 text-center" style="border-color: var(--color-error-subtle); background: var(--color-error-subtle);">
+			<p class="text-sm" style="color: var(--color-error);">{error}</p>
+			<button class="text-xs mt-2 underline" style="color: var(--color-error);" onclick={loadOrgs}>Retry</button>
+		</div>
 	{:else if filtered.length === 0}
 		<div class="rounded-xl border p-12 text-center" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
 			<svg class="w-12 h-12 mx-auto mb-3 opacity-20" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5">
@@ -98,6 +111,13 @@
 								<RelativeTime date={org.created_at} />
 							</span>
 						{/if}
+						<a
+							href="/orgs/{org.name}"
+							class="text-xs px-3 py-1.5 rounded-lg border transition-colors hover:bg-[rgba(255,255,255,0.06)]"
+							style="border-color: var(--glass-border); color: var(--color-text-dim);"
+						>
+							View
+						</a>
 						<button
 							class="text-xs px-3 py-1.5 rounded-lg border transition-colors btn-danger-subtle"
 							style="border-color: var(--glass-border); color: var(--color-error);"

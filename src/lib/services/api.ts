@@ -497,8 +497,18 @@ export interface AdminReposResponse {
 	total_pages: number;
 }
 
+export interface AdminAnalytics {
+	user_growth: { day: string; count: number }[];
+	repo_growth: { day: string; count: number }[];
+	issue_growth: { day: string; count: number }[];
+	active_today: number;
+	new_this_week: number;
+	new_this_month: number;
+}
+
 export const admin = {
 	stats: () => request<AdminStats>('GET', '/api/v1/admin/stats'),
+	analytics: () => request<AdminAnalytics>('GET', '/api/v1/admin/analytics'),
 	listUsers: (opts?: { page?: number; q?: string }) => {
 		const params = new URLSearchParams();
 		if (opts?.page) params.set('page', String(opts.page));
@@ -622,4 +632,113 @@ export const docs = {
 		request<void>('DELETE', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}`),
 	pageVersions: (spaceSlug: string, pageSlug: string) =>
 		request<DocPageVersion[]>('GET', `/api/v1/docs/spaces/${spaceSlug}/pages/${pageSlug}/versions`),
+};
+
+// Projects
+import type { Project, ProjectMember, ProjectColumn, ProjectSwimlane, ProjectSprint, ProjectItem, BoardData, ProjectItemHistory } from '$lib/types/project';
+
+export const projects = {
+	list: () => request<Project[]>('GET', '/api/v1/projects'),
+	create: (data: { name: string; description?: string; methodology: string; visibility?: string; color?: string }) =>
+		request<{ id: number; slug: string }>('POST', '/api/v1/projects', data),
+	get: (slug: string) => request<Project>('GET', `/api/v1/projects/${slug}`),
+	update: (slug: string, data: { name?: string; description?: string; methodology?: string; visibility?: string; default_view?: string; color?: string; icon?: string }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}`, data),
+	remove: (slug: string) => request<void>('DELETE', `/api/v1/projects/${slug}`),
+
+	board: (slug: string, sprintId?: number) => {
+		const qs = sprintId ? `?sprint_id=${sprintId}` : '';
+		return request<BoardData>('GET', `/api/v1/projects/${slug}/board${qs}`);
+	},
+
+	members: (slug: string) => request<ProjectMember[]>('GET', `/api/v1/projects/${slug}/members`),
+	addMember: (slug: string, data: { username: string; role?: string }) =>
+		request<void>('POST', `/api/v1/projects/${slug}/members`, data),
+	updateMember: (slug: string, username: string, data: { role: string }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/members/${username}`, data),
+	removeMember: (slug: string, username: string) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/members/${username}`),
+
+	columns: (slug: string) => request<ProjectColumn[]>('GET', `/api/v1/projects/${slug}/columns`),
+	createColumn: (slug: string, data: { name: string; color?: string; wip_limit?: number }) =>
+		request<{ id: number }>('POST', `/api/v1/projects/${slug}/columns`, data),
+	updateColumn: (slug: string, id: number, data: { name?: string; color?: string; wip_limit?: number; is_done?: boolean }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/columns/${id}`, data),
+	deleteColumn: (slug: string, id: number) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/columns/${id}`),
+	reorderColumns: (slug: string, columnIds: number[]) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/columns/reorder`, { column_ids: columnIds }),
+
+	swimlanes: (slug: string) => request<ProjectSwimlane[]>('GET', `/api/v1/projects/${slug}/swimlanes`),
+	createSwimlane: (slug: string, data: { name: string }) =>
+		request<{ id: number }>('POST', `/api/v1/projects/${slug}/swimlanes`, data),
+	updateSwimlane: (slug: string, id: number, data: { name: string }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/swimlanes/${id}`, data),
+	deleteSwimlane: (slug: string, id: number) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/swimlanes/${id}`),
+
+	sprints: (slug: string) => request<ProjectSprint[]>('GET', `/api/v1/projects/${slug}/sprints`),
+	createSprint: (slug: string, data: { name: string; goal?: string; start_date?: string; end_date?: string }) =>
+		request<{ id: number; number: number }>('POST', `/api/v1/projects/${slug}/sprints`, data),
+	getSprint: (slug: string, id: number) => request<ProjectSprint>('GET', `/api/v1/projects/${slug}/sprints/${id}`),
+	updateSprint: (slug: string, id: number, data: { name?: string; goal?: string; start_date?: string; end_date?: string }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/sprints/${id}`, data),
+	deleteSprint: (slug: string, id: number) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/sprints/${id}`),
+	startSprint: (slug: string, id: number) =>
+		request<void>('POST', `/api/v1/projects/${slug}/sprints/${id}/start`),
+	completeSprint: (slug: string, id: number) =>
+		request<{ velocity: number }>('POST', `/api/v1/projects/${slug}/sprints/${id}/complete`),
+
+	items: (slug: string, opts?: { column_id?: number; sprint_id?: number; assignee?: string; type?: string; priority?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.column_id) params.set('column_id', String(opts.column_id));
+		if (opts?.sprint_id) params.set('sprint_id', String(opts.sprint_id));
+		if (opts?.assignee) params.set('assignee', opts.assignee);
+		if (opts?.type) params.set('type', opts.type);
+		if (opts?.priority) params.set('priority', opts.priority);
+		const qs = params.toString();
+		return request<ProjectItem[]>('GET', `/api/v1/projects/${slug}/items${qs ? '?' + qs : ''}`);
+	},
+	createItem: (slug: string, data: { title: string; body?: string; column_id: number; type?: string; priority?: string; story_points?: number; assignee_id?: number; sprint_id?: number; issue_id?: number; due_date?: string }) =>
+		request<{ id: number }>('POST', `/api/v1/projects/${slug}/items`, data),
+	getItem: (slug: string, id: number) => request<ProjectItem>('GET', `/api/v1/projects/${slug}/items/${id}`),
+	updateItem: (slug: string, id: number, data: { title?: string; body?: string; type?: string; priority?: string; story_points?: number; assignee_id?: number; sprint_id?: number; due_date?: string }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/items/${id}`, data),
+	deleteItem: (slug: string, id: number) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/items/${id}`),
+	moveItem: (slug: string, id: number, data: { column_id: number; position: number; swimlane_id?: number }) =>
+		request<void>('PUT', `/api/v1/projects/${slug}/items/${id}/move`, data),
+	itemHistory: (slug: string, id: number) =>
+		request<ProjectItemHistory[]>('GET', `/api/v1/projects/${slug}/items/${id}/history`),
+
+	linkedRepos: (slug: string) => request<Repository[]>('GET', `/api/v1/projects/${slug}/repos`),
+	linkRepo: (slug: string, repoId: number) =>
+		request<void>('POST', `/api/v1/projects/${slug}/repos`, { repo_id: repoId }),
+	unlinkRepo: (slug: string, repoId: number) =>
+		request<void>('DELETE', `/api/v1/projects/${slug}/repos/${repoId}`),
+};
+
+// Calendar
+import type { CalendarEvent, CalendarEntry } from '$lib/types/calendar';
+
+export const calendar = {
+	events: (opts?: { start?: string; end?: string; type?: string }) => {
+		const params = new URLSearchParams();
+		if (opts?.start) params.set('start', opts.start);
+		if (opts?.end) params.set('end', opts.end);
+		if (opts?.type) params.set('type', opts.type);
+		const qs = params.toString();
+		return request<CalendarEvent[]>('GET', `/api/v1/calendar/events${qs ? '?' + qs : ''}`);
+	},
+	createEvent: (data: { title: string; description?: string; type?: string; start_time: string; end_time?: string; all_day?: boolean; color?: string; recurrence?: string; project_id?: number; milestone_id?: number; issue_id?: number; conversation_id?: number; attendees?: string[] }) =>
+		request<{ id: number }>('POST', '/api/v1/calendar/events', data),
+	getEvent: (id: number) => request<CalendarEvent>('GET', `/api/v1/calendar/events/${id}`),
+	updateEvent: (id: number, data: { title?: string; description?: string; type?: string; start_time?: string; end_time?: string; all_day?: boolean; color?: string; recurrence?: string }) =>
+		request<void>('PUT', `/api/v1/calendar/events/${id}`, data),
+	deleteEvent: (id: number) => request<void>('DELETE', `/api/v1/calendar/events/${id}`),
+	unified: (start: string, end: string) =>
+		request<CalendarEntry[]>('GET', `/api/v1/calendar/unified?start=${start}&end=${end}`),
+	rsvp: (id: number, status: string) =>
+		request<void>('POST', `/api/v1/calendar/events/${id}/rsvp`, { status }),
 };

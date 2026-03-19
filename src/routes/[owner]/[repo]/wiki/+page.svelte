@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 	import type { TreeEntry } from '$lib/types/repository';
 
@@ -10,21 +9,29 @@
 	let wikiPages = $state<TreeEntry[]>([]);
 	let loading = $state(true);
 	let hasWiki = $state(false);
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			const tree = await repos.tree(owner, repoName, 'main', 'wiki');
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const id = ++fetchId;
+
+		loading = true;
+		repos.tree(_owner, _repo, 'main', 'wiki').then(tree => {
+			if (id !== fetchId) return;
 			wikiPages = tree.filter(e => e.type === 'blob' && e.name.endsWith('.md')).sort((a, b) => {
 				if (a.name === 'Home.md') return -1;
 				if (b.name === 'Home.md') return 1;
 				return a.name.localeCompare(b.name);
 			});
 			hasWiki = true;
-		} catch {
+		}).catch(() => {
+			if (id !== fetchId) return;
 			hasWiki = false;
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	function pageSlug(entry: TreeEntry): string {

@@ -8,6 +8,7 @@
 	import RelativeTime from '$lib/components/RelativeTime.svelte';
 	import Skeleton from '$lib/components/Skeleton.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
+	import Pagination from '$lib/components/Pagination.svelte';
 
 	let repos = $state<Repository[]>([]);
 	let loading = $state(true);
@@ -18,6 +19,7 @@
 	let totalPages = $state(1);
 	let totalCount = $state(0);
 	let debounceTimer: ReturnType<typeof setTimeout>;
+	let fetchId = 0;
 
 	const langColors: Record<string, string> = {
 		Go: '#00add8',
@@ -59,6 +61,7 @@
 
 	async function loadRepos() {
 		loading = true;
+		const id = ++fetchId;
 		try {
 			const result = await explore.repos({
 				page: currentPage,
@@ -66,12 +69,15 @@
 				sort,
 				language: language || undefined
 			});
+			if (id !== fetchId) return;
 			repos = result.repos;
 			totalPages = result.total_pages;
 			totalCount = result.total_count;
 		} catch {
+			if (id !== fetchId) return;
 			repos = [];
 		} finally {
+			if (id !== fetchId) return;
 			loading = false;
 		}
 	}
@@ -384,39 +390,7 @@
 				{/each}
 			</div>
 
-			<!-- Pagination -->
-			{#if totalPages > 1}
-				<div class="flex items-center justify-center gap-3 mt-2">
-					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--color-primary-subtle)] disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
-						style="border-color: var(--glass-border); color: var(--color-text);"
-						disabled={currentPage <= 1}
-						onclick={() => {
-							currentPage--;
-							loadRepos();
-						}}
-					>
-						Previous
-					</button>
-					<span
-						class="text-sm font-medium px-3 py-1 rounded-lg"
-						style="color: var(--color-text-dim); background: rgba(255,255,255,0.03);"
-					>
-						{currentPage} / {totalPages}
-					</span>
-					<button
-						class="px-4 py-2 text-sm rounded-xl border transition-all duration-200 hover:bg-[rgba(255,255,255,0.03)] hover:border-[var(--color-primary-subtle)] disabled:opacity-40 disabled:cursor-not-allowed active:scale-[0.97]"
-						style="border-color: var(--glass-border); color: var(--color-text);"
-						disabled={currentPage >= totalPages}
-						onclick={() => {
-							currentPage++;
-							loadRepos();
-						}}
-					>
-						Next
-					</button>
-				</div>
-			{/if}
+			<Pagination page={currentPage} {totalPages} onPageChange={(p) => { currentPage = p; loadRepos(); }} />
 		{/if}
 	</div>
 </PageShell>

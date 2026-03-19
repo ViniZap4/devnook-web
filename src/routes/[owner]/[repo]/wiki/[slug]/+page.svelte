@@ -1,6 +1,5 @@
 <script lang="ts">
 	import { page } from '$app/stores';
-	import { onMount } from 'svelte';
 	import { repos } from '$lib/services/api';
 
 	const owner = $derived($page.params.owner!);
@@ -10,16 +9,27 @@
 	let content = $state('');
 	let loading = $state(true);
 	let notFound = $state(false);
+	let fetchId = 0;
 
-	onMount(async () => {
-		try {
-			const blob = await repos.blob(owner, repoName, 'main', `wiki/${slug}.md`);
+	$effect(() => {
+		const _owner = owner;
+		const _repo = repoName;
+		const _slug = slug;
+		const id = ++fetchId;
+
+		loading = true;
+		notFound = false;
+
+		repos.blob(_owner, _repo, 'main', `wiki/${_slug}.md`).then(blob => {
+			if (id !== fetchId) return;
 			content = blob.content;
-		} catch {
+		}).catch(() => {
+			if (id !== fetchId) return;
 			notFound = true;
-		} finally {
+		}).finally(() => {
+			if (id !== fetchId) return;
 			loading = false;
-		}
+		});
 	});
 
 	function renderMarkdown(md: string): string {

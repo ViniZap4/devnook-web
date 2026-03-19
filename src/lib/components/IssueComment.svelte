@@ -30,7 +30,7 @@
 			await onEdit(comment.id, editBody.trim());
 			editing = false;
 		} catch {
-			// ignore
+			// ignore – parent shows toast
 		} finally {
 			saving = false;
 		}
@@ -45,22 +45,51 @@
 			deleting = false;
 		}
 	}
+
+	function handleEditKeydown(e: KeyboardEvent) {
+		if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+			e.preventDefault();
+			handleSave();
+		}
+		if (e.key === 'Escape') {
+			editing = false;
+		}
+	}
 </script>
 
-<div class="rounded-lg border border-[var(--glass-border)] overflow-hidden">
-	<div class="flex items-center gap-2 px-4 py-2 border-b border-[var(--glass-border)] bg-[rgba(255,255,255,0.03)]">
-		<span class="text-sm text-[var(--color-text)] font-medium">{comment.author}</span>
-		<span class="text-xs text-[var(--color-text)] opacity-40">
+<div class="card overflow-hidden animate-fade-up-sm group">
+	<!-- Comment header -->
+	<div
+		class="flex items-center gap-2 px-4 py-2.5 border-b"
+		style="border-color: var(--glass-border); background: rgba(255,255,255,0.02);"
+	>
+		<!-- Avatar -->
+		<a
+			href="/{comment.author}"
+			class="shrink-0 w-6 h-6 rounded-full flex items-center justify-center text-[0.55rem] font-bold transition-transform duration-200 hover:scale-110"
+			style="background: linear-gradient(135deg, var(--color-primary), var(--color-secondary)); color: white;"
+			title={comment.author}
+		>
+			{comment.author.charAt(0).toUpperCase()}
+		</a>
+
+		<!-- Author + time -->
+		<a href="/{comment.author}" class="animated-link text-sm font-medium" style="color: var(--color-text);">
+			{comment.author}
+		</a>
+		<span class="text-xs" style="color: var(--color-text-dim);">
 			commented <RelativeTime date={comment.created_at} />
 		</span>
 		{#if comment.updated_at && comment.updated_at !== comment.created_at}
-			<span class="text-xs text-[var(--color-text)] opacity-30">· edited</span>
+			<span class="text-xs" style="color: var(--color-text-dim); opacity: 0.5;">· edited</span>
 		{/if}
+
+		<!-- Actions (only for comment author, appear on hover) -->
 		{#if canModify}
-			<div class="ml-auto flex items-center gap-2">
+			<div class="ml-auto flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
 				{#if onEdit && !editing}
 					<button
-						class="text-xs hover:underline"
+						class="text-xs px-2.5 py-1 rounded-lg glass-subtle transition-all duration-200 press-scale"
 						style="color: var(--color-text-dim);"
 						onclick={() => { editBody = comment.body; editing = true; confirmDelete = false; }}
 					>Edit</button>
@@ -68,19 +97,19 @@
 				{#if onDelete}
 					{#if confirmDelete}
 						<button
-							class="text-xs font-medium"
-							style="color: var(--color-error);"
+							class="text-xs px-2.5 py-1 rounded-lg font-medium transition-all duration-200 press-scale"
+							style="color: var(--color-error); background: var(--color-error-subtle);"
 							onclick={handleDelete}
 							disabled={deleting}
-						>{deleting ? 'Deleting...' : 'Confirm delete'}</button>
+						>{deleting ? 'Deleting...' : 'Confirm'}</button>
 						<button
-							class="text-xs"
+							class="text-xs px-2.5 py-1 rounded-lg glass-subtle transition-all duration-200 press-scale"
 							style="color: var(--color-text-dim);"
 							onclick={() => { confirmDelete = false; }}
 						>Cancel</button>
 					{:else}
 						<button
-							class="text-xs hover:underline"
+							class="text-xs px-2.5 py-1 rounded-lg glass-subtle transition-all duration-200 press-scale"
 							style="color: var(--color-text-dim);"
 							onclick={() => { confirmDelete = true; editing = false; }}
 						>Delete</button>
@@ -89,30 +118,37 @@
 			</div>
 		{/if}
 	</div>
+
+	<!-- Body / edit area -->
 	{#if editing}
-		<div class="p-4 flex flex-col gap-2">
+		<div class="p-4 flex flex-col gap-3 animate-fade-up-sm">
 			<textarea
 				bind:value={editBody}
-				rows={4}
-				class="w-full px-3 py-2 text-sm rounded-lg border resize-y"
-				style="border-color: var(--glass-border); background-color: #0f1629; color: var(--color-text);"
+				rows={5}
+				onkeydown={handleEditKeydown}
+				class="w-full px-4 py-3 text-sm rounded-xl border resize-y bg-transparent font-mono transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+				style="border-color: var(--glass-border); color: var(--color-text);"
+				placeholder="Write a comment..."
 			></textarea>
 			<div class="flex items-center gap-2">
 				<button
 					onclick={handleSave}
 					disabled={saving || !editBody.trim()}
-					class="px-3 py-1.5 text-xs font-medium rounded-lg text-white disabled:opacity-40"
-					style="background-color: var(--color-primary);"
+					class="btn-glow px-4 py-2 text-xs font-semibold rounded-xl text-white transition-all duration-200 disabled:opacity-40"
+					style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 				>{saving ? 'Saving...' : 'Update comment'}</button>
 				<button
 					onclick={() => { editing = false; }}
-					class="px-3 py-1.5 text-xs rounded-lg"
+					class="px-4 py-2 text-xs rounded-xl glass-subtle transition-all duration-200 press-scale"
 					style="color: var(--color-text-dim);"
 				>Cancel</button>
+				<span class="text-[0.6rem] ml-auto" style="color: var(--color-text-dim); opacity: 0.6;">
+					Ctrl+Enter to save · Esc to cancel
+				</span>
 			</div>
 		</div>
 	{:else}
-		<div class="p-4 text-[var(--color-text)]">
+		<div class="p-4" style="color: var(--color-text);">
 			<MarkdownRenderer content={comment.body} />
 		</div>
 	{/if}

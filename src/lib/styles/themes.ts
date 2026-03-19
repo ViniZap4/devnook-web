@@ -461,7 +461,7 @@ function computeGlassProps(theme: BaseTheme): Pick<Theme, 'glassBg' | 'glassBord
 	const r = parseInt(theme.surface.slice(1, 3), 16);
 	const g = parseInt(theme.surface.slice(3, 5), 16);
 	const b = parseInt(theme.surface.slice(5, 7), 16);
-	const alpha = theme.isDark ? 0.8 : 0.85;
+	const alpha = theme.isDark ? 0.92 : 0.94;
 
 	// Parse primary for glow
 	const pr = parseInt(theme.primary.slice(1, 3), 16);
