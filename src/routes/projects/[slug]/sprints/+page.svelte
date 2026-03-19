@@ -163,11 +163,8 @@
 
 		<!-- New sprint form -->
 		{#if showNewForm}
-			<div
-				class="rounded-xl border p-5 flex flex-col gap-4"
-				style="border-color: var(--color-primary); background: color-mix(in srgb, var(--color-primary) 5%, var(--glass-bg));"
-			>
-				<h3 class="text-sm font-semibold" style="color: var(--color-text);">New Sprint</h3>
+			<div class="card p-5 flex flex-col gap-4 animate-fade-up-sm" style="border-color: var(--color-primary);">
+				<h3 class="section-title">New Sprint</h3>
 				<div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
 					<div class="flex flex-col gap-1.5">
 						<label class="text-xs font-medium" style="color: var(--color-text-dim);">Name *</label>
@@ -175,8 +172,8 @@
 							type="text"
 							bind:value={newName}
 							placeholder="Sprint 1"
-							class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-							style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+							class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
@@ -185,8 +182,8 @@
 							type="text"
 							bind:value={newGoal}
 							placeholder="Sprint goal..."
-							class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-							style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+							class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
@@ -194,8 +191,8 @@
 						<input
 							type="date"
 							bind:value={newStartDate}
-							class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-							style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+							class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 					</div>
 					<div class="flex flex-col gap-1.5">
@@ -203,8 +200,8 @@
 						<input
 							type="date"
 							bind:value={newEndDate}
-							class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-							style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+							class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 					</div>
 				</div>
@@ -230,10 +227,7 @@
 
 		<!-- Sprint cards -->
 		{#if sprints.length === 0}
-			<div
-				class="rounded-xl border flex flex-col items-center justify-center py-16 gap-3"
-				style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
-			>
+			<div class="card flex flex-col items-center justify-center py-16 gap-3">
 				<svg class="w-12 h-12 opacity-10" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
 				</svg>
@@ -246,8 +240,8 @@
 					{@const pct = progressPct(sprint)}
 					{@const isActive = sprint.state === 'active'}
 					<div
-						class="rounded-xl border p-5 flex flex-col gap-3 transition-all"
-						style="border-color: {isActive ? 'color-mix(in srgb, #34d399 35%, var(--glass-border))' : 'var(--glass-border)'}; background: {isActive ? 'color-mix(in srgb, #34d399 4%, var(--glass-bg))' : 'var(--glass-bg)'}; backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
+						class="card p-5 flex flex-col gap-3 row-animate"
+						style="animation-delay: {i * 0.04}s; {isActive ? 'border-color: color-mix(in srgb, var(--color-success) 35%, var(--glass-border));' : ''}"
 					>
 						<!-- Top row: name + state + actions -->
 						<div class="flex items-start justify-between gap-3 flex-wrap">

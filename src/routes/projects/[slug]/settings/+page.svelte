@@ -340,11 +340,11 @@
 	};
 </script>
 
-<div class="flex flex-col gap-6 max-w-3xl">
+<div class="flex flex-col gap-6 max-w-3xl content-reveal">
 
 	<!-- ── Section: General ── -->
-	<section class="rounded-xl border p-5 flex flex-col gap-4" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
-		<h2 class="text-sm font-semibold" style="color: var(--color-text);">General</h2>
+	<section class="card p-5 flex flex-col gap-4 card-animate stagger-1">
+		<h2 class="section-title">General</h2>
 
 		{#if generalLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -355,8 +355,8 @@
 					<input
 						type="text"
 						bind:value={generalName}
-						class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					/>
 				</div>
 
@@ -365,8 +365,8 @@
 					<textarea
 						bind:value={generalDescription}
 						rows="3"
-						class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors resize-none"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors resize-none focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					></textarea>
 				</div>
 
@@ -374,8 +374,8 @@
 					<label class="text-xs font-medium" style="color: var(--color-text-dim);">Methodology</label>
 					<select
 						bind:value={generalMethodology}
-						class="px-3 py-2 text-sm rounded-lg border outline-none cursor-pointer transition-colors"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						{#each ['kanban','scrum','scrumban','xp','waterfall','custom'] as m}
 							<option value={m}>{m.charAt(0).toUpperCase() + m.slice(1)}</option>
@@ -387,8 +387,8 @@
 					<label class="text-xs font-medium" style="color: var(--color-text-dim);">Visibility</label>
 					<select
 						bind:value={generalVisibility}
-						class="px-3 py-2 text-sm rounded-lg border outline-none cursor-pointer transition-colors"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="private">Private</option>
 						<option value="members">Members only</option>
@@ -409,7 +409,7 @@
 							type="text"
 							bind:value={generalColor}
 							class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none transition-colors font-mono"
-							style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+							style="border-color: var(--glass-border); color: var(--color-text);"
 						/>
 					</div>
 				</div>
@@ -420,16 +420,16 @@
 						type="text"
 						bind:value={generalIcon}
 						placeholder="e.g. 🚀"
-						class="px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						class="px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					/>
 				</div>
 			</div>
 
 			<div class="pt-1">
 				<button
-					class="px-4 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110"
-					style="background: var(--color-primary);"
+					class="btn-glow px-5 py-2.5 text-sm font-semibold rounded-xl text-white disabled:opacity-40 transition-all hover:scale-[1.02] active:scale-[0.98]"
+					style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 					disabled={generalSaving || !generalName.trim()}
 					onclick={saveGeneral}
 				>
@@ -440,8 +440,8 @@
 	</section>
 
 	<!-- ── Section: Columns ── -->
-	<section class="rounded-xl border p-5 flex flex-col gap-4" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
-		<h2 class="text-sm font-semibold" style="color: var(--color-text);">Columns</h2>
+	<section class="card p-5 flex flex-col gap-4 card-animate stagger-2">
+		<h2 class="section-title">Columns</h2>
 
 		{#if columnsLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -590,7 +590,7 @@
 					placeholder="New column name..."
 					onkeydown={(e) => { if (e.key === 'Enter') addColumn(); }}
 					class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-					style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				<button
 					class="px-3.5 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
@@ -605,8 +605,8 @@
 	</section>
 
 	<!-- ── Section: Members ── -->
-	<section class="rounded-xl border p-5 flex flex-col gap-4" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
-		<h2 class="text-sm font-semibold" style="color: var(--color-text);">Members</h2>
+	<section class="card p-5 flex flex-col gap-4 card-animate stagger-3">
+		<h2 class="section-title">Members</h2>
 
 		{#if membersLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -657,7 +657,7 @@
 					placeholder="Username to add..."
 					onkeydown={(e) => { if (e.key === 'Enter') addMember(); }}
 					class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-					style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				<button
 					class="px-3.5 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
@@ -672,8 +672,8 @@
 	</section>
 
 	<!-- ── Section: Linked Repos ── -->
-	<section class="rounded-xl border p-5 flex flex-col gap-4" style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);">
-		<h2 class="text-sm font-semibold" style="color: var(--color-text);">Linked Repositories</h2>
+	<section class="card p-5 flex flex-col gap-4 card-animate stagger-4">
+		<h2 class="section-title">Linked Repositories</h2>
 
 		{#if linkedReposLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -721,7 +721,7 @@
 					<select
 						bind:value={selectedRepoId}
 						class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none cursor-pointer transition-colors"
-						style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="">Select a repository...</option>
 						{#each availableRepos as repo}
@@ -744,8 +744,8 @@
 	</section>
 
 	<!-- ── Section: Danger Zone ── -->
-	<section class="rounded-xl border p-5 flex flex-col gap-4" style="border-color: color-mix(in srgb, var(--color-error) 30%, transparent); background: color-mix(in srgb, var(--color-error) 4%, var(--glass-bg));">
-		<h2 class="text-sm font-semibold" style="color: var(--color-error);">Danger Zone</h2>
+	<section class="card p-5 flex flex-col gap-4 card-animate stagger-5" style="border-color: color-mix(in srgb, var(--color-error) 30%, transparent);">
+		<h2 class="section-title" style="color: var(--color-error);">Danger Zone</h2>
 
 		<div class="flex flex-col gap-2">
 			<p class="text-sm" style="color: var(--color-text-dim);">
@@ -761,7 +761,7 @@
 					bind:value={deleteConfirm}
 					placeholder={slug}
 					class="flex-1 max-w-xs px-3 py-2 text-sm rounded-lg border outline-none transition-colors font-mono"
-					style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				<button
 					class="px-4 py-2 text-sm font-medium rounded-lg disabled:opacity-40 transition-all hover:brightness-110"

@@ -164,7 +164,7 @@
 					placeholder="Search items..."
 					bind:value={searchQuery}
 					class="w-full pl-9 pr-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-					style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 			</div>
 
@@ -172,7 +172,7 @@
 			<select
 				bind:value={filterType}
 				class="text-xs px-2.5 py-2 rounded-lg border outline-none cursor-pointer transition-colors"
-				style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+				style="border-color: var(--glass-border); color: var(--color-text);"
 			>
 				<option value="">All types</option>
 				{#each Object.entries(typeConfig) as [key, cfg]}
@@ -184,7 +184,7 @@
 			<select
 				bind:value={filterPriority}
 				class="text-xs px-2.5 py-2 rounded-lg border outline-none cursor-pointer transition-colors"
-				style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+				style="border-color: var(--glass-border); color: var(--color-text);"
 			>
 				<option value="">All priorities</option>
 				{#each Object.entries(priorityConfig) as [key, cfg]}
@@ -197,7 +197,7 @@
 				<select
 					bind:value={filterAssignee}
 					class="text-xs px-2.5 py-2 rounded-lg border outline-none cursor-pointer transition-colors"
-					style="background: var(--color-surface); border-color: var(--glass-border); color: var(--color-text);"
+					style="border-color: var(--glass-border); color: var(--color-text);"
 				>
 					<option value="">All assignees</option>
 					{#each uniqueAssignees as assignee}
@@ -223,10 +223,7 @@
 
 		<!-- Table -->
 		{#if sorted.length === 0}
-			<div
-				class="rounded-xl border flex flex-col items-center justify-center py-16 gap-3"
-				style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
-			>
+			<div class="card flex flex-col items-center justify-center py-16 gap-3">
 				<svg class="w-12 h-12 opacity-10" style="color: var(--color-text);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1">
 					<path stroke-linecap="round" stroke-linejoin="round" d="M4 6h16M4 10h16M4 14h16M4 18h16" />
 				</svg>
@@ -237,8 +234,7 @@
 		{:else}
 			<div class="overflow-x-auto -mx-0.5">
 				<div
-					class="rounded-xl border overflow-hidden min-w-[680px]"
-					style="border-color: var(--glass-border); background: var(--glass-bg); backdrop-filter: blur(16px); -webkit-backdrop-filter: blur(16px);"
+					class="card overflow-hidden min-w-[680px]"
 				>
 					<!-- Header -->
 					<div
