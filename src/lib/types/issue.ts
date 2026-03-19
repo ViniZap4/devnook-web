@@ -11,6 +11,11 @@ export interface Issue {
 	assignee_id?: number;
 	assignee?: string;
 	labels?: Label[];
+	priority: 'critical' | 'high' | 'medium' | 'low' | 'none';
+	type: 'task' | 'bug' | 'feature' | 'story' | 'epic';
+	due_date?: string;
+	story_points: number;
+	comment_count?: number;
 	created_at: string;
 	updated_at: string;
 }

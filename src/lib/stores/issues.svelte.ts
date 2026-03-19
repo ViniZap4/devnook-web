@@ -8,7 +8,7 @@ export const issuesStore = {
 	get issues() { return issuesList; },
 	get loading() { return loading; },
 
-	async load(owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string }) {
+	async load(owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string; sort?: string; direction?: string; type?: string; priority?: string }) {
 		loading = true;
 		try {
 			issuesList = await api.list(owner, repo, opts);
@@ -19,7 +19,7 @@ export const issuesStore = {
 		}
 	},
 
-	async create(owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[] }) {
+	async create(owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[]; priority?: string; type?: string; due_date?: string; story_points?: number }) {
 		return await api.create(owner, repo, data);
 	},
 

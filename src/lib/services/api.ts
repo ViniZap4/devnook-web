@@ -411,21 +411,25 @@ export const orgs = {
 import type { Issue, IssueComment } from '$lib/types/issue';
 
 export const issues = {
-	list: (owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string }) => {
+	list: (owner: string, repo: string, opts?: { state?: string; labels?: string; milestone?: string; assignee?: string; q?: string; sort?: string; direction?: string; type?: string; priority?: string }) => {
 		const params = new URLSearchParams();
 		if (opts?.state) params.set('state', opts.state);
 		if (opts?.labels) params.set('labels', opts.labels);
 		if (opts?.milestone) params.set('milestone', opts.milestone);
 		if (opts?.assignee) params.set('assignee', opts.assignee);
 		if (opts?.q) params.set('q', opts.q);
+		if (opts?.sort) params.set('sort', opts.sort);
+		if (opts?.direction) params.set('direction', opts.direction);
+		if (opts?.type) params.set('type', opts.type);
+		if (opts?.priority) params.set('priority', opts.priority);
 		const qs = params.toString();
 		return request<Issue[]>('GET', `/api/v1/repos/${owner}/${repo}/issues${qs ? '?' + qs : ''}`);
 	},
-	create: (owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[] }) =>
+	create: (owner: string, repo: string, data: { title: string; body: string; milestone_id?: number; assignee_id?: number; label_ids?: number[]; priority?: string; type?: string; due_date?: string; story_points?: number }) =>
 		request<{ id: number; number: number }>('POST', `/api/v1/repos/${owner}/${repo}/issues`, data),
 	get: (owner: string, repo: string, number: number) =>
 		request<Issue>('GET', `/api/v1/repos/${owner}/${repo}/issues/${number}`),
-	update: (owner: string, repo: string, number: number, data: { title?: string; body?: string; state?: string; milestone_id?: number; assignee_id?: number }) =>
+	update: (owner: string, repo: string, number: number, data: { title?: string; body?: string; state?: string; milestone_id?: number; assignee_id?: number; priority?: string; type?: string; due_date?: string; story_points?: number }) =>
 		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/issues/${number}`, data),
 	comments: (owner: string, repo: string, number: number) =>
 		request<IssueComment[]>('GET', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments`),
@@ -434,7 +438,9 @@ export const issues = {
 	updateComment: (owner: string, repo: string, number: number, id: number, data: { body: string }) =>
 		request<void>('PUT', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`, data),
 	removeComment: (owner: string, repo: string, number: number, id: number) =>
-		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`)
+		request<void>('DELETE', `/api/v1/repos/${owner}/${repo}/issues/${number}/comments/${id}`),
+	addToProject: (owner: string, repo: string, number: number, data: { project_slug: string; column_id: number }) =>
+		request<{ id: number }>('POST', `/api/v1/repos/${owner}/${repo}/issues/${number}/add-to-project`, data),
 };
 
 // Branch Rules
