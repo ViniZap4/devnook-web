@@ -19,6 +19,10 @@
 	let selectedLabels = $state<number[]>([]);
 	let selectedMilestone = $state<number | undefined>(undefined);
 	let assignee = $state('');
+	let issueType = $state('task');
+	let issuePriority = $state('medium');
+	let dueDate = $state('');
+	let storyPoints = $state(0);
 
 	let fetchId = 0;
 
@@ -55,7 +59,11 @@
 				body,
 				label_ids: selectedLabels.length > 0 ? selectedLabels : undefined,
 				milestone_id: selectedMilestone || undefined,
-				assignee_id: undefined
+				assignee_id: undefined,
+				type: issueType,
+				priority: issuePriority,
+				due_date: dueDate || undefined,
+				story_points: storyPoints || undefined
 			});
 			toastStore.success('Issue created successfully');
 			goto(`/${owner}/${repoName}/issues/${result.number}`);
@@ -237,6 +245,60 @@
 					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				<p class="mt-1.5 text-[0.6rem]" style="color: var(--color-text-dim);">Enter a collaborator's username</p>
+			</div>
+
+			<!-- Type & Priority -->
+			<div class="card p-4 sidebar-animate" style="animation-delay: 0.4s;">
+				<h3 class="section-title mb-3">Properties</h3>
+				<div class="flex flex-col gap-3">
+					<div>
+						<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Type</label>
+						<select
+							bind:value={issueType}
+							class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+							style="border-color: var(--glass-border); color: var(--color-text);"
+						>
+							<option value="task">Task</option>
+							<option value="bug">Bug</option>
+							<option value="feature">Feature</option>
+							<option value="story">Story</option>
+							<option value="epic">Epic</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Priority</label>
+						<select
+							bind:value={issuePriority}
+							class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+							style="border-color: var(--glass-border); color: var(--color-text);"
+						>
+							<option value="critical">Critical</option>
+							<option value="high">High</option>
+							<option value="medium">Medium</option>
+							<option value="low">Low</option>
+							<option value="none">None</option>
+						</select>
+					</div>
+					<div>
+						<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Due Date</label>
+						<input
+							type="date"
+							bind:value={dueDate}
+							class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+							style="border-color: var(--glass-border); color: var(--color-text);"
+						/>
+					</div>
+					<div>
+						<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Story Points</label>
+						<input
+							type="number"
+							min="0"
+							bind:value={storyPoints}
+							class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+							style="border-color: var(--glass-border); color: var(--color-text);"
+						/>
+					</div>
+				</div>
 			</div>
 		</div>
 	</form>

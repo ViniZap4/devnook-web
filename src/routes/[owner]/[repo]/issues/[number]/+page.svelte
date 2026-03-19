@@ -581,8 +581,68 @@
 					{/if}
 				</div>
 
-				<!-- Metadata footer -->
+				<!-- Type & Priority -->
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.4s;">
+					<h3 class="section-title mb-3">Properties</h3>
+					<div class="flex flex-col gap-3">
+						{#if isOwner}
+							<div>
+								<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Type</label>
+								<select
+									value={issue.type || 'task'}
+									onchange={(e) => {
+										const val = (e.target as HTMLSelectElement).value;
+										issuesApi.update(owner, repoName, issueNumber, { type: val }).then(() => {
+											issue = { ...issue!, type: val as any };
+											toastStore.success('Type updated');
+										}).catch(() => toastStore.error('Failed to update type'));
+									}}
+									class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+									style="border-color: var(--glass-border); color: var(--color-text);"
+								>
+									<option value="task">Task</option>
+									<option value="bug">Bug</option>
+									<option value="feature">Feature</option>
+									<option value="story">Story</option>
+									<option value="epic">Epic</option>
+								</select>
+							</div>
+							<div>
+								<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Priority</label>
+								<select
+									value={issue.priority || 'medium'}
+									onchange={(e) => {
+										const val = (e.target as HTMLSelectElement).value;
+										issuesApi.update(owner, repoName, issueNumber, { priority: val }).then(() => {
+											issue = { ...issue!, priority: val as any };
+											toastStore.success('Priority updated');
+										}).catch(() => toastStore.error('Failed to update priority'));
+									}}
+									class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+									style="border-color: var(--glass-border); color: var(--color-text);"
+								>
+									<option value="critical">Critical</option>
+									<option value="high">High</option>
+									<option value="medium">Medium</option>
+									<option value="low">Low</option>
+									<option value="none">None</option>
+								</select>
+							</div>
+						{:else}
+							<div class="flex items-center justify-between text-xs">
+								<span style="color: var(--color-text-dim);">Type</span>
+								<span class="capitalize" style="color: var(--color-text);">{issue.type || 'task'}</span>
+							</div>
+							<div class="flex items-center justify-between text-xs">
+								<span style="color: var(--color-text-dim);">Priority</span>
+								<span class="capitalize" style="color: var(--color-text);">{issue.priority || 'medium'}</span>
+							</div>
+						{/if}
+					</div>
+				</div>
+
+				<!-- Metadata -->
+				<div class="card p-4 sidebar-animate" style="animation-delay: 0.5s;">
 					<h3 class="section-title mb-3">Details</h3>
 					<dl class="flex flex-col gap-2 text-xs">
 						<div class="flex items-center justify-between">
@@ -599,6 +659,20 @@
 								<a href="/{issue.author}" class="animated-link font-medium" style="color: var(--color-primary);">{issue.author}</a>
 							</dd>
 						</div>
+						{#if issue.story_points > 0}
+							<div class="flex items-center justify-between">
+								<dt style="color: var(--color-text-dim);">Story Points</dt>
+								<dd style="color: var(--color-text);">{issue.story_points}</dd>
+							</div>
+						{/if}
+						{#if issue.due_date}
+							<div class="flex items-center justify-between">
+								<dt style="color: var(--color-text-dim);">Due Date</dt>
+								<dd style="color: {issue.state === 'open' && new Date(issue.due_date) < new Date() ? 'var(--color-error)' : 'var(--color-text)'};">
+									{new Date(issue.due_date).toLocaleDateString()}
+								</dd>
+							</div>
+						{/if}
 					</dl>
 				</div>
 			</div>

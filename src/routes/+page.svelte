@@ -1,5 +1,4 @@
 <script lang="ts">
-	import { onMount } from 'svelte';
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import Spinner from '$lib/components/Spinner.svelte';
@@ -19,16 +18,16 @@
 		}
 	});
 
-	onMount(async () => {
-		// Re-init after logout (initialized was reset)
-		if (!userStore.initialized) {
-			await userStore.init();
-		}
+	// Root layout already calls userStore.init() — no need to re-init here.
+	// Just check auth state and redirect if already logged in.
+	$effect(() => {
+		if (!userStore.initialized) return;
 		if (userStore.isLoggedIn) {
 			redirecting = true;
 			goto('/dashboard');
 			return;
 		}
+		// Show the form with entrance animation
 		requestAnimationFrame(() => { mounted = true; });
 	});
 

@@ -35,6 +35,7 @@ export const userStore = {
 	 * If user is cached, show immediately and revalidate silently.
 	 */
 	async init() {
+		if (initialized) return;
 		registerUnauthorizedHandler(() => userStore.logout());
 
 		if (token) {
@@ -42,21 +43,13 @@ export const userStore = {
 				// User is cached — mark as initialized immediately, revalidate in background
 				initialized = true;
 				wsStore.connect(token);
-				// Silently refresh user data + sync theme
+				// Silently refresh user data + sync theme.
+				// 401 is handled by the global onUnauthorized callback (triggers logout).
+				// All other errors (network, 500, etc) are silently ignored — keep cached session.
 				auth.me().then((fresh) => {
 					user = fresh;
 					persistUser(fresh);
-				}).catch((err) => {
-					// Only logout on auth errors (401), not network failures
-					// The request() function already triggers onUnauthorized for 401s,
-					// so network errors (TypeError) should keep the session alive.
-					if (err instanceof TypeError) {
-						// Network error — server unreachable, keep cached session
-						return;
-					}
-					// Explicit auth error — force logout
-					userStore.logout();
-				});
+				}).catch(() => {});
 				themeStore.loadFromServer();
 				return;
 			}
@@ -95,6 +88,7 @@ export const userStore = {
 		setToken(res.token);
 		user = res.user;
 		persistUser(res.user);
+		initialized = true;
 		wsStore.connect(res.token);
 		themeStore.loadFromServer();
 	},
@@ -105,6 +99,7 @@ export const userStore = {
 		user = res.user;
 		persistUser(res.user);
 		needsSetup = false;
+		initialized = true;
 		wsStore.connect(res.token);
 		themeStore.loadFromServer();
 	},
@@ -114,6 +109,7 @@ export const userStore = {
 		setToken(res.token);
 		user = res.user;
 		persistUser(res.user);
+		initialized = true;
 		wsStore.connect(res.token);
 		themeStore.loadFromServer();
 	},
