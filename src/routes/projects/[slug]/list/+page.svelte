@@ -3,13 +3,15 @@
 	import { goto } from '$app/navigation';
 	import { userStore } from '$lib/stores/user.svelte';
 	import { projects } from '$lib/services/api';
-	import type { ProjectItem } from '$lib/types/project';
+	import { toastStore } from '$lib/stores/toast.svelte';
+	import type { ProjectItem, ProjectColumn } from '$lib/types/project';
 	import Spinner from '$lib/components/Spinner.svelte';
 	import Avatar from '$lib/components/Avatar.svelte';
 
 	const slug = $derived($page.params.slug!);
 
 	let items = $state<ProjectItem[]>([]);
+	let columns = $state<ProjectColumn[]>([]);
 	let loading = $state(true);
 	let fetchId = 0;
 
@@ -23,6 +25,18 @@
 	type SortKey = 'title' | 'type' | 'priority' | 'column_name' | 'assignee' | 'story_points' | 'due_date';
 	let sortKey = $state<SortKey>('type');
 	let sortAsc = $state(true);
+
+	// Inline expansion state
+	let expandedId = $state<number | null>(null);
+	let editTitle = $state('');
+	let editBody = $state('');
+	let editType = $state('');
+	let editPriority = $state('');
+	let editStoryPoints = $state(0);
+	let editDueDate = $state('');
+	let editColumnId = $state(0);
+	let saving = $state(false);
+	let deleting = $state(false);
 
 	const tableColumns: { key: string; label: string }[] = [
 		{ key: 'type', label: 'Type' },
@@ -61,10 +75,16 @@
 
 		loading = true;
 		items = [];
+		columns = [];
+		expandedId = null;
 
-		projects.items(_slug).then(data => {
+		Promise.all([
+			projects.items(_slug),
+			projects.columns(_slug)
+		]).then(([itemData, colData]) => {
 			if (id !== fetchId) return;
-			items = data;
+			items = itemData;
+			columns = colData;
 		}).catch(() => {
 			if (id !== fetchId) return;
 		}).finally(() => {
@@ -143,6 +163,76 @@
 	}
 
 	const hasFilters = $derived(!!searchQuery || !!filterType || !!filterPriority || !!filterAssignee);
+
+	// ---- Inline expansion ----
+
+	function toggleExpand(item: ProjectItem) {
+		if (expandedId === item.id) {
+			expandedId = null;
+			return;
+		}
+		expandedId = item.id;
+		editTitle = item.title;
+		editBody = item.body ?? '';
+		editType = item.type;
+		editPriority = item.priority;
+		editStoryPoints = item.story_points ?? 0;
+		editDueDate = item.due_date ? item.due_date.slice(0, 10) : '';
+		editColumnId = item.column_id;
+	}
+
+	function closeExpand() {
+		expandedId = null;
+	}
+
+	async function saveItem(item: ProjectItem) {
+		if (saving) return;
+		saving = true;
+		try {
+			await projects.updateItem(slug, item.id, {
+				title: editTitle.trim() || item.title,
+				body: editBody,
+				type: editType as ProjectItem['type'],
+				priority: editPriority as ProjectItem['priority'],
+				story_points: editStoryPoints,
+				due_date: editDueDate || undefined
+			});
+
+			// Move to different column if changed
+			if (editColumnId !== item.column_id) {
+				await projects.moveItem(slug, item.id, { column_id: editColumnId, position: item.position });
+			}
+
+			// Refresh items list
+			const [fresh, freshCols] = await Promise.all([
+				projects.items(slug),
+				projects.columns(slug)
+			]);
+			items = fresh;
+			columns = freshCols;
+			expandedId = null;
+			toastStore.success('Item updated');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update item');
+		} finally {
+			saving = false;
+		}
+	}
+
+	async function deleteItem(item: ProjectItem) {
+		if (!confirm(`Delete "${item.title}"? This cannot be undone.`)) return;
+		deleting = true;
+		try {
+			await projects.deleteItem(slug, item.id);
+			items = items.filter(i => i.id !== item.id);
+			expandedId = null;
+			toastStore.success('Item deleted');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to delete item');
+		} finally {
+			deleting = false;
+		}
+	}
 </script>
 
 {#if loading}
@@ -151,7 +241,7 @@
 		<span class="text-sm" style="color: var(--color-text-dim);">Loading items...</span>
 	</div>
 {:else}
-	<div class="flex flex-col gap-4">
+	<div class="flex flex-col gap-4 content-reveal">
 		<!-- Filter bar -->
 		<div class="flex items-center gap-2 flex-wrap">
 			<!-- Search -->
@@ -233,13 +323,11 @@
 			</div>
 		{:else}
 			<div class="overflow-x-auto -mx-0.5">
-				<div
-					class="card overflow-hidden min-w-[680px]"
-				>
+				<div class="card overflow-hidden min-w-[680px]">
 					<!-- Header -->
 					<div
 						class="grid items-center gap-3 px-4 py-2.5 text-xs font-medium uppercase tracking-wider border-b"
-						style="grid-template-columns: 80px 1fr 90px 120px 100px 60px 90px; border-color: var(--glass-border); color: var(--color-text-dim); background: rgba(255,255,255,0.02);"
+						style="grid-template-columns: 80px 1fr 90px 120px 100px 60px 90px 28px; border-color: var(--glass-border); color: var(--color-text-dim); background: rgba(255,255,255,0.02);"
 					>
 						{#each tableColumns as col}
 							<button
@@ -254,20 +342,24 @@
 								{/if}
 							</button>
 						{/each}
+						<!-- chevron column header spacer -->
+						<span></span>
 					</div>
 
 					<!-- Rows -->
 					{#each sorted as item, i (item.id)}
 						{@const tc = typeConfig[item.type] ?? typeConfig.task}
 						{@const pc = priorityConfig[item.priority] ?? priorityConfig.none}
-						<div
-							class="grid items-center gap-3 px-4 py-3 transition-colors cursor-pointer {i > 0 ? 'border-t' : ''}"
-							style="grid-template-columns: 80px 1fr 90px 120px 100px 60px 90px; border-color: var(--glass-border);"
+						{@const isExpanded = expandedId === item.id}
+
+						<!-- Data row -->
+						<button
+							class="row-animate w-full grid items-center gap-3 px-4 py-3 transition-colors cursor-pointer text-left {i > 0 ? 'border-t' : ''}"
+							style="grid-template-columns: 80px 1fr 90px 120px 100px 60px 90px 28px; border-color: var(--glass-border); animation-delay: {Math.min(i * 40, 320)}ms; background: {isExpanded ? 'rgba(255,255,255,0.035)' : 'transparent'};"
 							role="row"
-							tabindex="0"
-							onclick={() => {}}
-							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') {} }}
-							class:hover-row={true}
+							onclick={() => toggleExpand(item)}
+							onkeydown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); toggleExpand(item); } }}
+							class:hover-row={!isExpanded}
 						>
 							<!-- Type -->
 							<div>
@@ -361,7 +453,179 @@
 									<span class="text-xs" style="color: var(--color-text-dim); opacity: 0.4;">—</span>
 								{/if}
 							</div>
-						</div>
+
+							<!-- Expand chevron -->
+							<div class="flex items-center justify-center">
+								<svg
+									class="w-3.5 h-3.5 transition-transform duration-200 shrink-0"
+									style="color: var(--color-text-dim); transform: rotate({isExpanded ? '180deg' : '0deg'});"
+									fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"
+								>
+									<path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+								</svg>
+							</div>
+						</button>
+
+						<!-- Expanded detail panel -->
+						{#if isExpanded}
+							<div
+								class="border-t card-animate animate-fade-up-sm px-5 py-5"
+								style="border-color: var(--glass-border); background: rgba(255,255,255,0.018);"
+							>
+								<!-- Issue link badge -->
+								{#if item.issue_number}
+									<div class="mb-4">
+										<span
+											class="inline-flex items-center gap-1.5 text-xs font-medium px-2.5 py-1 rounded-full border"
+											style="border-color: color-mix(in srgb, var(--color-primary) 35%, transparent); background: color-mix(in srgb, var(--color-primary) 10%, transparent); color: var(--color-primary);"
+										>
+											<svg class="w-3 h-3" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+												<path stroke-linecap="round" stroke-linejoin="round" d="M13.828 10.172a4 4 0 00-5.656 0l-4 4a4 4 0 105.656 5.656l1.102-1.101m-.758-4.899a4 4 0 005.656 0l4-4a4 4 0 00-5.656-5.656l-1.1 1.1" />
+											</svg>
+											Linked to Issue #{item.issue_number}
+										</span>
+									</div>
+								{/if}
+
+								<div class="grid grid-cols-1 md:grid-cols-2 gap-5">
+									<!-- Left column: title + body -->
+									<div class="flex flex-col gap-3">
+										<div>
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Title</label>
+											<input
+												type="text"
+												bind:value={editTitle}
+												onclick={(e) => e.stopPropagation()}
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											/>
+										</div>
+										<div class="flex-1">
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Description</label>
+											<textarea
+												bind:value={editBody}
+												onclick={(e) => e.stopPropagation()}
+												rows="5"
+												placeholder="Add a description..."
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)] resize-y"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											></textarea>
+										</div>
+									</div>
+
+									<!-- Right column: metadata -->
+									<div class="flex flex-col gap-3">
+										<!-- Type -->
+										<div>
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Type</label>
+											<select
+												bind:value={editType}
+												onclick={(e) => e.stopPropagation()}
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											>
+												{#each Object.entries(typeConfig) as [key, cfg]}
+													<option value={key}>{cfg.label}</option>
+												{/each}
+											</select>
+										</div>
+
+										<!-- Priority -->
+										<div>
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Priority</label>
+											<select
+												bind:value={editPriority}
+												onclick={(e) => e.stopPropagation()}
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											>
+												{#each Object.entries(priorityConfig) as [key, cfg]}
+													<option value={key}>{cfg.label}</option>
+												{/each}
+											</select>
+										</div>
+
+										<!-- Status (column) -->
+										{#if columns.length > 0}
+											<div>
+												<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Status</label>
+												<select
+													bind:value={editColumnId}
+													onclick={(e) => e.stopPropagation()}
+													class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
+													style="border-color: var(--glass-border); color: var(--color-text);"
+												>
+													{#each columns as col}
+														<option value={col.id}>{col.name}</option>
+													{/each}
+												</select>
+											</div>
+										{/if}
+
+										<!-- Story Points -->
+										<div>
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Story Points</label>
+											<input
+												type="number"
+												min="0"
+												max="999"
+												bind:value={editStoryPoints}
+												onclick={(e) => e.stopPropagation()}
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											/>
+										</div>
+
+										<!-- Due Date -->
+										<div>
+											<label class="block text-[0.6875rem] mb-1 font-medium uppercase tracking-wide" style="color: var(--color-text-dim);">Due Date</label>
+											<input
+												type="date"
+												bind:value={editDueDate}
+												onclick={(e) => e.stopPropagation()}
+												class="w-full px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors focus:border-[var(--color-primary)]"
+												style="border-color: var(--glass-border); color: var(--color-text);"
+											/>
+										</div>
+									</div>
+								</div>
+
+								<!-- Action bar -->
+								<div
+									class="flex items-center justify-between mt-5 pt-4 border-t"
+									style="border-color: var(--glass-border);"
+									role="presentation"
+									onclick={(e) => e.stopPropagation()}
+								>
+									<div class="flex items-center gap-2">
+										<button
+											class="px-4 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110"
+											style="background: var(--color-primary);"
+											disabled={saving}
+											onclick={(e) => { e.stopPropagation(); saveItem(item); }}
+										>
+											{saving ? 'Saving...' : 'Save Changes'}
+										</button>
+										<button
+											class="px-4 py-2 text-sm rounded-lg transition-colors"
+											style="color: var(--color-text-dim);"
+											onclick={(e) => { e.stopPropagation(); closeExpand(); }}
+										>
+											Cancel
+										</button>
+									</div>
+
+									<button
+										class="px-4 py-2 text-sm font-medium rounded-lg transition-all hover:brightness-110"
+										style="border: 1px solid var(--color-error-subtle); color: var(--color-error); background: var(--color-error-subtle);"
+										disabled={deleting}
+										onclick={(e) => { e.stopPropagation(); deleteItem(item); }}
+									>
+										{deleting ? 'Deleting...' : 'Delete'}
+									</button>
+								</div>
+							</div>
+						{/if}
 					{/each}
 				</div>
 			</div>

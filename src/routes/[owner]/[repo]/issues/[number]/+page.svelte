@@ -15,7 +15,6 @@
 	const owner = $derived($page.params.owner!);
 	const repoName = $derived($page.params.repo!);
 	const issueNumber = $derived(Number($page.params.number!));
-	const isOwner = $derived(userStore.user?.username === owner);
 
 	let issue = $state<Issue | null>(null);
 	let comments = $state<IssueCommentType[]>([]);
@@ -34,7 +33,18 @@
 	let editingAssignee = $state(false);
 	let collaboratorsList = $state<Collaborator[]>([]);
 
+	// Close-with-comment state
+	let closeWithCommentBody = $state('');
+	let closingWithComment = $state(false);
+
 	let fetchId = 0;
+
+	// Permission: repo owner OR issue author OR collaborator
+	const canEdit = $derived(
+		userStore.user?.username === owner ||
+		userStore.user?.username === issue?.author ||
+		collaboratorsList.some(c => c.username === userStore.user?.username)
+	);
 
 	$effect(() => {
 		const _owner = owner;
@@ -78,6 +88,24 @@
 			toastStore.success(`Issue ${newState === 'closed' ? 'closed' : 'reopened'} successfully`);
 		} catch (err) {
 			toastStore.error(err instanceof Error ? err.message : 'Failed to update issue state');
+		}
+	}
+
+	async function closeWithComment() {
+		if (!issue || !closeWithCommentBody.trim()) return;
+		closingWithComment = true;
+		try {
+			// Add comment first, then close
+			await issuesApi.addComment(owner, repoName, issueNumber, { body: closeWithCommentBody.trim() });
+			await issuesApi.update(owner, repoName, issueNumber, { state: 'closed' });
+			comments = await issuesApi.comments(owner, repoName, issueNumber);
+			issue = { ...issue, state: 'closed' };
+			closeWithCommentBody = '';
+			toastStore.success('Comment added and issue closed');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to close with comment');
+		} finally {
+			closingWithComment = false;
 		}
 	}
 
@@ -156,6 +184,22 @@
 		}
 	}
 
+	function cancelEditBody() {
+		const hasChanges = editBody !== (issue?.body ?? '');
+		if (hasChanges) {
+			if (!confirm('Discard changes to the description?')) return;
+		}
+		editingBody = false;
+		editPreview = false;
+	}
+
+	function handleBodyKeydown(e: KeyboardEvent) {
+		if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+			e.preventDefault();
+			saveBody();
+		}
+	}
+
 	async function setAssignee(userId: number) {
 		if (!issue) return;
 		try {
@@ -188,6 +232,34 @@
 		} catch (err) {
 			toastStore.error(err instanceof Error ? err.message : 'Failed to update milestone');
 		}
+	}
+
+	async function setDueDate(value: string) {
+		if (!issue) return;
+		try {
+			await issuesApi.update(owner, repoName, issueNumber, { due_date: value || undefined });
+			issue = { ...issue, due_date: value || undefined };
+			toastStore.success(value ? 'Due date set' : 'Due date cleared');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update due date');
+		}
+	}
+
+	async function setStoryPoints(value: number) {
+		if (!issue) return;
+		try {
+			await issuesApi.update(owner, repoName, issueNumber, { story_points: value });
+			issue = { ...issue, story_points: value };
+			toastStore.success('Story points updated');
+		} catch (err) {
+			toastStore.error(err instanceof Error ? err.message : 'Failed to update story points');
+		}
+	}
+
+	// Format ISO date string to YYYY-MM-DD for date input value
+	function toDateInputValue(dateStr: string | undefined): string {
+		if (!dateStr) return '';
+		return dateStr.slice(0, 10);
 	}
 
 	const issueLabels = $derived(issue?.labels ?? []);
@@ -262,7 +334,7 @@
 								{issue.title}
 								<span class="font-normal text-lg" style="color: var(--color-text-dim);">&nbsp;#{issue.number}</span>
 							</h2>
-							{#if isOwner}
+							{#if canEdit}
 								<button
 									class="text-xs animated-link shrink-0 mt-1"
 									style="color: var(--color-primary);"
@@ -342,6 +414,7 @@
 							<textarea
 								bind:value={editBody}
 								rows={8}
+								onkeydown={handleBodyKeydown}
 								class="w-full px-4 py-3 text-sm rounded-xl border resize-y bg-transparent font-mono transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
 								style="border-color: var(--glass-border); color: var(--color-text);"
 							></textarea>
@@ -353,10 +426,15 @@
 								style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 							>Save changes</button>
 							<button
-								onclick={() => { editingBody = false; editPreview = false; }}
+								onclick={cancelEditBody}
 								class="px-4 py-2 text-xs rounded-xl glass-subtle"
 								style="color: var(--color-text-dim);"
 							>Cancel</button>
+							{#if !editPreview}
+								<span class="ml-auto text-[0.625rem]" style="color: var(--color-text-dim);">
+									{editBody.length} chars &middot; Ctrl+Enter to save
+								</span>
+							{/if}
 						</div>
 					</div>
 				{:else}
@@ -366,7 +444,7 @@
 						{:else}
 							<p class="text-sm italic" style="color: var(--color-text-dim);">No description provided.</p>
 						{/if}
-						{#if isOwner}
+						{#if canEdit}
 							<button
 								class="absolute top-3 right-3 text-xs px-2.5 py-1 rounded-lg opacity-0 group-hover:opacity-100 transition-all duration-300 glass-subtle"
 								style="color: var(--color-primary);"
@@ -421,6 +499,38 @@
 					<h3 class="section-title mb-4">Leave a comment</h3>
 					<CommentForm onSubmit={addComment} />
 				</div>
+
+				<!-- Close with comment (only when open and user can edit) -->
+				{#if issue.state === 'open' && canEdit}
+					<div class="card p-5 card-animate stagger-6">
+						<h3 class="section-title mb-3">Close with comment</h3>
+						<p class="text-xs mb-3" style="color: var(--color-text-dim);">Add a final comment and close this issue in one action.</p>
+						<textarea
+							bind:value={closeWithCommentBody}
+							rows={3}
+							placeholder="Leave a closing comment..."
+							class="w-full px-4 py-3 text-sm rounded-xl border resize-y bg-transparent font-mono transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none mb-3"
+							style="border-color: var(--glass-border); color: var(--color-text);"
+						></textarea>
+						<button
+							onclick={closeWithComment}
+							disabled={!closeWithCommentBody.trim() || closingWithComment}
+							class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium rounded-xl transition-all duration-300 press-scale disabled:opacity-40 disabled:cursor-not-allowed"
+							style="
+								border: 1px solid var(--color-error-subtle);
+								color: var(--color-error);
+								background: var(--color-error-subtle);
+							"
+						>
+							{#if closingWithComment}
+								<Spinner size="sm" />
+							{:else}
+								<svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" /></svg>
+							{/if}
+							Close with comment
+						</button>
+					</div>
+				{/if}
 			</div>
 
 			<!-- Sidebar -->
@@ -429,7 +539,7 @@
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.1s;">
 					<div class="flex items-center justify-between mb-3">
 						<h3 class="section-title">Labels</h3>
-						{#if isOwner && repoLabels.length > 0}
+						{#if canEdit && repoLabels.length > 0}
 							<button
 								class="text-xs animated-link"
 								style="color: var(--color-primary);"
@@ -448,7 +558,7 @@
 									style="background-color: color-mix(in srgb, {label.color} 10%, var(--color-surface)); color: {label.color}; border: 1px solid color-mix(in srgb, {label.color} 19%, var(--color-surface));"
 								>
 									{label.name}
-									{#if isOwner}
+									{#if canEdit}
 										<button
 											onclick={() => removeLabel(label.id)}
 											class="ml-0.5 hover:opacity-60 transition-opacity leading-none"
@@ -482,7 +592,7 @@
 				<!-- Milestone -->
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.2s;">
 					<h3 class="section-title mb-3">Milestone</h3>
-					{#if isOwner && repoMilestones.length > 0}
+					{#if canEdit && repoMilestones.length > 0}
 						<select
 							value={issue.milestone_id ?? ''}
 							onchange={(e) => setMilestone(Number((e.target as HTMLSelectElement).value))}
@@ -520,7 +630,7 @@
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.3s;">
 					<div class="flex items-center justify-between mb-3">
 						<h3 class="section-title">Assignee</h3>
-						{#if isOwner}
+						{#if canEdit}
 							<button
 								class="text-xs animated-link"
 								style="color: var(--color-primary);"
@@ -541,7 +651,7 @@
 								>{issue.assignee.charAt(0).toUpperCase()}</div>
 								<span class="truncate">{issue.assignee}</span>
 							</a>
-							{#if isOwner}
+							{#if canEdit}
 								<button
 									class="text-sm opacity-40 hover:opacity-80 transition-opacity"
 									style="color: var(--color-text-dim);"
@@ -585,7 +695,7 @@
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.4s;">
 					<h3 class="section-title mb-3">Properties</h3>
 					<div class="flex flex-col gap-3">
-						{#if isOwner}
+						{#if canEdit}
 							<div>
 								<label class="block text-[0.6875rem] mb-1" style="color: var(--color-text-dim);">Type</label>
 								<select
@@ -641,10 +751,10 @@
 					</div>
 				</div>
 
-				<!-- Metadata -->
+				<!-- Metadata + editable due date & story points -->
 				<div class="card p-4 sidebar-animate" style="animation-delay: 0.5s;">
 					<h3 class="section-title mb-3">Details</h3>
-					<dl class="flex flex-col gap-2 text-xs">
+					<dl class="flex flex-col gap-2.5 text-xs">
 						<div class="flex items-center justify-between">
 							<dt style="color: var(--color-text-dim);">Created</dt>
 							<dd style="color: var(--color-text);"><RelativeTime date={issue.created_at} /></dd>
@@ -659,20 +769,56 @@
 								<a href="/{issue.author}" class="animated-link font-medium" style="color: var(--color-primary);">{issue.author}</a>
 							</dd>
 						</div>
-						{#if issue.story_points > 0}
-							<div class="flex items-center justify-between">
-								<dt style="color: var(--color-text-dim);">Story Points</dt>
+
+						<!-- Story points -->
+						<div class="flex items-center justify-between gap-2">
+							<dt style="color: var(--color-text-dim);">Story Points</dt>
+							{#if canEdit}
+								<dd class="flex-shrink-0">
+									<input
+										type="number"
+										min="0"
+										max="999"
+										value={issue.story_points || 0}
+										onchange={(e) => {
+											const val = Math.max(0, Number((e.target as HTMLInputElement).value));
+											setStoryPoints(val);
+										}}
+										class="w-16 px-2 py-0.5 text-xs rounded-lg border bg-transparent text-right transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+										style="border-color: var(--glass-border); color: var(--color-text);"
+									/>
+								</dd>
+							{:else if issue.story_points > 0}
 								<dd style="color: var(--color-text);">{issue.story_points}</dd>
-							</div>
-						{/if}
-						{#if issue.due_date}
-							<div class="flex items-center justify-between">
-								<dt style="color: var(--color-text-dim);">Due Date</dt>
+							{:else}
+								<dd style="color: var(--color-text-dim);">—</dd>
+							{/if}
+						</div>
+
+						<!-- Due date -->
+						<div class="flex items-center justify-between gap-2">
+							<dt style="color: var(--color-text-dim);">Due Date</dt>
+							{#if canEdit}
+								<dd class="flex-shrink-0">
+									<input
+										type="date"
+										value={toDateInputValue(issue.due_date)}
+										onchange={(e) => {
+											const val = (e.target as HTMLInputElement).value;
+											setDueDate(val);
+										}}
+										class="w-32 px-2 py-0.5 text-xs rounded-lg border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+										style="border-color: var(--glass-border); color: var(--color-text);"
+									/>
+								</dd>
+							{:else if issue.due_date}
 								<dd style="color: {issue.state === 'open' && new Date(issue.due_date) < new Date() ? 'var(--color-error)' : 'var(--color-text)'};">
 									{new Date(issue.due_date).toLocaleDateString()}
 								</dd>
-							</div>
-						{/if}
+							{:else}
+								<dd style="color: var(--color-text-dim);">—</dd>
+							{/if}
+						</div>
 					</dl>
 				</div>
 			</div>
