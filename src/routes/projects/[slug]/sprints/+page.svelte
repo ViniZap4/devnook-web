@@ -235,7 +235,7 @@
 			</div>
 		{:else}
 			<div class="flex flex-col gap-3">
-				{#each sprints as sprint (sprint.id)}
+				{#each sprints as sprint, i (sprint.id)}
 					{@const sc = stateConfig[sprint.state] ?? stateConfig.planning}
 					{@const pct = progressPct(sprint)}
 					{@const isActive = sprint.state === 'active'}

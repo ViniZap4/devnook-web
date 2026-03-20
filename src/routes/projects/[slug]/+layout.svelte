@@ -32,6 +32,7 @@
 	});
 
 	const settingsActive = $derived(currentTab === 'settings');
+	const membersActive = $derived(currentTab === 'members');
 
 	$effect(() => {
 		const _slug = slug;
@@ -103,6 +104,7 @@
 		if (mounted && navContainer) {
 			const _ = currentTab;
 			const __ = settingsActive;
+			const ___ = membersActive;
 			tick().then(updateIndicator);
 		}
 	});
@@ -278,6 +280,27 @@
 							<path stroke-linecap="round" stroke-linejoin="round" d="M13 10V3L4 14h7v7l9-11h-7z" />
 						</svg>
 						<span class="hidden sm:inline">Sprints</span>
+					</a>
+
+					<!-- Members -->
+					<a
+						href="/projects/{slug}/members"
+						data-project-tab
+						data-tab-key="members"
+						class="flex items-center gap-2 px-3.5 py-2 text-xs rounded-lg whitespace-nowrap relative z-10"
+						style="
+							color: {currentTab === 'members' ? 'var(--color-primary)' : 'var(--color-text-dim)'};
+							font-weight: {currentTab === 'members' ? '600' : '400'};
+							transition: color 0.2s ease;
+						"
+						onmouseenter={(e) => { if (currentTab !== 'members') e.currentTarget.style.color = 'var(--color-text)'; }}
+						onmouseleave={(e) => { if (currentTab !== 'members') e.currentTarget.style.color = 'var(--color-text-dim)'; }}
+					>
+						<!-- Members icon -->
+						<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+							<path stroke-linecap="round" stroke-linejoin="round" d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z" />
+						</svg>
+						<span class="hidden sm:inline">Members</span>
 					</a>
 
 					<!-- Settings (pushed right) -->

@@ -1,7 +1,8 @@
 <script lang="ts">
 	import { page } from '$app/stores';
 	import { goto } from '$app/navigation';
-	import { issues, labels as labelsApi, milestones as milestonesApi } from '$lib/services/api';
+	import { issues, labels as labelsApi, milestones as milestonesApi, repos } from '$lib/services/api';
+	import type { Collaborator } from '$lib/services/api';
 	import { toastStore } from '$lib/stores/toast.svelte';
 	import type { Label, Milestone } from '$lib/types/issue';
 	import MarkdownRenderer from '$lib/components/MarkdownRenderer.svelte';
@@ -18,7 +19,8 @@
 	let repoMilestones = $state<Milestone[]>([]);
 	let selectedLabels = $state<number[]>([]);
 	let selectedMilestone = $state<number | undefined>(undefined);
-	let assignee = $state('');
+	let collaborators = $state<Collaborator[]>([]);
+	let selectedAssignee = $state<number | undefined>(undefined);
 	let issueType = $state('task');
 	let issuePriority = $state('medium');
 	let dueDate = $state('');
@@ -33,11 +35,13 @@
 
 		Promise.all([
 			labelsApi.list(_owner, _repo),
-			milestonesApi.list(_owner, _repo)
-		]).then(([l, m]) => {
+			milestonesApi.list(_owner, _repo),
+			repos.listCollaborators(_owner, _repo).catch(() => [] as Collaborator[])
+		]).then(([l, m, c]) => {
 			if (id !== fetchId) return;
 			repoLabels = l;
 			repoMilestones = m.filter((ms) => ms.state === 'open');
+			collaborators = c;
 		}).catch(() => {});
 	});
 
@@ -59,7 +63,7 @@
 				body,
 				label_ids: selectedLabels.length > 0 ? selectedLabels : undefined,
 				milestone_id: selectedMilestone || undefined,
-				assignee_id: undefined,
+				assignee_id: selectedAssignee,
 				type: issueType,
 				priority: issuePriority,
 				due_date: dueDate || undefined,
@@ -237,14 +241,20 @@
 			<!-- Assignee -->
 			<div class="card p-4 sidebar-animate" style="animation-delay: 0.3s;">
 				<h3 class="section-title mb-3">Assignee</h3>
-				<input
-					type="text"
-					bind:value={assignee}
-					placeholder="Username"
-					class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
-					style="border-color: var(--glass-border); color: var(--color-text);"
-				/>
-				<p class="mt-1.5 text-[0.6rem]" style="color: var(--color-text-dim);">Enter a collaborator's username</p>
+				{#if collaborators.length === 0}
+					<p class="text-xs" style="color: var(--color-text-dim);">No collaborators available</p>
+				{:else}
+					<select
+						bind:value={selectedAssignee}
+						class="w-full px-2.5 py-2 text-xs rounded-xl border bg-transparent transition-all duration-200 focus:border-[var(--color-primary)] focus:outline-none"
+						style="border-color: var(--glass-border); color: var(--color-text);"
+					>
+						<option value={undefined}>No assignee</option>
+						{#each collaborators as collab}
+							<option value={collab.id}>{collab.username.charAt(0).toUpperCase()} — {collab.username}</option>
+						{/each}
+					</select>
+				{/if}
 			</div>
 
 			<!-- Type & Priority -->
