@@ -58,6 +58,16 @@
 	let deleteConfirm = $state('');
 	let deleting = $state(false);
 
+	// ---- Section Nav ----
+	let activeSection = $state<'general' | 'columns' | 'repos' | 'danger'>('general');
+
+	const sections = [
+		{ id: 'general' as const, label: 'General', icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z' },
+		{ id: 'columns' as const, label: 'Columns', icon: 'M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7' },
+		{ id: 'repos' as const, label: 'Linked Repos', icon: 'M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z' },
+		{ id: 'danger' as const, label: 'Danger Zone', icon: 'M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z' },
+	];
+
 	// --- Load general (syncs from layout's loaded project data via re-fetch) ---
 	let fetchId = 0;
 
@@ -340,11 +350,46 @@
 	};
 </script>
 
-<div class="flex flex-col gap-6 max-w-3xl content-reveal">
+<div class="flex flex-col lg:flex-row gap-6 content-reveal">
+	<!-- Sidebar navigation -->
+	<nav class="lg:w-56 shrink-0 card-animate">
+		<div class="flex lg:flex-col gap-1 glass-subtle rounded-xl p-1.5 overflow-x-auto lg:overflow-x-visible">
+			{#each sections as section}
+				{@const active = activeSection === section.id}
+				<button
+					class="flex items-center gap-2.5 px-3.5 py-2.5 text-xs font-medium rounded-lg whitespace-nowrap transition-all duration-200 w-full text-left"
+					style="
+						color: {active ? (section.id === 'danger' ? 'var(--color-error)' : 'var(--color-primary)') : 'var(--color-text-dim)'};
+						background: {active ? (section.id === 'danger' ? 'var(--color-error-subtle)' : 'var(--color-primary-subtle)') : 'transparent'};
+						font-weight: {active ? '600' : '400'};
+					"
+					onclick={() => { activeSection = section.id; }}
+				>
+					<svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+						<path stroke-linecap="round" stroke-linejoin="round" d={section.icon} />
+					</svg>
+					<span class="hidden lg:inline">{section.label}</span>
+				</button>
+			{/each}
+		</div>
+	</nav>
 
-	<!-- ── Section: General ── -->
-	<section class="card p-5 flex flex-col gap-4 card-animate stagger-1">
-		<h2 class="section-title">General</h2>
+	<!-- Content area -->
+	<div class="flex-1 min-w-0">
+		{#key activeSection}
+		<div class="content-reveal flex flex-col gap-6">
+
+	{#if activeSection === 'general'}
+	<section class="card p-6 card-animate">
+		<div class="flex items-center gap-3 mb-6">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
+				<svg class="w-4.5 h-4.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.066 2.573c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.573 1.066c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.066-2.573c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z" /><circle cx="12" cy="12" r="3" /></svg>
+			</div>
+			<div>
+				<h3 class="font-semibold text-sm" style="color: var(--color-text);">General Settings</h3>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Project name, methodology, and visibility</p>
+			</div>
+		</div>
 
 		{#if generalLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -439,9 +484,17 @@
 		{/if}
 	</section>
 
-	<!-- ── Section: Columns ── -->
-	<section class="card p-5 flex flex-col gap-4 card-animate stagger-2">
-		<h2 class="section-title">Columns</h2>
+	{:else if activeSection === 'columns'}
+	<section class="card p-6 card-animate">
+		<div class="flex items-center gap-3 mb-6">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
+				<svg class="w-4.5 h-4.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9 17V7m0 10a2 2 0 01-2 2H5a2 2 0 01-2-2V7a2 2 0 012-2h2a2 2 0 012 2m0 10a2 2 0 002 2h2a2 2 0 002-2M9 7a2 2 0 012-2h2a2 2 0 012 2m0 10V7" /></svg>
+			</div>
+			<div>
+				<h3 class="font-semibold text-sm" style="color: var(--color-text);">Board Columns</h3>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Drag to reorder, click to edit</p>
+			</div>
+		</div>
 
 		{#if columnsLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -604,76 +657,17 @@
 		{/if}
 	</section>
 
-	<!-- ── Section: Members ── -->
-	<section class="card p-5 flex flex-col gap-4 card-animate stagger-3">
-		<h2 class="section-title">Members</h2>
-
-		{#if membersLoading}
-			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
-		{:else}
-			{#if members.length === 0}
-				<p class="text-sm" style="color: var(--color-text-dim); opacity: 0.6;">No members yet.</p>
-			{:else}
-				<div class="flex flex-col gap-1">
-					{#each members as member (member.id)}
-						{@const rc = roleConfig[member.role] ?? roleConfig.member}
-						<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg border" style="border-color: var(--glass-border); background: var(--color-surface);">
-							<Avatar username={member.username} size={32} />
-							<div class="flex-1 min-w-0">
-								<p class="text-sm font-medium truncate" style="color: var(--color-text);">{member.username}</p>
-								{#if member.full_name}
-									<p class="text-xs truncate" style="color: var(--color-text-dim);">{member.full_name}</p>
-								{/if}
-							</div>
-							<span
-								class="text-[0.5625rem] font-semibold px-1.5 py-0.5 rounded-full uppercase tracking-wide shrink-0"
-								style="background: {rc.bg}; color: {rc.color};"
-							>
-								{rc.label}
-							</span>
-							{#if member.role !== 'owner' && member.username !== userStore.user?.username}
-								<button
-									class="shrink-0 p-1.5 rounded-lg transition-colors hover:bg-[rgba(239,68,68,0.1)] disabled:opacity-40"
-									style="color: var(--color-text-dim);"
-									title="Remove member"
-									disabled={removingMember === member.username}
-									onclick={() => removeMember(member.username)}
-								>
-									<svg class="w-3.5 h-3.5" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-										<path stroke-linecap="round" stroke-linejoin="round" d="M6 18L18 6M6 6l12 12" />
-									</svg>
-								</button>
-							{/if}
-						</div>
-					{/each}
-				</div>
-			{/if}
-
-			<!-- Add member -->
-			<div class="flex items-center gap-2">
-				<input
-					type="text"
-					bind:value={newMemberUsername}
-					placeholder="Username to add..."
-					onkeydown={(e) => { if (e.key === 'Enter') addMember(); }}
-					class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none transition-colors"
-					style="border-color: var(--glass-border); color: var(--color-text);"
-				/>
-				<button
-					class="px-3.5 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
-					style="background: var(--color-primary);"
-					disabled={!newMemberUsername.trim() || addingMember}
-					onclick={addMember}
-				>
-					{addingMember ? '...' : 'Add'}
-				</button>
+	{:else if activeSection === 'repos'}
+	<section class="card p-6 card-animate">
+		<div class="flex items-center gap-3 mb-6">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-primary-subtle);">
+				<svg class="w-4.5 h-4.5" style="color: var(--color-primary);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" /></svg>
 			</div>
-		{/if}
-	</section>
-
-	<!-- ── Section: Linked Repos ── -->
-	<section class="card p-5 flex flex-col gap-4 card-animate stagger-4">
-		<h2 class="section-title">Linked Repositories</h2>
+			<div>
+				<h3 class="font-semibold text-sm" style="color: var(--color-text);">Linked Repositories</h3>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Connect repositories to this project</p>
+			</div>
+		</div>
 
 		{#if linkedReposLoading}
 			<div class="flex justify-center py-6"><Spinner size="sm" /></div>
@@ -683,25 +677,18 @@
 			{:else}
 				<div class="flex flex-col gap-1.5">
 					{#each linkedRepos as repo (repo.id)}
-						<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg border" style="border-color: var(--glass-border); background: var(--color-surface);">
+						<div class="flex items-center gap-3 px-3 py-2.5 rounded-lg border" style="border-color: var(--glass-border);">
 							<svg class="w-4 h-4 shrink-0" style="color: var(--color-text-dim);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
 								<path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
 							</svg>
 							<div class="flex-1 min-w-0">
-								<a
-									href="/{repo.owner}/{repo.name}"
-									class="text-sm font-medium hover:underline truncate block"
-									style="color: var(--color-primary);"
-								>
+								<a href="/{repo.owner}/{repo.name}" class="text-sm font-medium hover:underline truncate block" style="color: var(--color-primary);">
 									{repo.owner}/{repo.name}
 								</a>
 								{#if repo.description}
 									<p class="text-xs truncate" style="color: var(--color-text-dim);">{repo.description}</p>
 								{/if}
 							</div>
-							{#if repo.is_private}
-								<span class="text-[0.5625rem] font-semibold px-1.5 py-0.5 rounded-full shrink-0" style="background: rgba(148,163,184,0.1); color: #94a3b8;">Private</span>
-							{/if}
 							<button
 								class="shrink-0 px-2.5 py-1.5 text-xs rounded-lg transition-colors disabled:opacity-40"
 								style="color: var(--color-error); background: color-mix(in srgb, var(--color-error) 10%, transparent); border: 1px solid color-mix(in srgb, var(--color-error) 20%, transparent);"
@@ -715,12 +702,11 @@
 				</div>
 			{/if}
 
-			<!-- Link repo -->
 			{#if availableRepos.length > 0}
-				<div class="flex items-center gap-2">
+				<div class="flex items-center gap-2 mt-2">
 					<select
 						bind:value={selectedRepoId}
-						class="flex-1 px-3 py-2 text-sm rounded-lg border outline-none cursor-pointer transition-colors"
+						class="flex-1 px-3 py-2 text-sm rounded-lg border bg-transparent outline-none cursor-pointer transition-colors focus:border-[var(--color-primary)]"
 						style="border-color: var(--glass-border); color: var(--color-text);"
 					>
 						<option value="">Select a repository...</option>
@@ -729,38 +715,44 @@
 						{/each}
 					</select>
 					<button
-						class="px-3.5 py-2 text-sm font-medium rounded-lg text-white disabled:opacity-40 transition-all hover:brightness-110 shrink-0"
-						style="background: var(--color-primary);"
+						class="btn-glow px-4 py-2 text-sm font-semibold rounded-lg text-white disabled:opacity-40 transition-all hover:scale-[1.02] active:scale-[0.98] shrink-0"
+						style="background: linear-gradient(135deg, var(--color-primary), var(--color-accent));"
 						disabled={!selectedRepoId || linkingRepo}
 						onclick={linkRepo}
 					>
 						{linkingRepo ? '...' : 'Link'}
 					</button>
 				</div>
-			{:else if linkedRepos.length > 0}
-				<p class="text-xs" style="color: var(--color-text-dim); opacity: 0.6;">All your repositories are already linked.</p>
 			{/if}
 		{/if}
 	</section>
 
-	<!-- ── Section: Danger Zone ── -->
-	<section class="card p-5 flex flex-col gap-4 card-animate stagger-5" style="border-color: color-mix(in srgb, var(--color-error) 30%, transparent);">
-		<h2 class="section-title" style="color: var(--color-error);">Danger Zone</h2>
+	{:else if activeSection === 'danger'}
+	<section class="card p-6 card-animate" style="border-color: color-mix(in srgb, var(--color-error) 30%, transparent);">
+		<div class="flex items-center gap-3 mb-6">
+			<div class="w-9 h-9 rounded-xl flex items-center justify-center" style="background: var(--color-error-subtle);">
+				<svg class="w-4.5 h-4.5" style="color: var(--color-error);" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+			</div>
+			<div>
+				<h3 class="font-semibold text-sm" style="color: var(--color-error);">Danger Zone</h3>
+				<p class="text-xs mt-0.5" style="color: var(--color-text-dim);">Irreversible and destructive actions</p>
+			</div>
+		</div>
 
-		<div class="flex flex-col gap-2">
+		<div class="flex flex-col gap-3">
 			<p class="text-sm" style="color: var(--color-text-dim);">
 				Deleting this project is <strong style="color: var(--color-text);">permanent and cannot be undone.</strong>
-				All items, columns, and sprints will be lost.
+				All items, columns, sprints, and members will be removed.
 			</p>
 			<p class="text-xs" style="color: var(--color-text-dim);">
-				Type <code class="px-1 rounded text-xs font-mono" style="background: var(--color-surface); color: var(--color-text);">{slug}</code> to confirm.
+				Type <code class="px-1.5 py-0.5 rounded text-xs font-mono" style="background: var(--color-surface); color: var(--color-text);">{slug}</code> to confirm.
 			</p>
-			<div class="flex items-center gap-2 pt-1">
+			<div class="flex items-center gap-2 pt-2">
 				<input
 					type="text"
 					bind:value={deleteConfirm}
 					placeholder={slug}
-					class="flex-1 max-w-xs px-3 py-2 text-sm rounded-lg border outline-none transition-colors font-mono"
+					class="flex-1 max-w-xs px-3 py-2 text-sm rounded-lg border bg-transparent outline-none transition-colors font-mono focus:border-[var(--color-primary)]"
 					style="border-color: var(--glass-border); color: var(--color-text);"
 				/>
 				<button
@@ -775,4 +767,8 @@
 		</div>
 	</section>
 
+	{/if}
+	</div>
+	{/key}
+	</div>
 </div>
