@@ -24,38 +24,33 @@
 	}
 </script>
 
-<div class="feed-composer">
-	<div class="flex gap-3 p-4">
-		<div class="shrink-0 pt-0.5">
-			<Avatar {username} size={44} />
+<div class="card p-4">
+	<div class="flex gap-3">
+		<div class="shrink-0 pt-1">
+			<Avatar {username} size={40} />
 		</div>
-		<div class="flex-1 min-w-0 flex flex-col">
-			<div class="composer-input-wrapper">
-				<textarea
-					bind:value={content}
-					placeholder={postType === 'code' ? 'Paste your code snippet...' : "What's your latest commit? Share a snippet..."}
-					class="w-full bg-transparent resize-none text-[15px] leading-relaxed outline-none {postType === 'code' ? 'font-mono text-[13px]' : ''}"
-					style="color: var(--color-text); min-height: 72px;"
-					rows="3"
-					onfocus={() => { expanded = true; }}
-				></textarea>
+		<div class="flex-1 min-w-0">
+			<textarea
+				bind:value={content}
+				placeholder={postType === 'code' ? 'Paste your code snippet...' : "What's your latest commit? Share a snippet..."}
+				class="composer-textarea {postType === 'code' ? 'font-mono text-[13px]' : 'text-[15px]'}"
+				rows="2"
+				onfocus={() => { expanded = true; }}
+			></textarea>
 
-				{#if repoRef || postType === 'code'}
-					<div class="flex items-center gap-2 mt-2">
-						{#if postType === 'code'}
-							<span class="text-[11px] px-2 py-0.5 rounded font-mono" style="background: rgba(255,255,255,0.05); color: var(--color-text-dim);">code</span>
-						{/if}
-						{#if repoRef}
-							<span class="text-[11px] px-2 py-0.5 rounded" style="background: var(--color-primary-subtle); color: var(--color-primary);">{repoRef}</span>
-						{/if}
-					</div>
-				{/if}
-			</div>
+			{#if repoRef || postType === 'code'}
+				<div class="flex items-center gap-2 mt-1.5">
+					{#if postType === 'code'}
+						<span class="tag-pill font-mono">code</span>
+					{/if}
+					{#if repoRef}
+						<span class="tag-pill tag-pill-primary">{repoRef}</span>
+					{/if}
+				</div>
+			{/if}
 
-			<!-- Toolbar - always visible -->
-			<div class="composer-toolbar">
-				<div class="flex items-center gap-1">
-					<!-- Code toggle -->
+			<div class="flex items-center justify-between mt-3 pt-3" style="border-top: 1px solid var(--glass-border);">
+				<div class="flex items-center gap-0.5">
 					<button
 						class="toolbar-btn"
 						class:toolbar-btn-active={postType === 'code'}
@@ -64,11 +59,9 @@
 					>
 						<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4" /></svg>
 					</button>
-					<!-- Image -->
 					<button class="toolbar-btn" title="Add image">
 						<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2" ry="2" /><circle cx="8.5" cy="8.5" r="1.5" /><path d="m21 15-5-5L5 21" /></svg>
 					</button>
-					<!-- Link -->
 					<button
 						class="toolbar-btn"
 						title="Link repository"
@@ -79,7 +72,6 @@
 					>
 						<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M10 13a5 5 0 007.54.54l3-3a5 5 0 00-7.07-7.07l-1.72 1.71" /><path stroke-linecap="round" stroke-linejoin="round" d="M14 11a5 5 0 00-7.54-.54l-3 3a5 5 0 007.07 7.07l1.71-1.71" /></svg>
 					</button>
-					<!-- Hashtag -->
 					<button class="toolbar-btn" title="Add hashtag">
 						<svg class="w-[18px] h-[18px]" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M7 20l4-16m2 16l4-16M6 9h14M4 15h14" /></svg>
 					</button>
@@ -89,76 +81,72 @@
 					class="post-btn"
 					disabled={!content.trim()}
 					onclick={handleSubmit}
-				>Post Update</button>
+				>Post</button>
 			</div>
 		</div>
 	</div>
 </div>
 
 <style>
-	.feed-composer {
-		border-radius: 16px;
-		background: var(--glass-bg);
-		backdrop-filter: blur(16px);
-		-webkit-backdrop-filter: blur(16px);
-		border: 1px solid var(--glass-border);
+	.composer-textarea {
+		width: 100%;
+		background: transparent;
+		resize: none;
+		outline: none;
+		line-height: 1.6;
+		color: var(--color-text);
+		min-height: 52px;
 	}
-	.composer-input-wrapper {
-		background: #0f1629;
-		border: 1px solid rgba(255, 255, 255, 0.08);
-		border-radius: 12px;
-		padding: 12px 16px;
-		transition: border-color 0.15s;
+	.composer-textarea::placeholder {
+		color: var(--color-text-dim);
+		opacity: 0.5;
 	}
-	.composer-input-wrapper:focus-within {
-		border-color: rgba(255, 255, 255, 0.15);
+	.tag-pill {
+		font-size: 11px;
+		padding: 2px 8px;
+		border-radius: 6px;
+		background: var(--glass-border);
+		color: var(--color-text-dim);
 	}
-	.composer-toolbar {
-		display: flex;
-		align-items: center;
-		justify-content: space-between;
-		padding-top: 12px;
-		margin-top: 8px;
+	.tag-pill-primary {
+		background: var(--color-primary-subtle);
+		color: var(--color-primary);
 	}
 	.toolbar-btn {
-		width: 36px;
-		height: 36px;
+		width: 34px;
+		height: 34px;
 		display: flex;
 		align-items: center;
 		justify-content: center;
 		border-radius: 8px;
-		color: #64748b;
+		color: var(--color-text-dim);
 		transition: color 0.15s, background 0.15s;
 	}
 	.toolbar-btn:hover {
 		color: var(--color-primary);
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--color-primary-subtle);
 	}
 	.toolbar-btn-active {
 		color: var(--color-primary);
-		background: rgba(255, 255, 255, 0.05);
+		background: var(--color-primary-subtle);
 	}
 	.post-btn {
-		padding: 10px 24px;
-		border-radius: 20px;
+		padding: 8px 20px;
+		border-radius: 10px;
 		background: var(--color-primary);
 		color: white;
-		font-size: 14px;
+		font-size: 13px;
 		font-weight: 600;
-		box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
-		transition: background 0.15s, transform 0.15s, box-shadow 0.15s;
+		transition: opacity 0.15s, transform 0.1s;
 	}
 	.post-btn:hover:not(:disabled) {
-		background: #22d3ee;
+		opacity: 0.9;
 	}
 	.post-btn:active:not(:disabled) {
-		background: #0891b2;
-		transform: scale(0.98);
+		transform: scale(0.97);
 	}
 	.post-btn:disabled {
-		background: #1e293b;
-		color: #475569;
-		box-shadow: none;
+		opacity: 0.3;
 		cursor: not-allowed;
 	}
 </style>

@@ -55,7 +55,7 @@
 			bind:value={name}
 			placeholder="my-project"
 			class="w-full px-3 py-2.5 text-sm rounded-xl border transition-all duration-200 placeholder:opacity-30 focus:border-[var(--color-primary)]"
-			style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
+			style="border-color: var(--glass-border); background: rgba(255,255,255,0.03); color: var(--color-text);"
 			required
 		/>
 	</div>
@@ -71,7 +71,7 @@
 			bind:value={description}
 			placeholder="A short description"
 			class="w-full px-3 py-2.5 text-sm rounded-xl border transition-all duration-200 placeholder:opacity-30 focus:border-[var(--color-primary)]"
-			style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
+			style="border-color: var(--glass-border); background: rgba(255,255,255,0.03); color: var(--color-text);"
 		/>
 	</div>
 
@@ -89,7 +89,7 @@
 			bind:value={defaultBranch}
 			placeholder="main"
 			class="w-full px-3 py-2.5 text-sm rounded-xl border transition-all duration-200 placeholder:opacity-30 focus:border-[var(--color-primary)]"
-			style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
+			style="border-color: var(--glass-border); background: rgba(255,255,255,0.03); color: var(--color-text);"
 		/>
 	</div>
 
@@ -132,7 +132,7 @@
 				id="repo-gitignore"
 				bind:value={gitignoreTemplate}
 				class="w-full px-3 py-2.5 text-sm rounded-xl border transition-all duration-200 appearance-none focus:border-[var(--color-primary)]"
-				style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
+				style="border-color: var(--glass-border); background: rgba(255,255,255,0.03); color: var(--color-text);"
 			>
 				{#each gitignoreOptions as option}
 					<option value={option === 'None' ? '' : option}>{option}</option>
@@ -156,7 +156,7 @@
 				id="repo-license"
 				bind:value={license}
 				class="w-full px-3 py-2.5 text-sm rounded-xl border transition-all duration-200 appearance-none focus:border-[var(--color-primary)]"
-				style="border-color: var(--glass-border); background: #0f1629; color: var(--color-text);"
+				style="border-color: var(--glass-border); background: rgba(255,255,255,0.03); color: var(--color-text);"
 			>
 				{#each licenseOptions as option}
 					<option value={option === 'None' ? '' : option}>{option}</option>
